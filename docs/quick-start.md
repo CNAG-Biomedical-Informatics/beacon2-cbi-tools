@@ -20,15 +20,15 @@ bin/bff-tools vcf -i test/test_1000G.vcf.gz -p test/param.yaml
 ```bash
 # Validate metadata and convert to BFF
 mkdir bff_out
-bin/bff-tools validate -i Beacon-v2-Models_CINECA_UK1.xlsx --out-dir bff_out
+bin/bff-tools validate -i utils/bff_validator/Beacon-v2-Models_template.xlsx --out-dir bff_out
 ```
 
 # Usage
 
-===  "Full Usage"
+=== "Full Usage"
 
-     --8<-- "../bin/README.md"
+    --8<-- "../bin/README.md"
 
 === "Notes on `bff-tool validate`"
 
-     {% include-markdown "../utils/bff_validator/README.md" start="<!--how-to-run-start-->" end="<!--how-to-run-end-->" %}
+    {% include-markdown "../utils/bff_validator/README.md" start="<!--how-to-run-start-->" end="<!--how-to-run-end-->" %}

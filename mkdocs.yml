@@ -69,10 +69,11 @@ nav:
       - "🛠️ Non-containerized": download-and-installation/non-containerized.md
   - "🚀 Quick Start": quick-start.md
   - "🧪 Examples": 
+      - "🧬 GRCh37 / hg19": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/test/README.md
       - "🧬 GRCh38 / hg38": examples/hg38.md
   - "📚 Tutorial": data-beaconization.md
   - "📊 CINECA cohort": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1
-  - "🛠️  Utilities": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/utils/README.md
+  - "🛠️  Utilities": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils/README.md
   - "🆘 Help": 
       - "❓ FAQ": help/faq.md
       - "🧯 Troubleshooting": help/troubleshooting.md

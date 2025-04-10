@@ -13,8 +13,6 @@ use Cwd      qw(cwd abs_path);
 use YAML::XS qw(LoadFile DumpFile);
 
 sub new {
-
-    # Changes in $self performed at main
     my ( $class, $self ) = @_;
     bless $self, $class;
     return $self;
