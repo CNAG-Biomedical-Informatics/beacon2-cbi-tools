@@ -24,6 +24,7 @@ bff-validator: A script that validates metadata (XLSX|JSON) against Beacon v2 Mo
         -debug <level>                    Print debugging information (from 1 to 5, with 5 being the max)
         -verbose                          Enable verbosity
         -nc | --no-color                  Do not print colors to STDOUT
+        -ne | --no-emoji                  Do not print emojis to STDOUT
 
 # SUMMARY
 

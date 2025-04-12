@@ -45,6 +45,7 @@ bff-tools &lt;mode> \[-arguments\] \[-options\]
          -debug <level>                 Print debugging information (1 to 5)
          -verbose                       Enable verbosity
          -nc | --no-color               Do not print colors to STDOUT
+         -ne | --no-emoji               Do not print emojis to STDOUT
 
 # DESCRIPTION
 

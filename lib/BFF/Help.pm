@@ -90,6 +90,7 @@ sub parse_vcf_full_options {
         'debug=i'                  => \$arg{debug},
         'verbose'                  => \$arg{verbose},
         'no-color|nc'              => \$arg{nocolor},
+        'no-emoji|ne'              => \$arg{noemoji},
         'threads|t=i'              => \$arg{threads},
         'param|p=s'                => \$arg{paramfile},
         'config|c=s'               => \$arg{configfile},
@@ -123,6 +124,7 @@ sub load {
         'debug=i'                  => \$arg{debug},                   # numeric (integer)
         'verbose'                  => \$arg{verbose},                 # flag
         'no-color|nc'              => \$arg{nocolor},                 # flag
+        'no-emoji|ne'              => \$arg{noemoji},
         'threads|t=i'              => \$arg{threads},                 # numeric (integer)
         'param|p=s'                => \$arg{paramfile},               # string
         'config|c=s'               => \$arg{configfile},              # string

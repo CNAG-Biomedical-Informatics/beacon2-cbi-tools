@@ -51,8 +51,10 @@ $Data::Dumper::Sortkeys = 1;
 # Set STDOUT to output UTF-8
 binmode STDOUT, ':encoding(UTF-8)';
 
-my $debug   = 0;
-my $verbose = 0;
+# Global variables
+my $debug    = 0;
+my $verbose  = 0;
+my $no_emoji = 0;
 
 ##### Main #####
 validate_input_data();
@@ -68,17 +70,18 @@ sub validate_input_data {
 
     # Reading arguments
     GetOptions(
-        'input|i=s{1,7}'    => \my @in_files,                             # array
-        'schema-dir|s=s'    => \$schema_dir,                              # string
-        'out-dir|o=s'       => \$out_dir,                                 # string
-        'help|?'            => \my $help,                                 # flag
-        'man'               => \my $man,                                  # flag
-        'gv'                => \my $gv_flag,                              # flag
-        'gv-vcf'            => \my $gv_vcf_flag,                          # flag
-        'ignore-validation' => \my $ignore_validation,                    # flag
-        'debug=i'           => \$debug,                                   # integer
-        'verbose'           => \$verbose,                                 # flag
-        'no-color|nc'       => \my $no_color,                             # flag
+        'input|i=s{1,7}'    => \my @in_files,
+        'schema-dir|s=s'    => \$schema_dir,
+        'out-dir|o=s'       => \$out_dir,
+        'help|?'            => \my $help,
+        'man'               => \my $man,
+        'gv'                => \my $gv_flag,
+        'gv-vcf'            => \my $gv_vcf_flag,
+        'ignore-validation' => \my $ignore_validation,
+        'debug=i'           => \$debug,
+        'verbose'           => \$verbose,
+        'no-color|nc'       => \my $no_color,
+        'no-emoji|ne'       => \$no_emoji,
         'version|v'         => sub { say "$0 Version $version"; exit; }
     ) or pod2usage(2);
     pod2usage(1)                              if $help;
@@ -100,12 +103,12 @@ sub validate_input_data {
     $ENV{'ANSI_COLORS_DISABLED'} = 1 if $no_color;
 
     my %schema_emoji = (
-        analyses    => "🗂 ",    # collection of results
-        biosamples  => "🧪",     # biological samples
-        cohorts     => "👥",     # group of individuals
-        datasets    => "📦",     # package of data
-        individuals => "🧍",     # individual person
-        runs        => "🧫",     # sequencing run
+        analyses    => ( $no_emoji ? "" : "🗂 " ),
+        biosamples  => ( $no_emoji ? "" : "🧪" ),
+        cohorts     => ( $no_emoji ? "" : "👥" ),
+        datasets    => ( $no_emoji ? "" : "📦" ),
+        individuals => ( $no_emoji ? "" : "🧍" ),
+        runs        => ( $no_emoji ? "" : "🧫" ),
     );
 
     # Define a few more variables
@@ -157,7 +160,9 @@ sub validate_input_data {
                 $ok = 1;
                 print "Ignoring JSON Validation->";
             }
-            say "📝 Writing <$out> file\n" and write_json( $out, $json ) if $ok;
+            say( ( $no_emoji ? "" : "📝 " ) . "Writing <$out> file\n" )
+              and write_json( $out, $json )
+              if $ok;
         }
 
         # Route 2 - JSON
@@ -391,13 +396,15 @@ sub say_rows_processed {
 }
 
 sub say_errors {
-
     my $errors = shift;
     if ( @{$errors} ) {
         say BOLD RED( join "\n", @{$errors} ), RESET;
     }
     else {
-        say BOLD GREEN '🎉 Hurray! No errors found', RESET;
+        say BOLD GREEN,
+          ( $no_emoji
+            ? "Hurray! No errors found"
+            : "🎉 Hurray! No errors found" ), RESET;
     }
     return 1;
 }
@@ -725,17 +732,25 @@ sub check_input_type {
 }
 
 sub program_header {
-
     my $version = shift;
-    my $str     = <<EOF;
+
+    # Define emoji variables that depend on $no_emoji:
+    my $em_beacon   = ( $no_emoji ? "  " : "🧬" );
+    my $em_validate = ( $no_emoji ? "  " : "✅" );
+    my $em_version  = ( $no_emoji ? "  " : "🔢" );
+    my $em_rocket   = ( $no_emoji ? "  " : "🚀" );
+    my $em_author   = ( $no_emoji ? "  " : "🧙" );
+    my $em_mascot   = ( $no_emoji ? "  " : "🐧" );
+
+    my $str = <<"EOF";
 ****************************************
-*       🧬  beacon2-cbi-tools 🧬       *
+*       $em_beacon  beacon2-cbi-tools $em_beacon       *
 *--------------------------------------*
-*       ✅ BFF-TOOLS VALIDATE  ✅      *
+*       $em_validate BFF-TOOLS VALIDATE  $em_validate      *
 *   (Beacon Friendly Format Validator) *
 *--------------------------------------*
-*       🔢  Version: $version  🚀         *
-*    🧙 Author: Manuel Rueda, PhD 🐧   *
+*       $em_version  Version: $version  $em_rocket         *
+*    $em_author Author: Manuel Rueda, PhD $em_mascot   *
 ****************************************
 EOF
     return $str;
@@ -767,6 +782,7 @@ bff-validator: A script that validates metadata (XLSX|JSON) against Beacon v2 Mo
      -debug <level>                    Print debugging information (from 1 to 5, with 5 being the max)
      -verbose                          Enable verbosity
      -nc | --no-color                  Do not print colors to STDOUT
+     -ne | --no-emoji                  Do not print emojis to STDOUT
 
 
 =head1 SUMMARY

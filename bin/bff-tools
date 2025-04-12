@@ -91,7 +91,8 @@ $Data::Dumper::Terse = 1;
 ##############################################################
 
 # Parsing arguments/options and getting help if needed
-my $arg = Help::usage($version);
+my $arg      = Help::usage($version);
+my $no_emoji = $arg->{noemoji} // 0;    # 0 means emojis enabled by default
 
 # Reading the configuration values from the config file
 # NB: We'll avoid assigning $param->{foo} to vars unless their value changes often
@@ -104,14 +105,16 @@ $config->{version} = $version;
 my $param = Config::read_param_file($arg);
 
 # Start printing information
-say $prompt;
-say BOLD CYAN "$prompt 🚀 BFF-Tools $version", RESET;
-say "$prompt 🖥️ bff-tools exe: $bfftools_path";
-say "$prompt ✍️ $author";
-say "$prompt 📜 $license\n$prompt";
+# Conditional emoji printing for static text
+say BOLD CYAN "$prompt", ( $no_emoji ? "" : " 🚀" ), " BFF-Tools $version",
+  RESET;
+say "$prompt", ( $no_emoji ? "" : " 🖥️" ), " bff-tools exe: $bfftools_path";
+say "$prompt", ( $no_emoji ? "" : " ✍️" ), " $author";
+say "$prompt", ( $no_emoji ? "" : " 📜" ),  " $license\n$prompt";
 
 # Print arguments to stdout
-say BOLD YELLOW, "$prompt 🔧 ARGUMENTS USED:", RESET;
+say BOLD YELLOW, "$prompt", ( $no_emoji ? "" : " 🔧" ), " ARGUMENTS USED:",
+  RESET;
 say WHITE "$prompt mode: $arg->{mode}";
 my @tmp_keys =
   qw (inputfile configfile paramfile threads debug verbose nocolor projectdir-override);
@@ -125,7 +128,8 @@ for my $argument ( sort keys %argument ) {
 
 # Printing the config values to stdout according to the format below
 say WHITE "$prompt";
-say BOLD BLUE, "$prompt ⚙️  CONFIGURATION VALUES:", RESET;
+say BOLD BLUE, "$prompt", ( $no_emoji ? "" : " ⚙️ " ), "CONFIGURATION VALUES:",
+  RESET;
 
 $~ = "CONFIG";
 my $l_config = '';
@@ -140,7 +144,8 @@ $prompt, $l_config, $arrow, $config->{$l_config}
 
 # Printing the params to stdout according to the format below
 say WHITE "$prompt";
-say BOLD GREEN, "$prompt 🎬 BFF-TOOLS PARAMETERS:", RESET;
+say BOLD GREEN, "$prompt", ( $no_emoji ? "" : " 🎬" ), " BFF-TOOLS PARAMETERS:",
+  RESET;
 
 # Creating a tmp hash to deal with 2D hash
 my %tmp_param = %{$param};
@@ -161,7 +166,8 @@ $prompt, $l_param, $arrow, $tmp_param{$l_param}
 
 # Start bff-tools
 say $prompt;
-say BOLD CYAN "$prompt 🚦 STARTING BFF-TOOLS FUN";
+say BOLD CYAN, "$prompt", ( $no_emoji ? "" : " 🚦" ), " STARTING BFF-TOOLS FUN",
+  RESET;
 say RESET "$prompt $spacer";
 
 # Create the working dir
@@ -214,11 +220,11 @@ my $rah_beacon = {
 # Loading the object
 my $beacon = Tools->new($rah_beacon);
 
-# Define the hash with emoji values
+# Define emojis based on the $no_emoji flag
 my %pipeline_emoji = (
-    vcf2bff     => "🧬",
-    bff2mongodb => "📥",
-    bff2html    => "🌐",
+    vcf2bff     => $no_emoji ? "" : "🧬",
+    bff2mongodb => $no_emoji ? "" : "📥",
+    bff2html    => $no_emoji ? "" : "🌐",
 );
 
 # Now submitting the pipelines (order matters) through bash scripts
@@ -233,7 +239,8 @@ for my $pipeline (@pipelines) {
 
 # End bff-tools
 say "$prompt $spacer";
-say BOLD GREEN, "$prompt ✅ BFF-TOOLS FINISHED OK", RESET;
+say BOLD GREEN, "$prompt", ( $no_emoji ? "" : " ✅" ), " BFF-TOOLS FINISHED OK",
+  RESET;
 
 # Optional message
 say "$prompt Date: ",            scalar localtime if $arg->{verbose};
@@ -241,7 +248,7 @@ say "$prompt Running time(s): ", time - $^T       if $arg->{verbose};
 
 # Say goodbye message
 my $goodbye = GoodBye->new();
-say WHITE, $prompt, ' 👋 ', $goodbye->say_goodbye();
+say WHITE, $prompt, ( $no_emoji ? "" : " 👋 " ), $goodbye->say_goodbye();
 
 ##############################################################
 #                   Code ends here                           #
@@ -294,7 +301,9 @@ sub run_with_spinner {
                 my $message =
                     BOLD
                   . WHITE
-                  . " Please be patient - this job may take a while ⏳ (elapsed: $elapsed_str)..."
+                  . " Please be patient - this job may take a while"
+                  . ( $no_emoji ? "" : " ⏳" )
+                  . " (elapsed: $elapsed_str)..."
                   . RESET;
                 print "\r$spinner_char$message";
                 $i++;
@@ -375,6 +384,7 @@ bff-tools <mode> [-arguments] [-options]
        -debug <level>                 Print debugging information (1 to 5)
        -verbose                       Enable verbosity
        -nc | --no-color               Do not print colors to STDOUT
+       -ne | --no-emoji               Do not print emojis to STDOUT
 
 =head1 DESCRIPTION
 
