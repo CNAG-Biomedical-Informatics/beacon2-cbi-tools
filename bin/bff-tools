@@ -128,7 +128,7 @@ for my $argument ( sort keys %argument ) {
 
 # Printing the config values to stdout according to the format below
 say WHITE "$prompt";
-say BOLD BLUE, "$prompt", ( $no_emoji ? "" : " ⚙️ " ), "CONFIGURATION VALUES:",
+say BOLD BLUE, "$prompt", ( $no_emoji ? "" : " ⚙️ " ), " CONFIGURATION VALUES:",
   RESET;
 
 $~ = "CONFIG";
