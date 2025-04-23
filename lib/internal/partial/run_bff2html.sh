@@ -65,17 +65,27 @@ ln -s $ASSETSDIR assets # symbolic link for css, etc.
 $JSON2HTML --id $ID --assets-dir assets --panel-dir $PANELDIR --project-dir $PROJECTDIR > $ID.html
 
 cat <<EOF > README.txt
-# To visualize <$ID.html>
+### PREFERRED MODE
 
-# 1. Go to bff_browser directory
-cd beacon2-cbi-tools/utils/bff_browser
+# To visualize <$ID.html>:
 
-# 2. Execute BFF Browser Flask App
-python3 app.py 
+1. Go to the bff_browser directory:
+   cd beacon2-cbi-tools/utils/bff_browser
 
-# 3. Open a browser at http://0.0.0.0:8001/
+2. Start the BFF Browser Flask App:
+   python3 app.py
 
-# 4. Follow instructions at Home page
+3. Open your browser and navigate to:
+   http://0.0.0.0:8001/
+
+4. Follow the instructions on the Home page.
+
+---
+
+### ALTERNATIVE MODE
+
+# To open <$ID.html> directly in Chromium:
+chromium --allow-file-access-from-files $ID.html
 EOF
 
 # All done
