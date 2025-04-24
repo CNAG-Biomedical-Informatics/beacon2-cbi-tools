@@ -174,6 +174,21 @@ alias bff-tools='docker exec -ti beacon2-cbi-tools /usr/share/beacon2-cbi-tools/
 bff-tools
 ```
 
+Example run:
+
+```bash
+bff-tools vcf -i /beacon2-cbi-tools-data/chr22.Test.1000G.phase3.joint.vcf.gz  \
+              -p /beacon2-cbi-tools-data/param.yaml \
+              --projectdir-override /beacon2-cbi-tools-data/my_test_dir
+```
+
+Note: You can also set the path for the projectdir via parameters file.
+
+```yaml
+projectdir: /beacon2-cbi-tools-data/my_test_dir
+```
+
+
 ---
 
 ### 🔹 If You Used Method 3 (Docker Compose)
