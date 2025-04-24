@@ -205,13 +205,6 @@ To connect:
 docker exec -ti beacon2-cbi-tools bash
 ```
 
-To run tools from the host (optional):
-
-```bash
-alias bff-tools='docker exec -ti beacon2-cbi-tools /usr/share/beacon2-cbi-tools/bin/bff-tools'
-bff-tools
-```
-
 ---
 
 ### ✅ Test the Deployment
