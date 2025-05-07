@@ -82,10 +82,13 @@ cat <<EOF > README.txt
 
 ---
 
-### ALTERNATIVE MODE
+### ALTERNATIVE MODES
 
-# To open <$ID.html> directly in Chromium:
-chromium --allow-file-access-from-files $ID.html
+# Option 1: Open <$ID.html> directly in Chromium
+chromium --allow-file-access-from-files --disable-web-security $ID.html
+
+# Option 2: Use an HTTP server. Example using Python 3:
+python3 -m http.server
 EOF
 
 # All done
