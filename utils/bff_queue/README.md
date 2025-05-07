@@ -34,7 +34,7 @@ There are several options to accomplish this:
 In the example below, we allow `parallel` to process all 24 VCF files (one per chromosome). `parallel` will distribute one job per available core and manage the workload as a _lightweight_ queue system.
 
 ```bash
-parallel "./beacon vcf -n 1 -i chr{}.vcf.gz  > chr{}.log 2>&1" ::: {1..22} X Y
+parallel "bin/bff-tools vcf -t 1 -i chr{}.vcf.gz  > chr{}.log 2>&1" ::: {1..22} X Y
 ```
 
 **GNU-Parallel** is an excellent tool, and I highly recommend it.
@@ -102,7 +102,7 @@ Then, submit a job from there:
 (Please update the paths to match your environment)
 
 ```bash
-/usr/share/beacon2-ri/beacon2-cbi-tools/utils/bff_queue/bff-queue minion job -q beacon -e beacon_task -a '["cd /home/mrueda/beacon ; /usr/share/beacon2-ri/beacon2-cbi-tools/bin/beacon vcf -i test_1000G.vcf.gz -p param.yaml -n 1 > beacon.log 2>&1"]'
+/usr/share/beacon2-ri/beacon2-cbi-tools/utils/bff_queue/bff-queue minion job -q beacon -e beacon_task -a '["cd /home/mrueda/beacon ; /usr/share/beacon2-ri/beacon2-cbi-tools/bin/bff-tools vcf -i test_1000G.vcf.gz -p param.yaml -t 1 > beacon.log 2>&1"]'
 ```
 
 **Note:** If you encounter any issues, simply delete the `minion.db` file in the `bff_queue` directory.
