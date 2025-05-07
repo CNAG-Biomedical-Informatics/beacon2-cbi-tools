@@ -85,7 +85,6 @@ cat <<EOF > README.txt
 ### ALTERNATIVE MODE
 
 # To open <$ID.html> directly in Chromium:
-# Note: You need to open a new Chromium Window
 chromium --allow-file-access-from-files $ID.html
 EOF
 
