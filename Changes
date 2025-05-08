@@ -5,6 +5,7 @@ Revision history for beacon2-cbi-tools
     - Added docs
     - Made STDOUT friendlier with UTF-8 emoji (turn off via --no-emoji)
     - Restored defaults to: mem=8GB, tmpdir=/tmp, dbnsfpset=all
+    - Added pattern 'MODERATE' for fetching these annotated variants in 'bff2html'.
 
 2.0.8  2025-03-22
 

@@ -47,14 +47,18 @@ INPUT_BFF=$1
 PROJECTDIR=$2
 ID=$3
 
+# Set patterns 
+PATTERN_HIGH='HIGH' # it only appears in field 'Annotation Impact', otherwise use awk with #col (see below)
+PATTERN_MODERATE='MODERATE' # Idem
+PATTERN="${PATTERN_HIGH}.${PATTERN_MODERATE}"
+
 # Step 1: Parse BFF according to gene panels
 echo "# Running BFF2JSON"
-PATTERN='HIGH' # it only appears in field 'Annotation Impact', otherwise use awk with #col (see below)
 for PANEL in $PANELDIR/*.lst
 do
     BASE=$(basename $PANEL .lst)
     # NB:
-    zgrep -F -w $PATTERN $INPUT_BFF | grep -F -w -f $PANEL > $ID.$BASE.$PATTERN.json || echo "Nothing found for $BASE"
+    zgrep -F -w -e $PATTERN_HIGH -e $PATTERN_MODERATE $INPUT_BFF | grep -F -w -f $PANEL > $ID.$BASE.$PATTERN.json || echo "Nothing found for $BASE"
     $BFF2JSON -i $ID.$BASE.$PATTERN.json -f json | jq -s . > $BASE.json || echo "Could not run $BFF2JSON -f json for $BASE"  # jq needed
     $BFF2JSON -i $ID.$BASE.$PATTERN.json -f json4html > $BASE.mod.json || echo "Could not run $BFF2JSON -f json4html for $BASE"
 done

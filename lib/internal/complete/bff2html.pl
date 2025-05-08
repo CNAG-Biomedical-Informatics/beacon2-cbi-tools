@@ -199,14 +199,14 @@ sub generate_navbar {
                 <ul class="dropdown-menu">
                   <li class="nav-header">Help</li>
                   <li>
-                    <a href="https://b2ri-documentation.readthedocs.io/en/latest/data-ingestion/">
+                    <a href="https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils/bff_browser">
                       <span class="icon-question-sign"></span> Help Page
                     </a>
                   </li>
                   <li class="divider"></li>
                   <li class="nav-header">FAQs</li>
                   <li>
-                    <a href="https://b2ri-documentation.readthedocs.io/en/latest/faq">
+                    <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/help/faq/">
                       <span class="icon-question-sign"></span> FAQs Page
                     </a>
                   </li>
@@ -253,7 +253,7 @@ qq(    <a class="btn pull-right" href="./$panel.json"><i class="icon-download"><
     $html .= qq(    <h4>Project &#9658; $project_dir</h4>\n);
     $html .= qq(    <h3>Job ID &#9658; $id &#9658; genomicVariationsVcf</h3>\n);
     $html .=
-qq(    <p>Displaying variants with <strong>Annotation Impact</strong> values equal to <strong>HIGH</strong></p>\n);
+qq(    <p>Displaying variants with <strong>Annotation Impact</strong> values equal to <strong>HIGH|MODERATE</strong></p>\n);
     return $html;
 }
 

@@ -35,7 +35,7 @@ The App includes precomputed examples for `genomicVariations` and `individuals` 
 
 ## Browsing `genomicVariations`
 
-To visualize **genomic variations**, an **HTML** file needs to be created and later loaded into the **BFF Browser**. The process involves filtering variants with **HIGH** quality from the `JSON` file and rendering them in HTML using `JavaScript`.
+To visualize **genomic variations**, an **HTML** file needs to be created and later loaded into the **BFF Browser**. The process involves filtering variants with **HIGH|MODERATE** annotation from the `JSON` file and rendering them in HTML using `JavaScript`.
 
 **Note:** This method works efficiently for up to **5 million** variants. If your dataset exceeds this limit, consider using an alternative visualization method based on a backend database.
 
