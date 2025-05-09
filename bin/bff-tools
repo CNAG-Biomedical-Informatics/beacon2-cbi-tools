@@ -9,9 +9,9 @@
 #     3. full: Combines vcf and load modes
 #     4. validate: Resorts to utils/bff-validator
 #
-#   Last Modified: March/22/2025
+#   Last Modified: May/09/2025
 #
-#   Version: 2.0.8
+#   Version: 2.0.9
 #
 #   Copyright (C) 2021-2022 Manuel Rueda - CRG
 #   Copyright (C) 2023-2025 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
@@ -67,7 +67,7 @@ if ( ( $ARGV[0] // '' ) eq 'validate' ) {
 }
 
 # bff-tools version
-my $version = '2.0.8';
+my $version = '2.0.9';
 
 # Initialize a few more variables
 my $prompt        = 'Info:';

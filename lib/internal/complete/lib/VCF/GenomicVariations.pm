@@ -33,17 +33,17 @@ sub data2hash {
 
 sub data2json {
     my $self = shift;
-    return $coder_pretty->encode(unbless $self);
+    return $coder_pretty->encode( unbless $self);
 }
 
 sub data2bff_pretty {
     my ( $self, $uid, $verbose ) = @_;
-    return $coder_pretty->encode( mapping2beacon( $self, $uid, $verbose ));
+    return $coder_pretty->encode( mapping2beacon( $self, $uid, $verbose ) );
 }
 
 sub data2bff {
     my ( $self, $uid, $verbose ) = @_;
-    return $coder->encode( mapping2beacon( $self, $uid, $verbose ));
+    return $coder->encode( mapping2beacon( $self, $uid, $verbose ) );
 }
 
 sub mapping2beacon {
@@ -411,7 +411,8 @@ sub _map_variant_level_data {
         clinicalDb         => 'CLINVAR_CLNDISDB',      # INTERNAL FIELD
         clinicalRelevance  => 'CLINVAR_CLNSIG',
         clinicalRelevances => 'CLINVAR_CLNSIGINCL',    # INTERNAL FIELD
-        conditionId        => 'CLINVAR_CLNDN'
+        conditionId        => 'CLINVAR_CLNDN',
+        alleleId           => 'CLINVAR_ALLELEID'       # INTERNAL FIELD
     );
 
     # clinicalRelevance enum values
@@ -456,13 +457,27 @@ sub _map_variant_level_data {
                 my $tmp_var =
                   $cursor_info->{ $map_variant_level_data{clinicalRelevances} };
                 warn
-"CLINVAR_CLNSIGINCL is getting a value of '.' \nDid you use SnpSift annotate wth the flag -a?"
+"CLINVAR_CLNSIGINCL is getting a value of '.' \nDid you use SnpSift annotate with the flag -a?"
                   if $tmp_var eq '.';
+
+                # build alleleID => significance map
                 my %clnsigincl = split /[\|:]/, $tmp_var;
-                my %clinvar_sig;
-                @clinvar_sig{@clndn} = values %clnsigincl;    # Assuming keys match @clndn
-                if ( $clinvar_sig{$key} ) {
-                    my $parsed_acmg = parse_acmg_val( $clinvar_sig{$key} );
+
+                # grab our allele ID
+                my $allele_id =
+                  $cursor_info->{ $map_variant_level_data{alleleId} };
+
+                if ( exists $clnsigincl{$allele_id} ) {
+                    my $parsed_acmg = parse_acmg_val( $clnsigincl{$allele_id} );
+                    $tmp_ref->{clinicalRelevance} = $parsed_acmg
+                      if grep { $_ eq $parsed_acmg } @acmg_values;
+                }
+                else {
+                    # fallback to the overall CLNSIG if no per-allele entry
+                    my $tmp_fallback =
+                      $cursor_info->{ $map_variant_level_data{clinicalRelevance}
+                      };
+                    my $parsed_acmg = parse_acmg_val($tmp_fallback);
                     $tmp_ref->{clinicalRelevance} = $parsed_acmg
                       if grep { $_ eq $parsed_acmg } @acmg_values;
                 }
