@@ -118,7 +118,7 @@ bff2html: true
 ```
 
 !!! Important "Note about timing"
-    We made the script _as fast as we possibly could_ with a scripting language. In this regard, the processing time scales linearly with the #variants, but it's also affected by the #samples. For instance, 1M variants with 2,500 samples will take around ~20-25 min.
+    We optimized the script to be as fast as possible for a scripting language. (Update: In 2025, a `Rust` version for `vcf2bff` was created and tested, but it achieved similar speed.) Processing time scales linearly with the number of variants, but is also influenced by the number of samples. For example, annotating and processing 1 million variants across 2,500 samples takes approximately 20-25 minutes.
 
 If something is wrong with the input files, the script will complain and provide [possible solutions](https://b2ri-documentation.readthedocs.io/en/latest/faq/#data-ingestion-tools).
 
