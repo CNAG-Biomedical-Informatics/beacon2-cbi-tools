@@ -245,8 +245,10 @@ sub read_param_file {
     $param{gvvcfjson} =
       catfile( $param{projectdir}, 'vcf', 'genomicVariationsVcf.json.gz' );
 
+    # Genome
+    $param{genome} = 'hs37' if  $param{genome} eq 'b37';
     # Check parameter 'genome' (using any from List::Utils instead of exist $key{value}
-    my @assemblies = qw(hg19 hg38 hs37);
+    my @assemblies = qw(hg19 hg38 hs37 );
     die "Please select a valid reference genome. The options are [@assemblies]"
       unless ( any { $_ eq $param{genome} } @assemblies );
 

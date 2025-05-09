@@ -5,8 +5,8 @@
 
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
-??? faq "I have an error when attempting to use `beacon vcf`, what should I do?"
-    * In 9 out of 10 cases, the error comes from **BCFtools** and is related to the **reference genome** specified in the **parameters** [file](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools). The options are typically _hg19_, _hg38_ (which use `chr` prefixes), and _hs37_ (which do not). Ensure that your VCF’s contigs match the FASTA file or modify your `config.yaml` accordingly.
+??? faq "I have an error when attempting to use `bff-tools vcf`, what should I do?"
+    * In 9 out of 10 cases, the error comes from **BCFtools** and is related to the **reference genome** specified in the **parameters** [file](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools). The options are typically _hg19_, _hg38_ (which use `chr` prefixes), and _hs37_, _b37_ (which do not). Ensure that your VCF’s contigs match the FASTA file or modify your `config.yaml` accordingly.
     
     * Additionally, **BCFtools** may complain about the number of fields (for example, in the INFO field). In such cases, you can try fixing the VCF manually or use:
     

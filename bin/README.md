@@ -160,9 +160,9 @@ Please find below a detailed description of all parameters (alphabetical order):
 
     Your reference genome.
 
-    Accepted values: hg19, hg38 and hs37.
+    Accepted values: hg19, hg38, hs37, and b37 (b37 will be interpreted as hs37).
 
-    If you used GATKs GRCh37/b37 set it to hg19.
+    If you used GATKs GRCh37 set it to hg19.
 
     Not supported: NCBI36/hg18, NCBI35/hg17, NCBI34/hg16, hg15 and older.
 

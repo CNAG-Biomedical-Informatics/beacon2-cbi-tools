@@ -253,7 +253,7 @@ qq(    <a class="btn pull-right" href="./$panel.json"><i class="icon-download"><
     $html .= qq(    <h4>Project &#9658; $project_dir</h4>\n);
     $html .= qq(    <h3>Job ID &#9658; $id &#9658; genomicVariationsVcf</h3>\n);
     $html .=
-qq(    <p>Displaying variants with <strong>Annotation Impact</strong> values equal to <strong>HIGH|MODERATE</strong></p>\n);
+qq(    <p>Displaying variants with <strong>Annotation Impact</strong> values equal to <strong>HIGH | MODERATE</strong></p>\n);
     return $html;
 }
 
