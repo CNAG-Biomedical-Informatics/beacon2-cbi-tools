@@ -7,7 +7,7 @@ Revision history for beacon2-cbi-tools
     - Restored defaults to: mem=8GB, tmpdir=/tmp, dbnsfpset=all
     - Added pattern 'MODERATE' for fetching these annotated variants in 'bff2html'.
     - VCF2BFF
-      - Fixed ClinVar per-allele lookup: index CLNSIGINCL by CLINVAR_ALLELEID, fallback to CLNSIG.
+      - Fixed ClinVar per-allele lookup: index CLNSIGINCL by CLINVAR_ALLELEID, fallback to CLNSIG
 
 2.0.8  2025-03-22
 
