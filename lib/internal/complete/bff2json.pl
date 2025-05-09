@@ -13,7 +13,7 @@ use JSON::XS;
 #--------------------------------------------------
 # Global variables/metadata
 #--------------------------------------------------
-my $VERSION = '2.0.8';
+my $VERSION = '2.0.9';
 
 #--------------------------------------------------
 # "Main" entry point
@@ -168,10 +168,13 @@ sub serialize2json4html {
       map { "$_->{effect}{label}($_->{effect}{id})" }
       @{ $data->{variantLevelData}{clinicalInterpretations} };
 
-    $hash{clinicalRelevance} = join ',',
-      map  { parse_clinical_relevance( $_->{clinicalRelevance} ) }
-      grep { $_->{clinicalRelevance} }
+    # grab the first clinicalInterpretation that has a value
+    my ($first) = grep { $_->{clinicalRelevance} }
       @{ $data->{variantLevelData}{clinicalInterpretations} };
+    $hash{clinicalRelevance} =
+      $first
+      ? parse_clinical_relevance( $first->{clinicalRelevance} )
+      : '';
 
     $hash{dbSNP} = join ',', map { parse_dbsnp( $_->{id} ) }
       grep { $_->{id} =~ /dbSNP:/ }
@@ -213,22 +216,33 @@ sub serialize2json4html {
 #--------------------------------------------------
 # Parsers and small helpers
 #--------------------------------------------------
+
+# Split comma-separated rsIDs and emit one link per ID
 sub parse_dbsnp {
-    my ($id) = @_;
+    my ($id_list) = @_;
     my $dbsnp_url = 'https://www.ncbi.nlm.nih.gov/snp';
-    $id =~ s/dbSNP://;
-    return ( $id =~ /\w+/ )
-      ? qq(<a target="_blank" href="$dbsnp_url/$id">$id</a>)
-      : $id;
+    # split on commas, skip empty elements
+    my @ids = grep { length } split /,/, $id_list;
+    # map each to a link, then join with commas
+    return join ',', map {
+        (my $id = $_) =~ s/^dbSNP://;
+        $id =~ /\w/
+            ? qq(<a target="_blank" href="$dbsnp_url/$id">$id</a>)
+            : '';
+    } @ids;
 }
 
+# Split comma-separated ClinVar IDs and emit one link per ID
 sub parse_clinvar {
-    my ($id) = @_;
-    my $clinvar_url = 'https://www.ncbi.nlm.nih.gov/clinvar/variation/';
-    $id =~ s/ClinVar://;
-    return ( $id =~ /\d+/ )
-      ? qq(<a target="_blank" href="$clinvar_url/$id">$id</a>)
-      : $id;
+    my ($id_list) = @_;
+    my $clinvar_url = 'https://www.ncbi.nlm.nih.gov/clinvar/variation';
+    my @ids = grep { length } split /,/, $id_list;
+    return join ',', map {
+        (my $id = $_) =~ s/^ClinVar://;
+        $id =~ /\d/
+            ? qq(<a target="_blank" href="$clinvar_url/$id">$id</a>)
+            : '';
+    } @ids;
 }
 
 sub parse_gene {

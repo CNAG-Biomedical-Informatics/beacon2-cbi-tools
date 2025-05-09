@@ -74,7 +74,7 @@ exit;
 ###############################################################################
 sub vcf2bff {
 
-    my $version  = '2.0.8';
+    my $version  = '2.0.9';
     my $DEFAULT  = '.';
     my $exe_path = abs_path($0);
     my $cwd      = cwd;
