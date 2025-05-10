@@ -226,7 +226,7 @@ sub generate_navbar {
                   <li class="divider"></li>
                   <li class="nav-header">Links</li>
                   <li>
-                    <a href="https://www.cnag.crg.eu">
+                    <a href="https://www.cnag.eu">
                       <span class="icon-home"></span> CNAG
                     </a>
                   </li>
