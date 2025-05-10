@@ -1,11 +1,12 @@
 Revision history for beacon2-cbi-tools
 
-2.0.9  2025-05-09
+2.0.9  2025-05-10
     - Added docs
     - Made STDOUT friendlier with UTF-8 emoji (turn off via --no-emoji)
     - Restored defaults to: mem=8GB, tmpdir=/tmp, dbnsfpset=all
     - VCF2BFF
-      - Fixed ClinVar per-allele lookup: index CLNSIGINCL by CLINVAR_ALLELEID, fallback to CLNSIG
+      - Fixed error in assignment of 'clinicalRelevance' by using 'CLINVAR_CLNSIGINCL' when present (i.e., haplotype-based), instead of 'CLINVAR_CLNSIG'
+      - Added additional properties '_CLINVAR_CLNSIGINCL' and '_CLINVAR_ALLELEID' (if present) to the 'clinicalInterpretations' object
     - BFF2HTML
       - Added pattern 'MODERATE' for fetching these annotated variants in 'bff2html'.
       - Display only one 'clinicalRelevance' per variant instead of one per 'clinicalInterpretation'

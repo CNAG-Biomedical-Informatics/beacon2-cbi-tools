@@ -407,14 +407,6 @@ sub _map_variant_level_data {
     my ( $cursor_info, $cursor_internal ) = @_;
     my $variantLevelData = {};
 
-    my %map_variant_level_data = (
-        clinicalDb         => 'CLINVAR_CLNDISDB',      # INTERNAL FIELD
-        clinicalRelevance  => 'CLINVAR_CLNSIG',
-        clinicalRelevances => 'CLINVAR_CLNSIGINCL',    # INTERNAL FIELD
-        conditionId        => 'CLINVAR_CLNDN',
-        alleleId           => 'CLINVAR_ALLELEID'       # INTERNAL FIELD
-    );
-
     # clinicalRelevance enum values
     my @acmg_values = (
         'benign',
@@ -424,7 +416,32 @@ sub _map_variant_level_data {
         'pathogenic'
     );
 
-    # Examples of ClinVar Annotations for CLNDISDB and CLNDN
+    my %map_variant_level_data = (
+        conditionId         => 'CLINVAR_CLNDN',
+        clinicalRelevance   => 'CLINVAR_CLNSIG',
+        clinicalDb          => 'CLINVAR_CLNDISDB',
+        _CLINVAR_CLNSIGINCL => 'CLINVAR_CLNSIGINCL',
+        _CLINVAR_ALLELEID   => 'CLINVAR_ALLELEID'
+    );
+
+    #2	112582942	692104	G	A	.	.	ALLELEID=679848
+    #CLNDISDB=MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008
+    #CLNDN=Rothmund-Thomson_syndrome_type_1
+    #CLNHGVS=NC_000002.11:g.112582942G>A
+    #CLNREVSTAT=no_assertion_criteria_provided
+    #CLNSIG=Pathogenic/Likely_pathogenic
+    #CLNSIGSCV=SCV000996307|SCV000999016
+    #CLNVC=single_nucleotide_variant
+    #CLNVCSO=SO:0001483
+    #CLNVI=ClinGen:CA53563698|OMIM:608473.0001
+    #GENEINFO=ANAPC1:64682
+    #MC=SO:0001627|intron_variant
+    #ORIGIN=1
+    #RS=999743155
+    #CLNDISDBINCL=MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008
+    #CLNDNINCL=Rothmund-Thomson_syndrome_type_1
+    #CLNSIGINCL=694458:Likely_pathogenic|694459:Likely_pathogenic|694496:Likely_pathogenic
+
     if (   exists $cursor_info->{ $map_variant_level_data{clinicalDb} }
         && exists $cursor_info->{ $map_variant_level_data{conditionId} } )
     {
@@ -432,14 +449,15 @@ sub _map_variant_level_data {
           $cursor_info->{ $map_variant_level_data{conditionId} };
         my @clndisdb = split /\|/,
           $cursor_info->{ $map_variant_level_data{clinicalDb} };
-        my %clinvar_ont;
-        @clinvar_ont{@clndn} = @clndisdb;
+        my %clinvar_conditionId_ont;
+        @clinvar_conditionId_ont{@clndn} = @clndisdb;
 
-        while ( my ( $key, $val ) = each %clinvar_ont ) {
+        # Creating one entry by conditionId (CLINVAR_CLNDN):
+        # Example %clinvar_conditionId_ont:
+        #   (Rothmund-Thomson_syndrome_type_1 => MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008)
 
-            # "variantInternalId": "chr22_51064416_T_C",
-            # "variantLevelData": { "clinicalInterpretations": [ { "category": { "label": "disease or disorder", "id": "MONDO:0000001" },
-            # "effect": { "id": ".", "label": "ARYLSULFATASE_A_POLYMORPHISM" }, "conditionId": "ARYLSULFATASE_A_POLYMORPHISM" }
+        while ( my ( $key, $val ) = each %clinvar_conditionId_ont ) {
+
             next if $val eq '.';
             my $tmp_ref = {};
             $tmp_ref->{conditionId} = $key;
@@ -452,51 +470,32 @@ sub _map_variant_level_data {
             # ***** clinicalInterpretations.clinicalRelevance
             if (
                 exists
-                $cursor_info->{ $map_variant_level_data{clinicalRelevances} } )
+                $cursor_info->{ $map_variant_level_data{clinicalRelevance} } )
             {
-                my $tmp_var =
-                  $cursor_info->{ $map_variant_level_data{clinicalRelevances} };
-                warn
-"CLINVAR_CLNSIGINCL is getting a value of '.' \nDid you use SnpSift annotate with the flag -a?"
-                  if $tmp_var eq '.';
-
-                # build alleleID => significance map
-                my %clnsigincl = split /[\|:]/, $tmp_var;
-
-                # grab our allele ID
-                my $allele_id =
-                  $cursor_info->{ $map_variant_level_data{alleleId} };
-
-                if ( exists $clnsigincl{$allele_id} ) {
-                    my $parsed_acmg = parse_acmg_val( $clnsigincl{$allele_id} );
-                    $tmp_ref->{clinicalRelevance} = $parsed_acmg
-                      if grep { $_ eq $parsed_acmg } @acmg_values;
-                }
-                else {
-                    # fallback to the overall CLNSIG if no per-allele entry
-                    my $tmp_fallback =
-                      $cursor_info->{ $map_variant_level_data{clinicalRelevance}
-                      };
-                    my $parsed_acmg = parse_acmg_val($tmp_fallback);
-                    $tmp_ref->{clinicalRelevance} = $parsed_acmg
-                      if grep { $_ eq $parsed_acmg } @acmg_values;
-                }
+                my $raw_sig =
+                  $cursor_info->{ $map_variant_level_data{clinicalRelevance} };
+                my $parsed = parse_acmg_val($raw_sig);
+                $tmp_ref->{clinicalRelevance} = $parsed
+                  if grep { $_ eq $parsed } @acmg_values;
             }
-            else {
-                if (
-                    exists $cursor_info->{
-                        $map_variant_level_data{clinicalRelevance}
-                    }
-                  )
-                {
-                    my $tmp_var =
-                      $cursor_info->{ $map_variant_level_data{clinicalRelevance}
-                      };
-                    my $parsed_acmg = parse_acmg_val($tmp_var);
-                    $tmp_ref->{clinicalRelevance} = $parsed_acmg
-                      if grep { $_ eq $parsed_acmg } @acmg_values;
-                }
+
+            # Additional property
+            if (
+                exists
+                $cursor_info->{ $map_variant_level_data{_CLINVAR_CLNSIGINCL} } )
+            {
+                my $raw_hap =
+                  $cursor_info->{ $map_variant_level_data{_CLINVAR_CLNSIGINCL}
+                  };
+                warn "CLINVAR_CLNSIGINCL is '.' – did you use SnpSift -a?\n"
+                  if $raw_hap eq '.';
+                $tmp_ref->{_CLINVAR_CLNSIGINCL} = $raw_hap;
             }
+
+            # Additional property
+            $tmp_ref->{_CLINVAR_ALLELEID} =
+              $cursor_info->{ $map_variant_level_data{_CLINVAR_ALLELEID} }
+              if exists $cursor_info->{ $map_variant_level_data{_CLINVAR_ALLELEID} };
 
             # ***** clinicalInterpretations.annotatedeWith
             $tmp_ref->{annotatedWith} = $cursor_internal->{ANNOTATED_WITH};
@@ -580,8 +579,10 @@ sub parse_acmg_val {
 
     my $val = shift;
 
-    # Pathogenic/Likely_pathogenic => keeping first value until Models accept multiple values
-    $val = $val =~ m#(\w+)/# ? $1 : $val;
+    # Pathogenic/Likely_pathogenic => IMPORTANT: keeping first value
+    # Pathogenic|Likely_pathogenic => idem
+    # Likely_benign,_other         => idem
+    $val = $val =~ m#(\w+)[/|,]# ? $1 : $val;
     $val = lc($val);
     $val =~ tr/_/ /;
     return $val;
