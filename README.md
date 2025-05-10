@@ -14,10 +14,9 @@
 ![Maintenance status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-cbi-tools?icon=docker&label=beacon2-cbi-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/)
-[![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-ri-tools?icon=docker&label=legacy-beacon2-ri-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-ri-tools/)
-[![Docker Pulls EGA-archive](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=legacy-EGA-archive-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
+[![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-ri-tools?icon=docker&label=deprecated-beacon2-ri-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-ri-tools/)
+[![Docker Pulls EGA-archive](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=deprecated-EGA-archive-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
 ![version](https://img.shields.io/badge/version-2.0.9-blue)
-
 ---
 
 
@@ -130,7 +129,7 @@ A synthetic dataset for testing and demonstration purposes.
 
 ## Roadmap 
 
-**Latest Update: Mar-2025**
+**Latest Update: May-2025**
 
 This repository has been widely adopted in Beacon v2 implementations and is also used internally at CNAG. As a result, we plan to continue its development. Some of our upcoming plans include:
 

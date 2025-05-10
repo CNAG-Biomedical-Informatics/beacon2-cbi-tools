@@ -78,7 +78,7 @@ Once [beacon script](../bin/README.md) has finished, a static HTML page will be 
      - Advanced search with regular expressions (e.g., `rs12(3|4) (tp53|ace2) splice`).
 
 3. **Filtered Display**
-   - Only variations with a **HIGH** impact annotation are included.
+   - Only variations with a **HIGH** or **MODERATE** impact annotation are included.
    - Variations are filtered and displayed according to the `.lst` files in the `paneldir` folder.
 
 ![BFF Genomic Variations Browser](static/images/snapshot-BFF-genomic-variations-browser.png)
