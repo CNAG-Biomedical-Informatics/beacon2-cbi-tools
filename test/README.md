@@ -1,9 +1,11 @@
 
 # Test README
 
-This directory contains data to verify that the transformation of `VCF` to `BFF` functions as expected.
+This directory contains data to verify that the transformation of `VCF` and `TSV` to `BFF` function as expected.
 
-## Data Download (hs37)
+## VCF to BFF
+
+### Data Download (hs37)
 
 **(There is no need to download it again unless you want to test with a different region.)**
 
@@ -21,16 +23,17 @@ The test file included (`test_1000G.vcf.gz`) originates from the 1000 Genomes Pr
 # tabix -h ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz | 1:10000-200000 | bgzip > test_1000G.vcf.gz
 ```
 
-## Run `bff-tools`
+### Run `bff-tools`
 
 To test your installation, please execute the command below:
 (It should take less than 1 minute to complete.)
 
 ```bash
-../bin/bff-tools vcf -i test_1000G.vcf.gz -p param.yaml  # Note that here we used hs37 as the reference genome
+cd vcf
+../../bin/bff-tools vcf -i test_1000G.vcf.gz -p param.yaml  # Note that here we used hs37 as the reference genome
 ```
 
-## Test
+### Test
 
 Once completed, verify that your file `genomicVariationsVcf.json.gz` matches the provided one:
 
@@ -44,6 +47,23 @@ In Ubuntu, you can install the tool `jq` with the following command:
 
 ```bash
 sudo apt-get install jq
+```
+
+## TSV to BFF
+
+SNP microarrays text file to BFF
+
+### Run `bff-tools`
+
+```bash
+cd tsv
+../../bin/bff-tools tsv -i input.txt.gz -p param.yaml  # Note that here we used hs37 as the reference genome
+```
+
+### Test
+
+```bash
+diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat beacon_174706366392929/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S)
 ```
 
 Cheers!

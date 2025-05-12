@@ -10,17 +10,23 @@ bff-tools &lt;mode> \[-arguments\] \[-options\]
 
     Mode:
     * vcf
-         -i | --input <file>            Requires a VCF.gz file
+         -i | --input <file.vcf>        Requires a VCF.gz file (gz or not gz)
+                                        (May also use a parameters file)
+
+    * tsv
+         -i | --input <file.tsv>        Requires a SNP microarray TSV filea (e.g., from 23andme) 
                                         (May also use a parameters file)
 
     * load
                                         (Requires a parameters file specifying BFF files)
 
     * full (vcf + load)
-         -i | --input <file>            Requires a VCF.gz file
+               or
+           (tsv + load)
+         -i | --input <file>            Requires a VCF or TSV file
                                         (May also use a parameters file)
 
-       Options [vcf|load|full]
+       Options [vcf|tsv|load|full]
          -c | --config <file>           Requires a configuration file
          -p | --param <file>            Requires a parameters file (optional)
          -projectdir-override <path>    Custom project directory path (overrides config)
@@ -51,15 +57,19 @@ bff-tools &lt;mode> \[-arguments\] \[-options\]
 
 ### `bff-tools`
 
-`bff-tools` is a command-line toolkit with four operational modes for working with Beacon v2 data:
+`bff-tools` is a command-line toolkit with five operational modes for working with Beacon v2 data:
 
 # HOW TO RUN `bff-tools`
 
-This script supports four **modes**: `vcf`, `load`, `full`, and `validate`.
+This script supports four **modes**: `vcf`, `tsv`, `load`, `full`, and `validate`.
 
 **\* Mode `vcf`**
 
-Annotates a gzipped VCF file (optional) and serializes it into the Beacon-Friendly Format (BFF) as `genomicVariationsVcf.json.gz`.
+Annotates a gzipped (or uncompressed) VCF file and serializes it into the Beacon-Friendly Format (BFF) as `genomicVariationsVcf.json.gz`.
+
+**\* Mode `tsv`**
+
+Annotates a gzipped (or uncompressed) SNP microarray text file and serializes it into the Beacon-Friendly Format (BFF) as `genomicVariationsVcf.json.gz`.
 
 **\* Mode `load`**
 
@@ -76,10 +86,7 @@ Note: This mode uses a separate internal script and does not require a parameter
 
 To perform these tasks, you may need:
 
-- A gzipped VCF file (for modes: `vcf` and `full`)
-
-    Note: It does not need to be bgzipped.
-
+- A VCF file or a TSV file for modes: `vcf` and `full`.
 - A parameters file (optional)
 
     YAML file with job-specific values and metadata file references. Recommended for structured processing.
@@ -92,7 +99,7 @@ To perform these tasks, you may need:
 
     You can start with the provided Excel template and use `--gv` or `--ignore-validation` flags if needed.
 
-- Threads (only for `vcf` and `full` modes)
+- Threads (only for `vcf`, `tsv` and `full` modes)
 
     You can set the number of threads using `-t`. However, since SnpEff doesn't parallelize efficiently, it's best to use `-t 1` and distribute the work (e.g., by chromosome) using GNU `parallel` or the included [queue system](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils/bff_queue)).
 
@@ -105,6 +112,13 @@ Example for `vcf` mode:
 
     --
     genome: hs37 # default hg19
+    annotate: true # default true
+    bff2html: true # default false
+
+Example for `vcf` mode:
+
+    --
+    genome: b37 # default hg19
     annotate: true # default true
     bff2html: true # default false
 
@@ -148,6 +162,10 @@ Please find below a detailed description of all parameters (alphabetical order):
 
     Location for the Beacon Friendly Format JSON files.
 
+- **bff2html**
+
+    Set bff2html to `true` to create HTML for the BFF Genomic Variations Browser.
+
 - **center**
 
     Experimental feature. Not used for now.
@@ -169,10 +187,6 @@ Please find below a detailed description of all parameters (alphabetical order):
 - **organism**
 
     Experimental feature. Not used for now.
-
-- **bff2html**
-
-    Set bff2html to `true` to create HTML for the BFF Genomic Variations Browser.
 
 - **projectdir**
 

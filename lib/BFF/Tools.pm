@@ -22,7 +22,7 @@ sub vcf2bff {
     my $self       = shift;
     my $annotate   = $self->{annotate} ? 'true' : 'false';
     my $dir        = $self->{projectdir};
-    my $input      = $self->{inputfile};
+    my $inputfile  = $self->{inputfile};
     my $datasetid  = $self->{datasetid};
     my $snpeff     = $self->{snpeff};
     my $snpsift    = $self->{snpsift};
@@ -76,9 +76,10 @@ sub vcf2bff {
     write_file( $script_path, \$file_content );
 
     # Script submission
-    my $input_abs = abs_path($input);    # Mandatory to be abs_path
+    my $inputfile_abs = abs_path($inputfile);    # Mandatory to be abs_path
     say 'Dbg' . $debug . ': *** cwd: ', cwd, ' ***' if $debug;
-    my $cmd = "cd $dir && bash $script $input_abs $annotate > $script_log 2>&1";
+    my $cmd =
+      "cd $dir && bash $script $inputfile_abs $annotate > $script_log 2>&1";
     say 'Dbg' . $debug . ': *** Submitting => ', $cmd, ' ***' if $debug;
     submit_cmd( $cmd, $script_path, $script_log_path, $debug );
     say 'Dbg' . $debug . ': *** cwd: ', cwd, ' ***' if $debug;
@@ -91,7 +92,7 @@ sub bff2html {
     my $project_dir = $self->{projectdir};
     my $dir         = $project_dir;
     my $filename    = $self->{bash4html};
-    my $input       = $self->{gvvcfjson};
+    my $inputfile   = $self->{gvvcfjson};
     my $bff2json    = $self->{bff2json};
     my $json2html   = $self->{json2html};
     my $tmpdir      = $self->{tmpdir};
@@ -122,9 +123,9 @@ sub bff2html {
     write_file( $script_path, \$file_content );
 
     # Script submission
-    my $input_abs = abs_path($input);    # Mandatory to be abs_path
+    my $inputfile_abs = abs_path($inputfile);    # Mandatory to be abs_path
     my $cmd =
-"cd $dir && bash $script $input_abs $project_dir $jobid > $script_log 2>&1";
+"cd $dir && bash $script $inputfile_abs $project_dir $jobid > $script_log 2>&1";
     say 'Dbg' . $debug . ': *** cwd: ',          cwd,  ' ***' if $debug;
     say 'Dbg' . $debug . ': *** Submitting => ', $cmd, '***'  if $debug;
     submit_cmd( $cmd, $script_path, $script_log_path, $debug );
@@ -217,6 +218,61 @@ sub bff2mongodb {
     return 1;
 }
 
+sub tsv2vcf {
+    my $self      = shift;
+    my $dir       = $self->{projectdir};
+    my $inputfile = $self->{inputfile};
+    my $datasetid = $self->{datasetid};
+    my $bcftools  = $self->{bcftools};
+    my $sampleid  = $self->{sampleid};
+    my $ref       = $self->{reference};
+    my $genome    = $self->{genome} eq 'hs37' ? 'hg19' : $self->{genome};
+    my $zip       = $self->{zip};
+    my $filename  = $self->{bash4tsv};
+    my $debug     = $self->{debug};
+    my $tmpdir    = $self->{tmpdir};
+    my $verbose   = $self->{verbose};
+
+    # Option 3 - Load the original script and create a new version with the right vars
+    my @params = (
+        "export TMPDIR=$tmpdir", "ZIP='$zip'",
+        "BCFTOOLS=$bcftools",    "SAMPLE_ID=$sampleid",
+        "GENOME='$genome'",      "REF=$ref",
+        "DATASETID=$datasetid",  "PROJECTDIR=$dir",
+    );
+
+    # Prepare variables
+    my $str_var .= join "\n", @params;
+    my $file_content = path($filename)->slurp;
+
+    #my $file_content = do { local ( @ARGV, $/ ) = $filename; <> }; # Pure Perl load
+    $file_content =~ s/#____WRAPPER_VARIABLES____#/$str_var/;
+    my $script = basename($filename);
+    ( my $script_log = $script ) =~ s/sh/log/;
+    $dir = catdir( $dir, 'tsv' );
+    mkdir $dir;
+    my $script_path     = catfile( $dir, $script );
+    my $script_log_path = catfile( $dir, $script_log );
+
+    # Create script
+    write_file( $script_path, \$file_content );
+
+    # Script submission
+    my $inputfile_abs = abs_path($inputfile);    # Mandatory to be abs_path
+    say 'Dbg' . $debug . ': *** cwd: ', cwd, ' ***' if $debug;
+    my $cmd =
+      "cd $dir && bash $script $inputfile_abs $sampleid > $script_log 2>&1";
+    say 'Dbg' . $debug . ': *** Submitting => ', $cmd, ' ***' if $debug;
+    submit_cmd( $cmd, $script_path, $script_log_path, $debug );
+    say 'Dbg' . $debug . ': *** cwd: ', cwd, ' ***' if $debug;
+
+    # Set the inputfile for vcf2bff
+    $self->setter( 'inputfile',
+        abs_path( catfile( $dir, "$sampleid.filtered.vcf.gz" ) ) );
+
+    return 1;
+}
+
 #------------------
 # Helper functions
 #------------------
@@ -270,6 +326,12 @@ sub is_mongo_up {
     die "We could not connect to MongoDB <$host_uri>"
       if eval { my $client = MongoDB->connect($host_uri) };
     return 1;
+}
+
+sub setter {
+    my ( $self, $key, $value ) = @_;
+    $self->{$key} = $value;
+    return $self;
 }
 
 1;

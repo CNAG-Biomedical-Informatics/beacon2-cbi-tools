@@ -9,7 +9,10 @@ Revision history for beacon2-cbi-tools
     - Made STDOUT friendlier with UTF-8 emoji (turn off via --no-emoji)
     - Restored defaults to: mem=8GB, tmpdir=/tmp, dbnsfpset=all
     - VCF2BFF
-      - Fixed error in assignment of 'clinicalRelevance' by using 'CLINVAR_CLNSIGINCL' when present (i.e., haplotype-based), instead of 'CLINVAR_CLNSIG'
+      - Fixed error in assignment of 'clinicalRelevance' that was using 'CLINVAR_CLNSIGINCL' (i.e., haplotype-based) when present, instead of 'CLINVAR_CLNSIG'
+        - Affected variant rate in CINECA_synthetic_cohort_EUROPE_UK1 (chr22 WGS VCF): 
+          - Total variants: < 0.0003% (3 / 1,109,368)
+          - ACMG-annotated variants: < 0.03% (3 / 10,580)
       - Added additional properties '_CLINVAR_CLNSIGINCL' and '_CLINVAR_ALLELEID' (if present) to the 'clinicalInterpretations' object
     - BFF2HTML
       - Added pattern 'MODERATE' for fetching these annotated variants in 'bff2html'.

@@ -101,8 +101,8 @@ sub read_config_file {
     $config{hs37clinvar} = $config{hg19clinvar};
 
     # Set defaults for the optional keys
-    $config{tmpdir} = $config{tmpdir} // '/tmp';
-    $config{mem} = $config{mem} // '8G';
+    $config{tmpdir}    = $config{tmpdir}    // '/tmp';
+    $config{mem}       = $config{mem}       // '8G';
     $config{dbnsfpset} = $config{dbnsfpset} // 'all';
 
     #print Dumper \%config and die;
@@ -130,6 +130,7 @@ sub read_config_file {
     $config{bash4html} = catfile( $beacon_partial_dir, 'run_bff2html.sh' );
     $config{bash4mongodb} =
       catfile( $beacon_partial_dir, 'run_bff2mongodb.sh' );
+    $config{bash4tsv}   = catfile( $beacon_partial_dir,  'run_tsv2vcf.sh' );
     $config{vcf2bff}    = catfile( $beacon_complete_dir, 'vcf2bff.pl' );
     $config{bff2json}   = catfile( $beacon_complete_dir, 'bff2json.pl' );
     $config{json2html}  = catfile( $beacon_complete_dir, 'bff2html.pl' );
@@ -142,7 +143,7 @@ sub read_config_file {
 
     # Check if the scripts exist and have +x permission
     my @scripts =
-      qw(bash4bff bash4html bash4mongodb vcf2bff bff2json json2html);
+      qw(bash4bff bash4html bash4mongodb bash4tsv vcf2bff bff2json json2html);
     for my $script (@scripts) {
         die "You don't have +x permission for script <$config{$script}>"
           unless ( -x $config{$script} );
@@ -197,8 +198,10 @@ sub read_param_file {
         pipeline   => {
             vcf2bff     => 0,
             bff2html    => 0,
-            bff2mongodb => 0
+            bff2mongodb => 0,
+            tsv2vcf     => 0
         },
+        sampleid   => '23andme_1',
         technology => 'Illumina HiSeq 2000'
 
     );
@@ -245,8 +248,16 @@ sub read_param_file {
     $param{gvvcfjson} =
       catfile( $param{projectdir}, 'vcf', 'genomicVariationsVcf.json.gz' );
 
+    # Replace spaces with underscores
+    $param{sampleid} =~ tr/ /_/;
+
+    # Check annotate:
+    die "'annotate' must be set to true when using tsv mode"
+      if ( $arg->{mode} eq 'tsv' && !$param{annotate} );
+
     # Genome
-    $param{genome} = 'hs37' if  $param{genome} eq 'b37';
+    $param{genome} = 'hs37' if $param{genome} eq 'b37';
+
     # Check parameter 'genome' (using any from List::Utils instead of exist $key{value}
     my @assemblies = qw(hg19 hg38 hs37 );
     die "Please select a valid reference genome. The options are [@assemblies]"
@@ -254,16 +265,31 @@ sub read_param_file {
 
     # Enforcing options depending on mode
     my %modes = (
-        full =>
-          { vcf2bff => 1, bff2html => $param{bff2html}, bff2mongodb => 1 },
-        vcf => { vcf2bff => 1, bff2html => $param{bff2html}, bff2mongodb => 0 },
+        full => {
+            vcf2bff     => 1,
+            bff2html    => $param{bff2html},
+            tsv2vcf     => $param{tsv2vcf},
+            bff2mongodb => 1
+        },
+        vcf => {
+            vcf2bff     => 1,
+            bff2html    => $param{bff2html},
+            tsv2vcf     => 0,
+            bff2mongodb => 0
+        },
+        +tsv => {
+            vcf2bff     => 1,
+            bff2html    => $param{bff2html},
+            tsv2vcf     => 1,
+            bff2mongodb => 0
+        },
         load => { vcf2bff => 0, bff2html => 0, bff2mongodb => 1 },
     );
-
     die "Invalid mode: $arg->{mode}" unless exists $modes{ $arg->{mode} };
     $param{pipeline}{vcf2bff}     = $modes{ $arg->{mode} }{vcf2bff};
     $param{pipeline}{bff2html}    = $modes{ $arg->{mode} }{bff2html};
     $param{pipeline}{bff2mongodb} = $modes{ $arg->{mode} }{bff2mongodb};
+    $param{pipeline}{tsv2vcf}     = $modes{ $arg->{mode} }{tsv2vcf};
 
     # Check if -f user_collections for modes [load|full]
     if ( $arg->{mode} eq 'load' || $arg->{mode} eq 'full' ) {

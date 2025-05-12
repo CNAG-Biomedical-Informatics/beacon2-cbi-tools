@@ -106,6 +106,11 @@ sub mapping2beacon {
     # ======== *****************************************************************
     $genomic_variations->{_position} = _map_position($cursor_internal);
 
+    # ==============
+    # referenceBases # DEPRECATED - SINCE APR-2022 !!!
+    # ==============
+    #$genomic_variations->{referenceBases} = $cursor_uid->{REF};
+
     # =================
     # variantInternalId
     # =================
@@ -291,6 +296,16 @@ sub _map_identifiers {
     );
     while ( my ( $key, $val ) = each %map_identifiers_array ) {
 
+        # ABOUT HGVS NOMENCLATURE recommends Ensembl or RefSeq
+        # https://genome.ucsc.edu/FAQ/FAQgenes.html#ens
+        # Ensembl (GENCODE): ENSG*, ENSP*, ENST*
+        # RefSeq : NM_*, NP_*
+
+        # genomicHGVSId => dbNSFP_clinvar_hgvs (USED)
+        # transcriptHGVSId => dbNSFP_Ensembl_transcriptid (USED), ANN:Feature_ID
+        # proteinHGVSIds  => dbNSFP_Ensembl_proteinid (USED)
+        # For HGVS.p we don't have NP_ ids in ANN but we have ENS in dbNSFP_Ensembl_proteinid anyway until we solve the issue
+
         # ABOUT HGVS NOMENCLATURE: recommends Ensembl or RefSeq identifiers
         next if $key eq 'dbNSFP_HGVSp_snpEff' || $key eq 'dbNSFP_HGVSc_snpEff';
         if ( $key eq 'proteinHGVSIds' || $key eq 'transcriptHGVSIds' ) {
@@ -424,6 +439,8 @@ sub _map_variant_level_data {
         _CLINVAR_ALLELEID   => 'CLINVAR_ALLELEID'
     );
 
+    # Example variant
+    #
     #2	112582942	692104	G	A	.	.	ALLELEID=679848
     #CLNDISDB=MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008
     #CLNDN=Rothmund-Thomson_syndrome_type_1
@@ -453,8 +470,18 @@ sub _map_variant_level_data {
         @clinvar_conditionId_ont{@clndn} = @clndisdb;
 
         # Creating one entry by conditionId (CLINVAR_CLNDN):
-        # Example %clinvar_conditionId_ont:
-        #   (Rothmund-Thomson_syndrome_type_1 => MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008)
+        # Example 1:
+        #
+        # CLNDN=Rothmund-Thomson_syndrome_type_1
+        # CLNDISDB=MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008
+        # %clinvar_conditionId_ont = (Rothmund-Thomson_syndrome_type_1 => MONDO:MONDO:0016368,MedGen:C5231433,OMIM:618625,Orphanet:221008);
+
+        # Example 2:
+        #
+        # CLNDN=Nephronophthisis|Nephronophthisis_4
+        # CLNDISDB=Human_Phenotype_Ontology:HP:0000090,Human_Phenotype_Ontology:HP:0004748,MONDO:MONDO:0019005|MONDO:MONDO:0011752,MedGen:C1847013,OMIM:606966
+        # %clinvar_conditionId_ont = (Nephronophthisis => Human_Phenotype_Ontology:HP:0000090,Human_Phenotype_Ontology:HP:0004748,MONDO:MONDO:0019005,
+        #                             Nephronophthisis_4 => MONDO:MONDO:0011752,MedGen:C1847013,OMIM:606966);
 
         while ( my ( $key, $val ) = each %clinvar_conditionId_ont ) {
 
@@ -495,7 +522,9 @@ sub _map_variant_level_data {
             # Additional property
             $tmp_ref->{_CLINVAR_ALLELEID} =
               $cursor_info->{ $map_variant_level_data{_CLINVAR_ALLELEID} }
-              if exists $cursor_info->{ $map_variant_level_data{_CLINVAR_ALLELEID} };
+              if
+              exists $cursor_info->{ $map_variant_level_data{_CLINVAR_ALLELEID}
+              };
 
             # ***** clinicalInterpretations.annotatedeWith
             $tmp_ref->{annotatedWith} = $cursor_internal->{ANNOTATED_WITH};
@@ -540,12 +569,23 @@ sub _map_variation {
 #----------------------------------------------------------------------
 sub _map_variant_quality {
     my ($cursor_uid) = @_;
-    my %quality;
-    for my $term (qw(QUAL FILTER)) {
-        $quality{$term} =
-          $term eq 'QUAL' ? 0 + $cursor_uid->{$term} : $cursor_uid->{$term};
-    }
-    return \%quality;
+
+    # Handle QUAL: dot → undef, otherwise coerce to number
+    my $raw_qual = $cursor_uid->{QUAL};
+    my $qual     = $raw_qual eq '.' 
+                  ? undef 
+                  : 0 + $raw_qual;
+
+    # Handle FILTER: dot → undef, otherwise leave as-is
+    my $raw_filt = $cursor_uid->{FILTER};
+    my $filt     = $raw_filt eq '.' 
+                  ? undef 
+                  : $raw_filt;
+
+    return {
+        QUAL   => $qual,
+        FILTER => $filt,
+    };
 }
 
 sub parse_acmg_val {

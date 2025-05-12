@@ -48,19 +48,19 @@ sub usage {
     # The first argument determines the mode.
     my $mode = shift @ARGV;
 
-    my %valid_modes = ( full => 1, vcf => 1, load => 1 );
+    my %valid_modes = ( full => 1, vcf => 1, load => 1, tsv => 1 );
     pod2usage(
         -exitval => 1,
         -verbose => 1,
         -message => "Unknown mode $mode"
     ) unless $valid_modes{$mode};
 
-    # For vcf and full modes, use our unified option parser.
-    if ( $mode eq 'vcf' || $mode eq 'full' ) {
-        my $options = parse_vcf_full_options($mode);
+    # For vcf, tsv, and full modes, use our unified option parser.
+    if ( $mode eq 'vcf' || $mode eq 'tsv' || $mode eq 'full' ) {
+        my $options = parse_vcf_tsv_full_options($mode);
     }
     elsif ( $mode eq 'load' ) {
-        load();  # The load sub remains separate if it needs its own logic.
+        load();    # The load sub remains separate if it needs its own logic.
     }
 }
 
@@ -78,9 +78,9 @@ sub info {
     return 1;
 }
 
-sub parse_vcf_full_options {
+sub parse_vcf_tsv_full_options {
     my ($mode) = @_;
-    $mode //= 'vcf';  # Default to 'vcf' if no mode provided
+    $mode //= 'vcf';    # Default to 'vcf' if no mode provided
     my %arg = (
         debug => 0,
         mode  => $mode,
@@ -98,12 +98,34 @@ sub parse_vcf_full_options {
         'projectdir-override|po=s' => \$arg{'projectdir-override'},
     ) or pod2usage( -exitval => 1, -verbose => 1 );
 
-    # For both 'vcf' and 'full', an input file is required.
+    # For 'vcf', 'tsv' and 'full', an input file is required.
     pod2usage(
         -exitval => 1,
         -verbose => 1,
-        -message => "Modes vcf|full require an input vcf file"
+        -message => "Modes vcf|tsv|full require an input file"
     ) unless $arg{inputfile};
+
+    # MODE-SPECIFIC EXTENSION CHECKS
+    my %allowed = (
+        vcf  => qr/\.(?:vcf)(?:\.gz)?$/i,
+        tsv  => qr/\.(?:tsv|txt)(?:\.gz)?$/i,
+        full => qr/\.(?:vcf|tsv|txt)(?:\.gz)?$/i,
+    );
+    my $re = $allowed{$mode}
+      or die "Unknown mode “$mode” in parse_vcf_tsv_full_options";
+    my %msg = (
+        vcf  => "'.vcf' (optionally .gz)",
+        tsv  => "'.tsv' or '.txt' (optionally .gz)",
+        full => "'.vcf', '.tsv' or '.txt' (optionally .gz)",
+    );
+    unless ( $arg{inputfile} =~ $re ) {
+        pod2usage(
+            -exitval => 1,
+            -verbose => 1,
+            -message =>
+              "Mode '$mode' requires an input file ending in $msg{$mode}"
+        );
+    }
 
     usage_params( \%arg );
 
@@ -112,6 +134,7 @@ sub parse_vcf_full_options {
 
     # Example: if you need mode-specific behavior, branch here:
     if ( $mode eq 'full' ) {
+
         # Additional logic or flag settings for 'full' mode
     }
 
@@ -136,7 +159,6 @@ sub load {
     # Turning color off if argument <--no-color>
     $ENV{'ANSI_COLORS_DISABLED'} = 1 if $arg{nocolor};
 
-    #print Dumper \%arg;
     return wantarray ? %arg : \%arg;
 }
 
@@ -226,3 +248,4 @@ EOF
     return $random_word;
 }
 1;
+
