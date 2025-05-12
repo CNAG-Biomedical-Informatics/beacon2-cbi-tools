@@ -1,17 +1,17 @@
 #!/usr/bin/env perl
 #
-#   BFF-tools: Script to process VCF/BFF data
-#   It has four modes:
-#     1. vcf:
-#         a) Annotates VCF with SnpEff (optional)
+#   BFF-tools: Script to process VCF/TSV/BFF data
+#   It has five modes of operation:
+#     1-2. vcf|tsv:
+#         a) Annotates VCF|TSV with SnpEff (optional)
 #         b) Serializes VCF to BFF
-#     2. load: Transfers BFF data to MongoDB
-#     3. full: Combines vcf and load modes
-#     4. validate: Resorts to utils/bff-validator
+#     3. load: Transfers BFF data to MongoDB
+#     4. full: Combines vcf and load modes
+#     5. validate: Resorts to utils/bff-validator
 #
-#   Last Modified: May/09/2025
+#   Last Modified: May/12/2025
 #
-#   Version: 2.0.9
+#   Version: 2.0.10
 #
 #   Copyright (C) 2021-2022 Manuel Rueda - CRG
 #   Copyright (C) 2023-2025 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
@@ -468,6 +468,7 @@ Example for C<tsv> mode:
  genome: b37 # default hg19
  annotate: true # default true
  bff2html: true # default false
+ sampleid: my_sample_id_01 # default '23andme_1'
 
 Example for C<load> mode:
 
@@ -515,7 +516,6 @@ Location for the Beacon Friendly Format JSON files.
 
 Set bff2html to C<true> to create HTML for the BFF Genomic Variations Browser.
 
-
 =item B<center>
 
 Experimental feature. Not used for now.
@@ -542,6 +542,10 @@ Experimental feature. Not used for now.
 
 The prefix for dir name (e.g., 'cancer_sample_001'). Note that it can also contain a path (e.g., /workdir/cancer_sample_001).
 The script will automatically add an unique identifier to each job.
+
+=item B<sampleid>
+
+To be used in C<tsv> mode.  A string to name your sample, which will be used as the sample ID in the VCF.
 
 =item B<technology>
 

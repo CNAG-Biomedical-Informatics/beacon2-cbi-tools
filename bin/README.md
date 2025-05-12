@@ -121,6 +121,7 @@ Example for `tsv` mode:
     genome: b37 # default hg19
     annotate: true # default true
     bff2html: true # default false
+    sampleid: my_sample_id_01 # default '23andme_1'
 
 Example for `load` mode:
 
@@ -192,6 +193,10 @@ Please find below a detailed description of all parameters (alphabetical order):
 
     The prefix for dir name (e.g., 'cancer\_sample\_001'). Note that it can also contain a path (e.g., /workdir/cancer\_sample\_001).
     The script will automatically add an unique identifier to each job.
+
+- **sampleid**
+
+    To be used in `tsv` mode.  A string to name your sample, which will be used as the sample ID in the VCF.
 
 - **technology**
 
