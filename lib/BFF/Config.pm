@@ -252,7 +252,7 @@ sub read_param_file {
     $param{sampleid} =~ tr/ /_/;
 
     # Check annotate:
-    die "'annotate' must be set to true when using tsv mode"
+    die "'annotate' must be set to true when using tsv mode\n"
       if ( $arg->{mode} eq 'tsv' && !$param{annotate} );
 
     # Genome

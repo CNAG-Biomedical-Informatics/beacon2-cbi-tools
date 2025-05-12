@@ -342,7 +342,7 @@ __END__
 
 =head1 NAME
 
-C<bff-tools>: A unified command-line toolkit for working with Beacon v2 Models data. It allows users to B<annotate> and B<convert> VCF files into the C<genomicVariations> entity using the Beacon-Friendly Format (BFF), B<validate> metadata files (XLSX or JSON) against Beacon v2 schema definitions and B<load> BFF-formatted data into a B<MongoDB> instance.
+C<bff-tools>: A unified command-line toolkit for working with Beacon v2 Models data. It allows users to B<annotate> and B<convert> VCF/TSV files into the C<genomicVariations> entity using the Beacon-Friendly Format (BFF), B<validate> metadata files (XLSX or JSON) against Beacon v2 schema definitions and B<load> BFF-formatted data into a B<MongoDB> instance.
 
 This tool is part of the C<beacon2-cbi-tools> repository and is designed to support Beacon v2 data ingestion pipelines, metadata validation workflows, and federated data sharing initiatives.
 
@@ -462,7 +462,7 @@ Example for C<vcf> mode:
  annotate: true # default true
  bff2html: true # default false
 
-Example for C<vcf> mode:
+Example for C<tsv> mode:
 
  --
  genome: b37 # default hg19

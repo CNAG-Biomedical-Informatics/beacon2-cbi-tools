@@ -54,7 +54,7 @@
 **beacon2-cbi-tools** is a suite of tools originally developed as part of the ELIXIR–Beacon v2 Reference Implementation, now continuing under [CNAG](https://www.cnag.eu) Biomedical Informatics. It provides essential functionality around the Beacon Friendly Format (BFF) data exchange format, including:
 
 - **Validating XLSX/JSON** files against Beacon v2 schemas
-- **Converting VCF** files into BFF (genomicVariations)
+- **Converting VCF and microarray** files into BFF (genomicVariations)
 - **Loading BFF** data (metadata and genomic variations) **into MongoDB**
 
 This toolkit streamlines data preparation, validation, and ingestion for federated genomic and phenotypic data sharing under Beacon v2. The resulting BFF-formatted data **can be used with any implementation of the [Beacon v2 API specification](https://docs.genomebeacons.org/) that operates on MongoDB**.
@@ -64,15 +64,17 @@ This toolkit streamlines data preparation, validation, and ingestion for federat
 ### [BFF-Tools script](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/bin/README.md) (`bin/bff-tools`):  
   A command-line tool for converting VCF data into BFF format and inserting the resulting BFF data into a MongoDB instance.
 
-The tool offers four modes:
+The tool offers five modes:
 
   1. **vcf**: Convert a VCF.gz file into BFF format.
 
-  2. **load**: Load BFF-formatted data into a MongoDB instance.
+  2. 🆕 **tsv**: Convert a SNP microarray file (e.g., from 23andme) into BFF format.
 
-  3. **full**: Perform both VCF conversion and MongoDB loading.
+  3. **load**: Load BFF-formatted data into a MongoDB instance.
 
-  4. **validate**: Validate XLSX or JSON metadata against Beacon v2 schemas and serialize into BFF. An [Excel template](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/CINECA_synthetic_cohort_EUROPE_UK1/Beacon-v2-Models_CINECA_UK1.xlsx) is provided to help structure your metadata.
+  4. **full**: Perform both TSV/VCF conversion and MongoDB loading.
+
+  5. **validate**: Validate XLSX or JSON metadata against Beacon v2 schemas and serialize into BFF. An [Excel template](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/CINECA_synthetic_cohort_EUROPE_UK1/Beacon-v2-Models_CINECA_UK1.xlsx) is provided to help structure your metadata.
 
 ### [Utility Suite](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils):  
 
@@ -98,16 +100,18 @@ A synthetic dataset for testing and demonstration purposes.
               XLSX  |          |
                or   | Metadata | (incl. Phenotypic data)
               JSON  |__________|
-                         |
-                         |
-                         | bff-tools validate
-                         |                                   Beacon v2
-    _________        ____v____            __________          ______
+    _________            |
+    |       |            |
+    |  TSV  |            | bff-tools validate
+    |______ |            |
+        |                |                                    Beacon v2
+        | bff-tools tsv  |
+    ____v____        ____v____            __________          ______
     |       |        |       |            |          |        |     | <---- Request
     |  VCF  | -----> |  BFF  | ---------> | Database | <----> | API |
     |_______|        |_ _____|            |__________|        |_____| ----> Response
                          |                  MongoDB
-           bff-tools vcf |  bff-tools load
+         bff-tools vcf   |   bff-tools load
                          |
                          |
                       Optional (utils)
@@ -123,8 +127,10 @@ A synthetic dataset for testing and demonstration purposes.
     -----------------------------------------------|||---------------------------
     beacon2-cbi-tools                                     e.g. beacon2-ri-api
                                                                beacon2-pi-api
-                                                               java-beacon-v2.api   
+                                                               java-beacon-v2.api
                                                                ...
+
+
 <!--description-end-->
 
 ## Roadmap 

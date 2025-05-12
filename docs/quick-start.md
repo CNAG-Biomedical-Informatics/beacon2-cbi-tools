@@ -14,7 +14,12 @@ bin/bff-tools --man
 
 ```bash
 # Convert VCF to BFF
-bin/bff-tools vcf -i test/test_1000G.vcf.gz -p test/param.yaml
+bin/bff-tools vcf -i test/vcf/test_1000G.vcf.gz -p test/vcf/param.yaml
+```
+
+```bash
+# ✨ Convert TSV (SNP microarray) to BFF
+bin/bff-tools tsv -i test/tsv/input.txt.gz -p test/tsv/param.yaml
 ```
 
 ```bash

@@ -36,6 +36,21 @@
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
+?? faq "Can I use SNP microarray data files such as those from [23andme](https://23andme.com)?"
+    Yes, starting from **version 2.0.10** you can use a `TSV/TXT` file. If you use the parameter:
+
+    ```yaml
+    bff2html: true
+    ```
+    You will be able to visualize your variants in HTML based tables.
+    
+    Example with test data:
+    ```bash
+    bin/bff-tools tsv test/tsv/input.txt.gz -p test/tsv/param.yaml
+    ```
+
+    ##### last change 2025-05-12 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
+
 ??? faq "In `bff-tools vcf` mode, why are we re-annotating VCFs | Can I use my own annotations?"
 
     The goal of re-annotation is to ensure consistency across the community. To create the `genomicVariationsVcf.json.gz` BFF, we parse an annotated VCF—this guarantees that the essential fields are present. Any previous annotations will be discarded. This approach has been instrumental in over 1,000 deployments for testing Beacon v2 API implementations.

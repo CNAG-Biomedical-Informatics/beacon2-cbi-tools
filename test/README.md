@@ -7,6 +7,8 @@ This directory contains data to verify that the transformation of `VCF` and `TSV
 
 ### Data Download (hs37)
 
+All data is inside [vcf](./vcf) directory):
+
 **(There is no need to download it again unless you want to test with a different region.)**
 
 The test file included (`test_1000G.vcf.gz`) originates from the 1000 Genomes Project. It was obtained using the following command:
@@ -51,7 +53,9 @@ sudo apt-get install jq
 
 ## TSV to BFF
 
-SNP microarrays text file to BFF
+SNP microarrays text file to BFF.
+
+All data is inside [tsv](./tsv) directory):
 
 ### Run `bff-tools`
 
