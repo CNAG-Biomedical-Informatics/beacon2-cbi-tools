@@ -12,4 +12,6 @@
     <h1>beacon2-cbi-tools</h1>
 </div>
 
+--8<-- "about/disclaimer.md"
+
 {% include-markdown "../README.md" start="<!--description-start-->" end="<!--description-end-->" %}

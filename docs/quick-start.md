@@ -12,6 +12,8 @@ bin/bff-tools --help
 bin/bff-tools --man
 ```
 
+--8<-- "about/disclaimer.md"
+
 ```bash
 # Convert VCF to BFF
 bin/bff-tools vcf -i test/vcf/test_1000G.vcf.gz -p test/vcf/param.yaml

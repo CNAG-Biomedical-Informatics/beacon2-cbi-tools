@@ -79,6 +79,7 @@ nav:
   - "ℹ️ About":
       - "📄 About": about/about.md
       - "📖 Citation": about/citation.md
+      - "⚠️  Disclaimer": about/disclaimer.md
 
 theme:
   name: material
