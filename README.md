@@ -25,7 +25,8 @@
 
 🚫 **Legacy B2RI Documentation:** <a href="https://b2ri-documentation.readthedocs.io/" target="_blank">https://b2ri-documentation.readthedocs.io/</a>
 
-⚠️ **Genetic Data Interpretation Disclaimer:** <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer/" target="_blank">https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer</a>
+⚠️  **Genetic Data Interpretation Disclaimer:** <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer/" target="_blank">https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer</a>
+
 ---
 
 **Actively maintained by CNAG Biomedical Informatics**
