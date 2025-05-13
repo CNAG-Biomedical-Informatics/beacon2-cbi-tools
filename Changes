@@ -1,6 +1,6 @@
 Revision history for beacon2-cbi-tools
 
-2.0.10  2025-05-XX
+2.0.10  2025-05-13
 
     - Added 'tsv' mode to support SNP microarray data as input
 
