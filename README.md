@@ -16,9 +16,8 @@
 [![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-cbi-tools?icon=docker&label=beacon2-cbi-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/)
 [![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-ri-tools?icon=docker&label=deprecated-beacon2-ri-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-ri-tools/)
 [![Docker Pulls EGA-archive](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=deprecated-EGA-archive-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
-![version](https://img.shields.io/badge/version-2.0.9-blue)
+![version](https://img.shields.io/badge/version-2.0.10-blue)
 ---
-
 
 ✨ **New documentation:** <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools" target="_blank">https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools</a>
 
@@ -26,6 +25,7 @@
 
 🚫 **Legacy B2RI Documentation:** <a href="https://b2ri-documentation.readthedocs.io/" target="_blank">https://b2ri-documentation.readthedocs.io/</a>
 
+⚠️ **Genetic Data Interpretation Disclaimer:** <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer/" target="_blank">https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer</a>
 ---
 
 **Actively maintained by CNAG Biomedical Informatics**

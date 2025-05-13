@@ -74,4 +74,3 @@ echo "# Running vcf2bff conversion"
 $VCF2BFF -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" -verbose
 
 echo "# Finished OK"
-

@@ -37,7 +37,7 @@ json2html();
 exit;
 
 sub json2html {
-    my $version        = '2.0.9';
+    my $version        = '2.0.10';
     my @browser_fields = qw(
       variantInternalId assemblyId refseqId position referenceBases alternateBases
       QUAL FILTER variantType genomicHGVSId geneIds molecularEffects aminoacidChanges
