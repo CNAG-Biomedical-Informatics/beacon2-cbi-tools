@@ -67,7 +67,7 @@ cd tsv
 ### Test
 
 ```bash
-diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat beacon_174706366392929/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S)
+diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat beacon_174721318508733/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S)
 ```
 
 Cheers!
