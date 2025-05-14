@@ -261,7 +261,7 @@ sub tsv2vcf {
     my $inputfile_abs = abs_path($inputfile);    # Mandatory to be abs_path
     say 'Dbg' . $debug . ': *** cwd: ', cwd, ' ***' if $debug;
     my $cmd =
-      "cd $dir && bash $script $inputfile_abs $sampleid > $script_log 2>&1";
+      "cd $dir && bash $script $inputfile_abs > $script_log 2>&1";
     say 'Dbg' . $debug . ': *** Submitting => ', $cmd, ' ***' if $debug;
     submit_cmd( $cmd, $script_path, $script_log_path, $debug );
     say 'Dbg' . $debug . ': *** cwd: ', cwd, ' ***' if $debug;

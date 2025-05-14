@@ -29,22 +29,22 @@ export LC_ALL=C
 #____WRAPPER_VARIABLES____#
 
 function usage {
-    echo "Usage: $0 <input_tsv.gz> <sample_id>"
+    echo "Usage: $0 <input_tsv.gz>"
     exit 1
 }
 
 # Check if the arguments are provided
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
     usage
 fi
 
 # Load input arguments
 INPUT_TSV=$1
-SAMPLE_ID=$2
 BASE=$(basename "$INPUT_TSV" .vcf.gz)
 
 echo "# Running bcftools convert --tsv2vcf"
-$BCFTOOLS convert --tsv2vcf "$INPUT_TSV" -f "$REF" -s "SAMPLE_ID" -Oz -o "$SAMPLE_ID.vcf.gz"
+# 23andMe outputs alleles alphabetically, so unphased hets may appear as 0/1 or 1/0
+$BCFTOOLS convert --tsv2vcf "$INPUT_TSV" -f "$REF" -s "$SAMPLE_ID" -Oz -o "$SAMPLE_ID.vcf.gz"
 
 echo "# Filtering empty ALT"
 $BCFTOOLS view -e 'ALT="."' "$SAMPLE_ID.vcf.gz" -Oz -o "$SAMPLE_ID.filtered.vcf.gz"

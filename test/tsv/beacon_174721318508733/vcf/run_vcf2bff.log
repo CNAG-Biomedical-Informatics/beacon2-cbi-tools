@@ -755,7 +755,7 @@ REF/ALT total/modified/added:  	1/0/0
 # Running SnpSift COSMIC annotation
 # Running vcf2bff conversion
 Info:
-Info: vcf2bff 2.0.9
+Info: vcf2bff 2.0.10
 Info: vcf2bff exe /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/complete/vcf2bff.pl
 Info: Author: Manuel Rueda, PhD
 Info:
@@ -764,18 +764,18 @@ Info: --i 23andme_1.filtered.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz
 Info: --genome hg19
 Info: --format bff
 Info: --dataset-id default_beacon_1
-Info: --project-dir beacon_174706366392929
+Info: --project-dir beacon_174721318508733
 Info: --verbose
 Info:
 Info: VCF2BFF PARAMETERS:
-Info: cwd               =>  /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/test/tsv/beacon_174706366392929/vcf
+Info: cwd               =>  /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/test/tsv/beacon_174721318508733/vcf
 Info: filein            =>  23andme_1.filtered.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz
 Info: fileout           =>  ./genomicVariationsVcf.json.gz
-Info: hostname          =>  mrueda-ws1
-Info: projectDir        =>  beacon_174706366392929
-Info: threadshost       =>  6
+Info: hostname          =>  mrueda-ws5
+Info: projectDir        =>  beacon_174721318508733
+Info: threadshost       =>  12
 Info: user              =>  mrueda
-Info: version           =>  2.0.9
+Info: version           =>  2.0.10
 Info:
 Info: ****************************
 Info: STARTING VCF2BFF

@@ -30,17 +30,17 @@ set -euo pipefail
 export LC_ALL=C
 
 export TMPDIR=/media/mrueda/2TBS/tmp
-ZIP='/usr/bin/pigz -p 5'
+ZIP='/usr/bin/pigz -p 11'
 SNPEFF='/usr/bin/java -Xmx8G -jar /media/mrueda/2TBS/NGSutils/snpEff_v5.0/snpEff.jar'
 SNPSIFT='/usr/bin/java -Xmx8G -jar /media/mrueda/2TBS/NGSutils/snpEff_v5.0/SnpSift.jar'
-BCFTOOLS=/media/mrueda/2TBS/NGSutils/bcftools-1.21-103_arm64/bcftools
+BCFTOOLS=/media/mrueda/2TBS/NGSutils/bcftools-1.21-103_x86_64/bcftools
 VCF2BFF=/media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/complete/vcf2bff.pl
 GENOME='hg19'
 REF=/media/mrueda/2TBS/Databases/genomes/hs37d5.fa.gz
 COSMIC=/media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/CosmicCodingMuts.normal.hg19.vcf.gz
 DBNSFP=/media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/dbNSFP4.1a_hg19.txt.gz
 DATASETID=default_beacon_1
-PROJECTDIR=beacon_174706366392929
+PROJECTDIR=beacon_174721318508733
 CLINVAR=/media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/clinvar_20250312.vcf.gz
 
 function usage {
