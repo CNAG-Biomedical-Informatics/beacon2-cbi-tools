@@ -67,7 +67,7 @@ if ( ( $ARGV[0] // '' ) eq 'validate' ) {
 }
 
 # bff-tools version
-my $version = '2.0.10';
+my $version = '2.0.10_1';
 
 # Initialize a few more variables
 my $prompt        = 'Info:';
