@@ -5,6 +5,13 @@ This directory contains data to verify that the transformation of `VCF` and `TSV
 
 ## VCF to BFF
 
+Note: You can perform this same test by performing:
+
+```bash
+cd ../scripts
+bash 02_test_deployment.sh
+```
+
 ### Data Download (hs37)
 
 All data is inside [vcf](./vcf) directory):
