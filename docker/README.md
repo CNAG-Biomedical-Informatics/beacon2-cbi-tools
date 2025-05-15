@@ -50,6 +50,12 @@ Extract the tar archive:
 tar -xzvf data.tar.gz
 ```
 
+Make sure a `tmp` directory exists in teh directory where you extracted your data:
+
+```bash
+mkdir tmp
+```
+
 ### Step 5: Configure Path in SnpEff
 
 1. Navigate to your downloaded data and locate the **SnpEff configuration file**. It is located at:
@@ -67,7 +73,6 @@ data.dir = /path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/data
 ```
 
 **Important:** Ensure that you use an absolute path and verify that the directory exists to avoid any errors during subsequent analyses.
-
 ---
 
 ## Installation Options

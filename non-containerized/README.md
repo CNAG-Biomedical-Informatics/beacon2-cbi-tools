@@ -49,6 +49,13 @@ Extract the tar archive:
 ```bash
 tar -xzvf data.tar.gz
 ```
+
+Make sure a `tmp` directory exists in teh directory where you extracted your data:
+
+```bash
+mkdir tmp
+```
+
 ## Download from GitHub
 
 First, we need to install a few system components:
@@ -117,6 +124,26 @@ data.dir = /path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/data
 ```
 
 **Important:** Ensure that you use an absolute path and verify that the directory exists to avoid any errors during subsequent analyses.
+
+### Step 6: Install mongosh locally
+
+```bash
+curl -fsSL \
+  "https://downloads.mongodb.com/compass/mongosh-2.4.0-linux-x64.tgz" \
+  -o ~/Downloads/mongosh.tgz
+```
+
+Untar and take note of where the executable is-
+
+### Step 7: Update paths in `bin/config.yaml`
+
+Make sure that `base: /beacon2-cbi-tools-data ` points to the directory where you downloaded the data (see above).
+
+Replace `mongosh: "/usr/bin/mongosh"` with your path.
+
+
+
+
 
 
 ## System requirements
