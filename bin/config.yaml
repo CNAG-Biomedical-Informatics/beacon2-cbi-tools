@@ -1,6 +1,9 @@
 ---
 base: /beacon2-cbi-tools-data
 
+# Absolute path to the Java executable
+javabin: /usr/bin/java
+
 # Reference assemblies (genomes)
 hs37fasta: "{base}/databases/genomes/hs37d5.fa.gz"
 hg19fasta: "{base}/databases/genomes/ucsc.hg19.fasta.gz"

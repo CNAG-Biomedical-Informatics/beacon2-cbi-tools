@@ -61,7 +61,7 @@ sub read_config_file {
 
     # Ensure that all necessary configuration values are present
     my @required_keys = qw(
-      hs37fasta hg19fasta hg38fasta hg19clinvar hg38clinvar hg19cosmic hg38cosmic hg19dbnsfp hg38dbnsfp snpeff snpsift bcftools mem tmpdir mongoimport mongostat mongodburi mongosh dbnsfpset
+      hs37fasta hg19fasta hg38fasta hg19clinvar hg38clinvar hg19cosmic hg38cosmic hg19dbnsfp hg38dbnsfp javabin snpeff snpsift bcftools mem tmpdir mongoimport mongostat mongodburi mongosh dbnsfpset
     );
 
     # Parsing config file
@@ -122,10 +122,9 @@ sub read_config_file {
     my $beacon_internal_dir = catdir( $root_dir, 'lib', 'internal' );    # Global $::Bin variable
     my $beacon_complete_dir = catdir( $beacon_internal_dir, 'complete' );
     my $beacon_partial_dir  = catdir( $beacon_internal_dir, 'partial' );
-    my $java                = '/usr/bin/java';
-    $config{java}      = $java;
-    $config{snpeff}    = "$java -Xmx" . $config{mem} . " -jar $config{snpeff}";
-    $config{snpsift}   = "$java -Xmx" . $config{mem} . " -jar $config{snpsift}";
+    my $javabin        = $config{java};
+    $config{snpeff}    = "$javabin -Xmx" . $config{mem} . " -jar $config{snpeff}";
+    $config{snpsift}   = "$javabin -Xmx" . $config{mem} . " -jar $config{snpsift}";
     $config{bash4bff}  = catfile( $beacon_partial_dir, 'run_vcf2bff.sh' );
     $config{bash4html} = catfile( $beacon_partial_dir, 'run_bff2html.sh' );
     $config{bash4mongodb} =

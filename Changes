@@ -2,7 +2,8 @@ Revision history for beacon2-cbi-tools
 
 2.0.11  2025-0X-XX
 
-    - Updated paths in 'scripts/02_test_deployment.sh 
+    - Updated paths in 'scripts/02_test_deployment.sh'
+    - Path to Java bin now can be set via config.yaml 
 
 2.0.10  2025-05-14
 
