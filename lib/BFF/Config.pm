@@ -122,7 +122,7 @@ sub read_config_file {
     my $beacon_internal_dir = catdir( $root_dir, 'lib', 'internal' );    # Global $::Bin variable
     my $beacon_complete_dir = catdir( $beacon_internal_dir, 'complete' );
     my $beacon_partial_dir  = catdir( $beacon_internal_dir, 'partial' );
-    my $javabin        = $config{java};
+    my $javabin        = $config{javabin};
     $config{snpeff}    = "$javabin -Xmx" . $config{mem} . " -jar $config{snpeff}";
     $config{snpsift}   = "$javabin -Xmx" . $config{mem} . " -jar $config{snpsift}";
     $config{bash4bff}  = catfile( $beacon_partial_dir, 'run_vcf2bff.sh' );
