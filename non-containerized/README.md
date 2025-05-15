@@ -100,6 +100,25 @@ We'll also need a few Python 3 modules:
 pip install -r requirements.txt
 ```
 
+### Step 5: Configure Path in SnpEff
+
+1. Navigate to your downloaded data and locate the **SnpEff configuration file**. It is located at:
+
+```bash
+/path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/snpEff.config
+```
+
+2. Open `snpEff.config` with a text editor and find the line containing the `data.dir` variable.
+
+3. Update the `data.dir` variable to reflect the correct path to your downloaded data directory. It should look similar to this:
+
+```bash
+data.dir = /path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/data
+```
+
+**Important:** Ensure that you use an absolute path and verify that the directory exists to avoid any errors during subsequent analyses.
+
+
 ## System requirements
 
 - OS/ARCH supported: **linux/amd64** and **linux/arm64**.
@@ -115,9 +134,8 @@ The Perl itself does not need a lot of RAM (max load will reach 400MB), but exte
 
 You may wanna install `jq` for running tests.
 
-Go to directory `test` and execute:
-
 ```bash
+cd scripts
 bash 02_test_deployment.sh
 ```
 

@@ -210,7 +210,7 @@ docker exec -ti beacon2-cbi-tools bash
 ### ✅ Test the Deployment
 
 ```bash
-cd test
+cd scripts
 bash 02_test_deployment.sh
 ```
 
