@@ -73,7 +73,6 @@ data.dir = /path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/data
 ```
 
 **Important:** Ensure that you use an absolute path and verify that the directory exists to avoid any errors during subsequent analyses.
----
 
 ## Installation Options
 
