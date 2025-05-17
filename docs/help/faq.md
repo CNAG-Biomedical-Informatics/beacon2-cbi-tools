@@ -36,7 +36,8 @@
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
-?? faq "Can I use SNP microarray data files such as those from [23andme](https://23andme.com)?"
+??? faq "Can I use SNP microarray data files such as those from [23andme](https://23andme.com)?"
+
     Yes, starting from **version 2.0.10** you can use a `TSV/TXT` file. If you use the parameter:
 
     ```yaml
