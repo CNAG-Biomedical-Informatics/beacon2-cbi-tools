@@ -223,7 +223,7 @@ bash 02_test_deployment.sh
 
 ## MongoDB: Manual Setup (Optional)
 
-> ⚠️ This section is only needed if you're **not** using `docker-compose.all.yml`, or want to run MongoDB manually.
+> ⚠️  This section is only needed if you're **not** using `docker-compose.all.yml`, or want to run MongoDB manually.
 
 ### Step 1: Download `docker-compose.yml`
 
@@ -240,7 +240,7 @@ docker compose up -d
 
 Mongo Express will be accessible at `http://localhost:8081` with default credentials `admin` and `pass`.
 
-> **IMPORTANT:** If you plan to load data into MongoDB from inside the `beacon2-cbi-tools` container, read the section below.
+**IMPORTANT:** If you plan to load data into MongoDB from inside the `beacon2-cbi-tools` container, read the section below.
 
 ### Access MongoDB from Inside the Container
 
