@@ -56,17 +56,17 @@ PATTERN="${PATTERN_HIGH}.${PATTERN_MODERATE}"
 echo "# Running BFF2JSON"
 for PANEL in $PANELDIR/*.lst
 do
-    BASE=$(basename $PANEL .lst)
+    BASE=$(basename "$PANEL" .lst)
     # NB:
-    zgrep -F -w -e $PATTERN_HIGH -e $PATTERN_MODERATE $INPUT_BFF | grep -F -w -f $PANEL > $ID.$BASE.$PATTERN.json || echo "Nothing found for $BASE"
-    $BFF2JSON -i $ID.$BASE.$PATTERN.json -f json | jq -s . > $BASE.json || echo "Could not run $BFF2JSON -f json for $BASE"  # jq needed
-    $BFF2JSON -i $ID.$BASE.$PATTERN.json -f json4html > $BASE.mod.json || echo "Could not run $BFF2JSON -f json4html for $BASE"
+    zgrep -F -w -e $PATTERN_HIGH -e $PATTERN_MODERATE "$INPUT_BFF" | grep -F -w -f "$PANEL" > "$ID"."$BASE".$PATTERN.json || echo "Nothing found for $BASE"
+    $BFF2JSON -i "$ID"."$BASE".$PATTERN.json -f json | jq -s . > "$BASE".json || echo "Could not run $BFF2JSON -f json for $BASE"  # jq needed
+    $BFF2JSON -i "$ID"."$BASE".$PATTERN.json -f json4html > "$BASE".mod.json || echo "Could not run $BFF2JSON -f json4html for $BASE"
 done
 
 # Step 2: Create HTML for JSON
 echo "# Running JSON2HTML"
-ln -s $ASSETSDIR assets # symbolic link for css, etc.
-$JSON2HTML --id $ID --assets-dir assets --panel-dir $PANELDIR --project-dir $PROJECTDIR > $ID.html
+ln -s "$ASSETSDIR" assets # symbolic link for css, etc.
+$JSON2HTML --id "$ID" --assets-dir assets --panel-dir "$PANELDIR" --project-dir "$PROJECTDIR" > "$ID".html
 
 cat <<EOF > README.txt
 ### PREFERRED MODE

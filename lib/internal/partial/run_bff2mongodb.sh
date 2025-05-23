@@ -47,7 +47,7 @@ fi
 for collection in "${!collections[@]}"
 do
  echo "Loading collection...$collection"
- $MONGOIMPORT --jsonArray --uri "$MONGODBURI" --file ${collections[$collection]} --collection $collection || echo "Could not load <${collections[$collection]}> for <$collection>"
+ $MONGOIMPORT --jsonArray --uri "$MONGODBURI" --file "${collections[$collection]}" --collection "$collection" || echo "Could not load <${collections[$collection]}> for <$collection>"
  echo "Indexing collection...$collection"
  $MONGOSH "$MONGODBURI" << EOF
 disableTelemetry()

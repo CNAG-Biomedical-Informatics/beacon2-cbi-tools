@@ -128,7 +128,7 @@
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
 ??? faq "Should I update to the `latest` version?"
-    Yes. We recommend checking our GitHub repositories ([beacon2-cbi-tools](https://github.com/mrueda/beacon2-cbi-tools) for the latest updates.
+    Yes. We recommend checking our GitHub repository ([beacon2-cbi-tools](https://github.com/mrueda/beacon2-cbi-tools) for the latest updates.
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
