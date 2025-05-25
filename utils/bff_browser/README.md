@@ -15,7 +15,7 @@ pip install -r requirements.txt
 ## How to Run  
 1. Navigate to the App folder:
     ```bash
-    cd utils/browser
+    cd utils/bff_browser
     ```
 2. Run the application:
     ```bash
