@@ -76,9 +76,10 @@ Once [beacon script](../bin/README.md) has finished, a static HTML page will be 
    - **Key Features**:
      - Column reordering.
      - Advanced search with regular expressions. Examples:
-       - `PASS 0/1 pathogenic` - Yields heterozygot variants labelled as Pathogenic or Likely Pathogenic.
-       - `PASS 1/1 Uncertain` - Yields homozygot ALT variants labelled as VUS 
-       - `rs12(3|4) (tp53|ace2) splice`) - Filters out these specific variants
+	   - `PASS 0/1 pathogenic` - Returns heterozygous variants labeled as Pathogenic or Likely Pathogenic.
+	   - `PASS 1/0 pathogenic` - Same as above, with ALT and REF alleles flipped (e.g., from 23andMe format).
+       - `PASS 1/1 Uncertain` - Yields homozygot ALT variants labelled as VUS.
+       - `rs12(3|4) (tp53|ace2) splice`) - Filters out these specific variants.
 
 3. **Filtered Display**
    - Only variations with a **HIGH** or **MODERATE** impact annotation are included.
