@@ -75,7 +75,10 @@ Once [beacon script](../bin/README.md) has finished, a static HTML page will be 
    - The browser generates searchable and sortable tables directly in HTML.
    - **Key Features**:
      - Column reordering.
-     - Advanced search with regular expressions (e.g., `rs12(3|4) (tp53|ace2) splice`).
+     - Advanced search with regular expressions. Examples:
+       - `PASS 0/1 pathogenic` - Yields heterozygot variants labelled as Pathogenic or Likely Pathogenic.
+       - `PASS 1/1 Uncertain` - Yields homozygot ALT variants labelled as VUS 
+       - `rs12(3|4) (tp53|ace2) splice`) - Filters out these specific variants
 
 3. **Filtered Display**
    - Only variations with a **HIGH** or **MODERATE** impact annotation are included.

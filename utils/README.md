@@ -4,7 +4,10 @@ This directory contains utility tools for data management, validation, and inter
 
 ## Utilities Overview
 
-### 1. **bff-browser**
+### 1. **bff-browser** 
+
+[bff-browser link](bff_browser/README.md)
+
 A lightweight, client-based tool for browsing and interacting with BFF data.
 
 - **Purpose:** Provides a user-friendly frontend for querying and visualizing Beacon datasets.  
@@ -14,6 +17,9 @@ A lightweight, client-based tool for browsing and interacting with BFF data.
   - Intended for researchers and non-technical users  
 
 ### 2. **bff-portal**
+
+[bff-portal link](bff_portal/README.md)
+
 An API and web-based portal interface for browsing and querying Beacon v2 data **stored in MongoDB**.
 
 - **Purpose:** Enables quick and flexible exploration of the MongoDB database through a web-based interface or API.  
@@ -22,16 +28,7 @@ An API and web-based portal interface for browsing and querying Beacon v2 data *
   - Supports collection browsing  
   - Designed for quick data inspection  
 
-### 3. **bff-queue**
-A utility for managing and monitoring CLI tasks.
-
-- **Purpose:** Handles asynchronous operations and task queues for data processing or integration workflows.  
-- **Key Features:**  
-  - Queue management for bulk operations in a workstation  
-  - Monitors background jobs  
-  - Enhances system scalability  
-
-## How BFF Browser Differs from BFF Portal
+#### How BFF Browser Differs from BFF Portal
 
 The **BFF Browser** and **BFF Portal** serve different purposes within the BFF ecosystem. Below is a detailed comparison to clarify their distinct functionalities:
 
@@ -48,7 +45,7 @@ The **BFF Browser** and **BFF Portal** serve different purposes within the BFF e
 | **Deployment**               | Lightweight, no database required         | Requires MongoDB backend for live data |
 | **Intended Users**           | Users needing quick, offline browsing     | Users needing live, flexible data querying |
 
-### When to Use Each Tool
+#### When to Use Each Tool
 
 - **Use BFF Browser if:**  
   - You need a lightweight, client-side tool for browsing precomputed data.  
@@ -60,6 +57,19 @@ The **BFF Browser** and **BFF Portal** serve different purposes within the BFF e
   - You require cross-collection querying and pagination for large datasets.  
   - You need a web interface that allows flexible data exploration and visualization.  
 
-### Future Integration
+#### Future Integration
 
 While the BFF Browser and BFF Portal currently serve separate use cases, there are plans to merge their functionalities in the future. This would combine the simplicity of static data browsing with the flexibility and power of dynamic, database-driven queries into a single, unified platform.
+
+### 3. **bff-queue**
+
+[bff-queue link](bff_queue/README.md)
+
+A utility for managing and monitoring CLI tasks.
+
+- **Purpose:** Handles asynchronous operations and task queues for data processing or integration workflows.
+- **Key Features:**
+  - Queue management for bulk operations in a workstation
+  - Monitors background jobs
+  - Enhances system scalability
+
