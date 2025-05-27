@@ -93,6 +93,7 @@ $Data::Dumper::Terse = 1;
 # Parsing arguments/options and getting help if needed
 my $arg      = Help::usage($version);
 my $no_emoji = $arg->{noemoji} // 0;    # 0 means emojis enabled by default
+my $no_spinner = $arg->{debug} || $arg->{verbose};
 
 # Reading the configuration values from the config file
 # NB: We'll avoid assigning $param->{foo} to vars unless their value changes often
@@ -278,8 +279,8 @@ sub handle_validate {
 sub run_with_spinner {
     my $code_ref = shift;
 
-    # Run code directly if not interactive.
-    return $code_ref->() unless -t STDOUT;
+    # Run code directly if not debug|verbose or interactive.
+    return $code_ref->() if ($no_spinner || !-t STDOUT);
 
     my $done : shared = 0;
     my $spinner_thread = threads->create(
