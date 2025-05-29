@@ -1,5 +1,9 @@
 Revision history for beacon2-cbi-tools
 
+2.0.11  2025-0X-XX
+
+    - STDOUT spinner is turned off when --debug or --verbose are used
+
 2.0.10  2025-05-15
 
     - Added 'tsv' mode to support SNP microarray data as input

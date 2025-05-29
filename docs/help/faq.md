@@ -132,6 +132,13 @@
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
+??? faq "Do you send any personal information to your servers?"
+    No. All files are created locally, and we do not send usage information (or anything else) over the internet.  
+    But please, if you use this software, cite it.
+
+    ##### last change 2025-05-29 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
+
+
 ??? faq "How do I cite `beacon2-cbi-tools`?"
 
     You can cite the **Beacon v2 Reference Implementation** paper. Thx!
