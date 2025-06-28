@@ -57,7 +57,7 @@ bff-tools &lt;mode> \[-arguments\] \[-options\]
 
 ### `bff-tools`
 
-`bff-tools` is a command-line toolkit with five operational modes for working with Beacon v2 data:
+`bff-tools` is a command-line toolkit with five operational modes (subcommands) for working with Beacon v2 data:
 
 # HOW TO RUN `bff-tools`
 

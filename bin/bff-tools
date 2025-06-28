@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 #   BFF-tools: Script to process VCF/TSV/BFF data
-#   It has five modes of operation:
+#   It has five modes of operation (subcommands):
 #     1-2. vcf|tsv:
 #         a) Annotates VCF|TSV with SnpEff (optional)
 #         b) Serializes VCF to BFF
@@ -400,7 +400,7 @@ bff-tools <mode> [-arguments] [-options]
 
 =head3 C<bff-tools>
 
-C<bff-tools> is a command-line toolkit with five operational modes for working with Beacon v2 data:
+C<bff-tools> is a command-line toolkit with five operational modes (subcommands) for working with Beacon v2 data:
 
 =head1 HOW TO RUN C<bff-tools>
 

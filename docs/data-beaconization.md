@@ -98,7 +98,7 @@ bin/bff-tools vcf   -t 4       -i input.vcf.gz -p param_file.yaml
     exe      mode   #threads   <vcf>           parameters file (optional)
 ```
 
-Here we are using `bff-tools` script in mode ***vcf***. This mode is one of the five available [vcf|tsv|load|full|validate]. 
+Here we are using `bff-tools` script in mode ***vcf***. This mode (subcommand) is one of the five available [vcf|tsv|load|full|validate]. 
 
 The parameters file is optional if you want to use the default value (hg19) but it is needed if you want to change them. Note that you must provide the **reference genome** (unless you're using `hg19` which is the default one) that was used to create your VCF. See all the script options [here](https://github.com/mrueda/beacon2-cbi-tools#how-to-run-beacon).
 
