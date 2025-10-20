@@ -58,8 +58,8 @@ use BFF::Tools;
 binmode STDOUT, ':encoding(UTF-8)';
 
 # Personalize warn and die functions
-$SIG{__WARN__} = sub { warn BOLD YELLOW "Warn: ", @_ };
-$SIG{__DIE__}  = sub { die BOLD RED "Error: ", @_ };
+$SIG{__WARN__} = sub { warn BOLD YELLOW "Warn: ", @_ , RESET, "\n"};
+$SIG{__DIE__}  = sub { die BOLD RED "Error: ", @_ , RESET, "\n" };
 
 # Check if the first argument is "validate" and call the subroutine if so.
 if ( ( $ARGV[0] // '' ) eq 'validate' ) {
