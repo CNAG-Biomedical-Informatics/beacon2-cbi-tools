@@ -4,6 +4,9 @@
 
  * [Manuel Rueda, PhD](https://github.com/mrueda)
 
+ Project documentation was created using [Material for MkDocs](https://squidfunk.github.io/mkdocs-material).
+
+
 ## Acknowledgments
 
   * Bio and Dev Teams &#64; [CRG-EGA](https://www.crg.eu/ca/programmes-groups/ega-team-european-genome-phenome-archive-crg)

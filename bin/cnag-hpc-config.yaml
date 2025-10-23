@@ -1,0 +1,42 @@
+---
+base: /software/biomed/beacon2-cbi-tools-data
+
+javabin: "/software/crgadm/software/Java/17.0.2/bin/java"
+
+# Reference assemblies (genomes)
+hs37fasta: "{base}/databases/genomes/hs37d5.fa.gz"
+hg19fasta: "{base}/databases/genomes/ucsc.hg19.fasta.gz"
+hg38fasta: "{base}/databases/genomes/hg38.fa.gz"
+
+# ClinVar
+hg19clinvar: "{base}/databases/snpeff/v5.0/hg19/clinvar_20250312.vcf.gz"
+hg38clinvar: "{base}/databases/snpeff/v5.0/hg38/clinvar_20250312.vcf.gz"
+
+# Cosmic 
+hg19cosmic: "{base}/databases/snpeff/v5.0/hg19/CosmicCodingMuts.normal.hg19.vcf.gz"
+hg38cosmic: "{base}/databases/snpeff/v5.0/hg38/CosmicCodingMuts.normal.hg38.vcf.gz"
+
+# dbSNSFP Academic
+hg19dbnsfp: "{base}/databases/snpeff/v5.0/hg19/dbNSFP4.1a_hg19.txt.gz"
+hg38dbnsfp: "{base}/databases/snpeff/v5.0/hg38/dbNSFP4.1a_hg38.txt.gz"
+
+# Miscellanea software
+snpeff: "{base}/soft/snpEff/snpEff.jar"
+snpsift: "{base}/soft/snpEff/SnpSift.jar"
+#bcftools: "{base}/soft/NGSutils/bcftools-1.21-103_{arch}/bcftools"
+bcftools: "/software/crgadm/software/BCFtools/1.17-GCC-12.2.0/bin/bcftools"
+
+# Optional: Maximum RAM for SnpEff (default: 8G)
+mem: 8G
+
+# Optional: Temporary directory (default: /tmp)
+tmpdir: "{base}/tmp"
+
+# MongoDB 
+mongoimport: "{base}/soft/mongodb-database-tools-ubuntu2404-{arch}-100.11.0/bin/mongoimport"
+mongostat: "{base}/soft/mongodb-database-tools-ubuntu2404-{arch}-100.11.0/bin/mongostat"
+mongodburi: "mongodb://root:example@mongo:27017/beacon?authSource=admin"
+mongosh: "/software/biomed/beacon2-cbi-tools-data/bin/mongosh-2.4.0-linux-x64/bin/mongosh"
+
+# Optional: Set of fields from dbNSFP. Values: all | cnag (default: all)
+dbnsfpset: all
