@@ -8,7 +8,7 @@ cd "$(dirname "$0")/../test/vcf"
 
 # Define paths and reference output
 BFF_TOOLS="../../bin/bff-tools"
-REFERENCE_RESULT="beacon_166403275914916"
+REFERENCE_RESULT="ref_beacon_166403275914916"
 
 echo "Info: Cwd => $(pwd) ..."
 

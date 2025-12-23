@@ -13,7 +13,7 @@
 #   Version taken from $beacon
 #
 #   Copyright (C) 2021-2022 Manuel Rueda - CRG
-#   Copyright (C) 2023-2025 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
+#   Copyright (C) 2023-2026 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ exit;
 ###############################################################################
 sub vcf2bff {
 
-    my $version  = '2.0.10';
+    my $version  = '2.0.11';
     my $DEFAULT  = '.';
     my $exe_path = abs_path($0);
     my $cwd      = cwd;
@@ -420,9 +420,9 @@ sub parse_cli_args {
     return \%opts;
 }
 
-###############################################################################
-# Below subroutines remain mostly unchanged, except for a few minor warnings. #
-###############################################################################
+###########################
+# MIscellaneu Subroutines #  
+###########################
 
 sub parse_header_snpeff {
     my $line = shift;

@@ -64,26 +64,40 @@ Once [beacon script](../bin/README.md) has finished, a static HTML page will be 
 
 ### Features  
 
-1. **Gene Panel Support**  
+1. **Gene Panel Support**
    - Variations are displayed in **HTML tabs** organized by gene panels.
    - **Gene Panels**: Simple text files with a `.lst` extension containing a list of gene names.
    - **Default Directory**: `$beacon_path/browser/data`.
    - **Customization**: Modify the directory using the `paneldir` parameter in the `config.yaml` file.
    - **Extendability**: You can create and add additional gene panels.
 
-2. **Dynamic Tables**  
+2. **Dynamic Tables**
    - The browser generates searchable and sortable tables directly in HTML.
    - **Key Features**:
      - Column reordering.
      - Advanced search with regular expressions. Examples:
-	   - `PASS 0/1 pathogenic` - Returns heterozygous variants labeled as Pathogenic or Likely Pathogenic.
-	   - `PASS 1/0 pathogenic` - Same as above, with ALT and REF alleles flipped (e.g., from 23andMe format).
-       - `PASS 1/1 Uncertain` - Yields homozygot ALT variants labelled as VUS.
-       - `rs12(3|4) (tp53|ace2) splice`) - Filters out these specific variants.
+       - `PASS 0/1 pathogenic` — Returns heterozygous variants labeled as *Pathogenic* or *Likely Pathogenic*.
+       - `PASS 1/0 pathogenic` — Same as above, with ALT and REF alleles flipped (e.g. 23andMe format).
+       - `PASS 1/1 Uncertain` — Yields homozygous ALT variants labeled as *VUS*.
+       - `rs12(3|4) (tp53|ace2) splice` — Filters specific variants by ID, gene, and consequence.
+     - Built-in pagination, column visibility controls, and printable views.
 
-3. **Filtered Display**
-   - Only variations with a **HIGH** or **MODERATE** impact annotation are included.
-   - Variations are filtered and displayed according to the `.lst` files in the `paneldir` folder.
+3. **Clinician-Friendly Quick Filters**
+   - A **sticky “Quick filters” bar** is shown above the tables for rapid clinical triage.
+   - Available toggles:
+     - **Clinical relevance**: show only variants where `clinicalRelevance` matches `/pathogenic/i`.
+     - **Genotype**: show only variants that are **homozygous ALT** (`1/1` or `1|1` in `biosampleId`).
+     - **Scan aid**: optionally highlight rows with *Pathogenic* clinical relevance without filtering.
+   - Filters are **combinable** (AND logic) and can be cleared instantly with a single button.
+
+4. **Filtered Display**
+   - Only variations with **HIGH** or **MODERATE** annotation impact are included.
+   - Variations are further filtered and displayed according to the `.lst` gene panel definitions in the `paneldir` folder.
+
+5. **Visual Aids for Clinical Review**
+   - Soft background highlighting of *Pathogenic* variants to improve visual scanning.
+   - Manual row selection (click-to-highlight) for ad-hoc review and discussion.
+   - Clean, compact table layout optimized for rapid interpretation by clinicians.
 
 ![BFF Genomic Variations Browser](static/images/snapshot-BFF-genomic-variations-browser.png)
 

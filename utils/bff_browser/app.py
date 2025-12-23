@@ -208,4 +208,4 @@ def combined_example():
     return render_template("combined_bff.html", data_rows=combined_data)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8001, debug=True)

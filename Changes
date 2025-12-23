@@ -1,8 +1,10 @@
 Revision history for beacon2-cbi-tools
 
-2.0.11  2025-0X-XX
+2.0.11  2025-12-23
 
     - STDOUT spinner is turned off when --debug or --verbose are used
+    - Fixed persistent COLOR in SHELL after STDERR in Docker/HPC
+    - BFF Browser: added clinician-friendly filters (Pathogenic clinicalRelevance, homozygous ALT), row counters, and visual highlighting.
 
 2.0.10  2025-05-15
 

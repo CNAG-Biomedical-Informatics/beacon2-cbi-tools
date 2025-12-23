@@ -2,21 +2,58 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>BFF Browser - Genomic Variations</title>
+    <title>BFF Browser</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Beacon Friendly Format Genomic Variations Browser">
-    <meta name="author" content="Manuel Rueda"> 
+    <meta name="description" content="Beacon Friendly Format Browser">
+    <meta name="author" content="Manuel Rueda">
 
-      <!-- Le styles -->
+    <!-- Styles -->
     <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-responsive.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="assets/css/main.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="assets/jsD/media/css/jquery.dataTables.css">
-    <link rel="stylesheet" type="text/css" href="assets/jsD/media/css/dataTables.colReorder.css">
-    <link rel="stylesheet" type="text/css" href="assets/jsD/media/css/dataTables.colVis.css">
-    <link rel="stylesheet" type="text/css" href="assets/jsD/media/css/dataTables.tableTools.css">
-   
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-responsive.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/jsD/media/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="assets/jsD/media/css/dataTables.colReorder.css">
+    <link rel="stylesheet" href="assets/jsD/media/css/dataTables.colVis.css">
+    <link rel="stylesheet" href="assets/jsD/media/css/dataTables.tableTools.css">
+
+    <style type="text/css">
+      /* Manual selection always visible */
+      tr.row_manual td { background-color: #f9d2d2 !important; }
+
+      /* Auto-highlight scan aid (Pathogenic rows) */
+      tr.row_pathogenic td { background-color: #fff2f2 !important; }
+
+      /* Sticky filters bar */
+      .filters-bar {
+        position: sticky;
+        top: 50px; /* below navbar */
+        z-index: 999;
+        padding: 10px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+      }
+
+      /* Nicer table headers */
+      table.dataTable thead th {
+        background: #f7f7f7;
+        border-bottom: 1px solid #ddd !important;
+      }
+
+      /* Tighter rows */
+      table.dataTable tbody td {
+        padding-top: 4px;
+        padding-bottom: 4px;
+      }
+
+      /* Active tab cue */
+      .nav-tabs > .active > a,
+      .nav-tabs > .active > a:hover {
+        font-weight: bold;
+      }
+    </style>
+
+    <!-- JavaScript -->
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/jsD/media/js/jquery.dataTables.min.js"></script>
@@ -25,257 +62,353 @@
     <script src="assets/jsD/media/js/dataTables.tableTools.js"></script>
     <script src="assets/js/jqBootstrapValidation.js"></script>
 
-   <script type="text/javascript" language="javascript" class="init">
+    <script type="text/javascript" class="init">
+$(document).ready(function() {
 
-   $(document).ready(function() {
-    $('#table-panel-Invitae_Multi_Cancer').dataTable( {
-        "ajax": "Invitae_Multi_Cancer.mod.json",
-        "bDeferRender": true,
-         stateSave: true,
-        "language": {
-         "sSearch": '<span class="icon-search" aria-hidden="true"></span>',
-         "lengthMenu": "Show _MENU_ variants",
-         "sInfo": "Showing _START_ to _END_ of _TOTAL_ variants",
-          "sInfoFiltered": " (filtered from _MAX_ variants)"
-       },
-        "order": [[  1, "asc" ]],
-        search: {
-          "regex": true
-         }, 
-       aoColumnDefs: [
-          { visible: false, targets: [ 0, 1, 6, 7, 9, 12, 13, 15, 14, 18 ] }
-       ], 
-       dom: 'CRT<"clear">lfrtip',
-       colVis: {
-            showAll: "Show all",
-            showNone: "Show none"
-        },
-          tableTools: {
-            aButtons: [ { "sExtends": "print" , "sButtonText": '<span class="icon-print" aria-hidden="true"></span>' } ]
-        } 
-     } );
-   } );
+  var PANELS = ['Invitae_Multi_Cancer', 'cardiopathy', 'exome'];
 
+  // 0-based indices:
+  // 17 = clinicalRelevance
+  // 18 = biosampleId
+  var CLINREL_COL   = 17;
+  var BIOSAMPLE_COL = 18;
 
-   $(document).ready(function() {
-    $('#table-panel-cardiopathy').dataTable( {
-        "ajax": "cardiopathy.mod.json",
-        "bDeferRender": true,
-         stateSave: true,
-        "language": {
-         "sSearch": '<span class="icon-search" aria-hidden="true"></span>',
-         "lengthMenu": "Show _MENU_ variants",
-         "sInfo": "Showing _START_ to _END_ of _TOTAL_ variants",
-          "sInfoFiltered": " (filtered from _MAX_ variants)"
-       },
-        "order": [[  1, "asc" ]],
-        search: {
-          "regex": true
-         }, 
-       aoColumnDefs: [
-          { visible: false, targets: [ 0, 1, 6, 7, 9, 12, 13, 15, 14, 18 ] }
-       ], 
-       dom: 'CRT<"clear">lfrtip',
-       colVis: {
-            showAll: "Show all",
-            showNone: "Show none"
-        },
-          tableTools: {
-            aButtons: [ { "sExtends": "print" , "sButtonText": '<span class="icon-print" aria-hidden="true"></span>' } ]
-        } 
-     } );
-   } );
+  function stripHtml(x) {
+    if (x === null || x === undefined) return '';
+    return String(x).replace(/<[^>]*>/g, '').trim();
+  }
 
+  function togglePathogenicOn() {
+    return ($('#toggle-only-pathogenic').length && $('#toggle-only-pathogenic').prop('checked'));
+  }
 
-   $(document).ready(function() {
-    $('#table-panel-exome').dataTable( {
-        "ajax": "exome.mod.json",
-        "bDeferRender": true,
-         stateSave: true,
-        "language": {
-         "sSearch": '<span class="icon-search" aria-hidden="true"></span>',
-         "lengthMenu": "Show _MENU_ variants",
-         "sInfo": "Showing _START_ to _END_ of _TOTAL_ variants",
-          "sInfoFiltered": " (filtered from _MAX_ variants)"
-       },
-        "order": [[  1, "asc" ]],
-        search: {
-          "regex": true
-         }, 
-       aoColumnDefs: [
-          { visible: false, targets: [ 0, 1, 6, 7, 9, 12, 13, 15, 14, 18 ] }
-       ], 
-       dom: 'CRT<"clear">lfrtip',
-       colVis: {
-            showAll: "Show all",
-            showNone: "Show none"
-        },
-          tableTools: {
-            aButtons: [ { "sExtends": "print" , "sButtonText": '<span class="icon-print" aria-hidden="true"></span>' } ]
-        } 
-     } );
-   } );
+  function toggleHomAltOn() {
+    return ($('#toggle-only-homalt').length && $('#toggle-only-homalt').prop('checked'));
+  }
 
-   </script>
+  function toggleHighlightOn() {
+    return ($('#toggle-highlight-pathogenic').length && $('#toggle-highlight-pathogenic').prop('checked'));
+  }
 
+  function rowIsPathogenic(aData) {
+    var cr = stripHtml(aData[CLINREL_COL]);
+    return /pathogenic/i.test(cr);
+  }
 
+  function rowIsHomAlt(aData) {
+    var bs = stripHtml(aData[BIOSAMPLE_COL]);
+    return /1[\/|]1/.test(bs);
+  }
+
+  // DataTables 1.9 filter hook
+  if ($.fn.dataTableExt && $.fn.dataTableExt.afnFiltering) {
+    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+
+      var pOn = togglePathogenicOn();
+      var hOn = toggleHomAltOn();
+      if (!pOn && !hOn) return true;
+
+      if (pOn && !rowIsPathogenic(aData)) return false;
+      if (hOn && !rowIsHomAlt(aData))     return false;
+
+      return true;
+    });
+  }
+
+  var DT = {};
+
+  function applyHighlight(dtApi) {
+    try {
+      var nodes = dtApi.fnGetNodes();
+      for (var i = 0; i < nodes.length; i++) {
+        var rowNode = nodes[i];
+
+        if (!toggleHighlightOn()) {
+          $(rowNode).removeClass('row_pathogenic');
+          continue;
+        }
+
+        var rowData = dtApi.fnGetData(rowNode);
+        if (rowIsPathogenic(rowData)) $(rowNode).addClass('row_pathogenic');
+        else $(rowNode).removeClass('row_pathogenic');
+      }
+    } catch (e) {
+      // keep UI alive
+    }
+  }
+
+  function initPanel(panel) {
+    var tableId = '#table-panel-' + panel;
+
+    var dt = $(tableId).dataTable({
+      "sAjaxSource": panel + ".mod.json",
+      "sAjaxDataProp": "data",
+      "sServerMethod": "GET",
+
+      "bDeferRender": true,
+      "stateSave": true,
+
+      "language": {
+        "sSearch": '<span class="icon-search" aria-hidden="true"></span>',
+        "lengthMenu": "Show _MENU_ variants",
+        "sInfo": "Showing _START_ to _END_ of _TOTAL_ variants",
+        "sInfoFiltered": " (filtered from _MAX_ variants)"
+      },
+
+      "order": [[ 1, "asc" ]],
+      "search": { "regex": true },
+
+      "aoColumnDefs": [
+        { "visible": false, "targets": [ 0, 1, 6, 7, 9, 12, 13, 15, 14, 18 ] }
+      ],
+
+      /* Keep default info line + pagination below */
+      "dom": 'CRT<"clear">lfrtip',
+      "colVis": { "showAll": "Show all", "showNone": "Show none" },
+      "tableTools": {
+        "aButtons": [
+          { "sExtends": "print", "sButtonText": '<span class="icon-print" aria-hidden="true"></span>' }
+        ]
+      },
+
+      // Use oSettings.oInstance (available during init)
+      "fnInitComplete": function(oSettings) {
+        var api = (oSettings && oSettings.oInstance) ? oSettings.oInstance : dt;
+        applyHighlight(api);
+      },
+
+      "fnDrawCallback": function(oSettings) {
+        var api = (oSettings && oSettings.oInstance) ? oSettings.oInstance : dt;
+        applyHighlight(api);
+      }
+    });
+
+    DT[panel] = dt;
+
+    $(tableId + ' tbody').on('click', 'tr', function() {
+      $(this).toggleClass('row_manual');
+    });
+  }
+
+  for (var i = 0; i < PANELS.length; i++) initPanel(PANELS[i]);
+
+  function redrawAll() {
+    for (var i = 0; i < PANELS.length; i++) {
+      var p = PANELS[i];
+      if (DT[p] && typeof DT[p].fnDraw === 'function') DT[p].fnDraw();
+    }
+  }
+
+  $('#toggle-only-pathogenic').on('change', redrawAll);
+  $('#toggle-only-homalt').on('change', redrawAll);
+  $('#toggle-highlight-pathogenic').on('change', redrawAll);
+
+  $('#btn-clear-filters').on('click', function(e) {
+    e.preventDefault();
+    $('#toggle-only-pathogenic').prop('checked', false);
+    $('#toggle-only-homalt').prop('checked', false);
+    redrawAll();
+  });
+
+});
+    </script>
   </head>
   <body class="dt-example">
-
-    <!-- NAVBAR
-    ================================================== -->
+    <!-- NAVBAR -->
     <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">BFF Browser - Genomic Variations</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Help <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-header">Help</li>
+                  <li>
+                    <a href="https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils/bff_browser">
+                      <span class="icon-question-sign"></span> Help Page
                     </a>
-                    <a class="brand" href="#">BFF Browser - Genomic Variations</a>
-                    <div class="nav-collapse collapse">
-                        <ul class="nav">
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
-                                <ul class="dropdown-menu">
-                                    <li class="nav-header">Help</li>
-                                    <li><a href="https://b2ri-documentation.readthedocs.io/en/latest/data-ingestion/"><span class="icon-question-sign"></span> Help Page</a>
-                                    <li class="divider"></li>
-                                    <li class="nav-header">FAQs</li>
-                                    <li><a href="https://b2ri-documentation.readthedocs.io/en/latest/faq"><span class="icon-question-sign"></span> FAQs Page</a></a></li>
-                                </ul>
-                            </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Links <b class="caret"></b></a>
-                                <ul class="dropdown-menu">
-                                    <li class="nav-header">Contact</li>
-                                    <li><a href="mailto:manuel.rueda@cnag.eu"><span class="icon-envelope"></span> Author</a></li>
-                                    <li class="divider"></li>
-                                    <li class="nav-header">Links</li>
-                                    <li><a href="https://www.cnag.eu"><span class="icon-home"></span> CNAG</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div><!--/.nav-collapse -->
-                </div>
-            </div>
+                  </li>
+                  <li class="divider"></li>
+                  <li class="nav-header">FAQs</li>
+                  <li>
+                    <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/help/faq/">
+                      <span class="icon-question-sign"></span> FAQs Page
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Links <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-header">Contact</li>
+                  <li>
+                    <a href="mailto:manuel.rueda\@cnag.eu">
+                      <span class="icon-envelope"></span> Author
+                    </a>
+                  </li>
+                  <li class="divider"></li>
+                  <li class="nav-header">Links</li>
+                  <li>
+                    <a href="https://www.cnag.eu">
+                      <span class="icon-home"></span> CNAG
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+  <div class="container">
+    <a class="btn pull-right" href="./Invitae_Multi_Cancer.json"><i class="icon-download"></i> Invitae_Multi_Cancer JSON</a>
+    <a class="btn pull-right" href="./cardiopathy.json"><i class="icon-download"></i> Cardiopathy JSON</a>
+    <a class="btn pull-right" href="./exome.json"><i class="icon-download"></i> Exome JSON</a>
+    <h4>Project &#9658; cineca_uk1_173625581783940</h4>
+    <h3>Job ID &#9658; 173625581783940 &#9658; genomicVariationsVcf</h3>
+    <p>Displaying variants with <strong>Annotation Impact</strong> values equal to <strong>HIGH | MODERATE</strong></p>
+    <div class="well filters-bar">
+      <div class="row-fluid">
+        <div class="span9">
+          <h4 style="margin:0 0 6px 0;">Quick filters</h4>
+
+          <label class="checkbox" style="margin-bottom:6px;">
+            <input type="checkbox" id="toggle-only-pathogenic">
+            <strong>Clinical relevance:</strong>
+            show only <span class="label label-important">Pathogenic</span>
+            <span class="muted">(matches <code>clinicalRelevance</code>, case-insensitive)</span>
+          </label>
+
+          <label class="checkbox" style="margin-bottom:6px;">
+            <input type="checkbox" id="toggle-only-homalt">
+            <strong>Genotype:</strong>
+            show only <span class="label label-info">Homozygous ALT</span>
+            <span class="muted">(<code>1/1</code> or <code>1|1</code> in <code>biosampleId</code>)</span>
+          </label>
+
+          <label class="checkbox" style="margin-bottom:0;">
+            <input type="checkbox" id="toggle-highlight-pathogenic" checked>
+            <strong>Scan aid:</strong>
+            softly highlight rows with <span class="label label-important">Pathogenic</span>
+            <span class="muted">(no filtering)</span>
+          </label>
         </div>
 
-     <div class="container">
-      <a class="btn pull-right" href="./exome.json"><i class="icon-download"></i> Exome JSON</a>
-      <a class="btn pull-right" href="./cardiopathy.json"><i class="icon-download"></i> Cardiopathy JSON</a>
-      <a class="btn pull-right" href="./Invitae_Multi_Cancer.json"><i class="icon-download"></i> Invitae_Multi_Cancer JSON</a>
-
-     <h3>Job ID: 173625581783940 &#9658 genomicVariationsVcf</h3>
-     <p>Displaying variants with <strong>Annotation Impact</strong> values equal to <strong>HIGH</strong><p>
-
-      <div>
-
-       <ul class="nav nav-tabs">
-      <li class="active"><a href="#tab-panel-Invitae_Multi_Cancer" data-toggle="tab"> Invitae_Multi_Cancer panel - 84 genes</a></li>
-      <li class=""><a href="#tab-panel-cardiopathy" data-toggle="tab"> Cardiopathy panel - 147 genes</a></li>
-      <li class=""><a href="#tab-panel-exome" data-toggle="tab"> Exome panel - 19205 genes</a></li>
-       </ul>
-      <div id="myTabContent" class="tab-content">
-      <div class="tab-pane fade in " id="tab-panel-Invitae_Multi_Cancer">
-      <!-- TABLE -->
-      <table id="table-panel-Invitae_Multi_Cancer" class="display table table-hover table-condensed">
-        <thead>
-            <tr>
-             <th>variantInternalId</th>
-             <th>assemblyId</th>
-             <th>refseqId</th>
-             <th>position</th>
-             <th>referenceBases</th>
-             <th>alternateBases</th>
-             <th>QUAL</th>
-             <th>FILTER</th>
-             <th>variantType</th>
-             <th>genomicHGVSId</th>
-             <th>geneIds</th>
-             <th>molecularEffects</th>
-             <th>aminoacidChanges</th>
-             <th>annotationImpact</th>
-             <th>conditionId</th>
-             <th>dbSNP</th>
-             <th>ClinVar</th>
-             <th>clinicalRelevance</th>
-             <th>biosampleId</th>
-            </tr>
-        </thead>
-     </table>
-     </div>
-
-      <div class="tab-pane fade in active" id="tab-panel-cardiopathy">
-      <!-- TABLE -->
-      <table id="table-panel-cardiopathy" class="display table table-hover table-condensed">
-        <thead>
-            <tr>
-             <th>variantInternalId</th>
-             <th>assemblyId</th>
-             <th>refseqId</th>
-             <th>position</th>
-             <th>referenceBases</th>
-             <th>alternateBases</th>
-             <th>QUAL</th>
-             <th>FILTER</th>
-             <th>variantType</th>
-             <th>genomicHGVSId</th>
-             <th>geneIds</th>
-             <th>molecularEffects</th>
-             <th>aminoacidChanges</th>
-             <th>annotationImpact</th>
-             <th>conditionId</th>
-             <th>dbSNP</th>
-             <th>ClinVar</th>
-             <th>clinicalRelevance</th>
-             <th>biosampleId</th>
-            </tr>
-        </thead>
-     </table>
-     </div>
-
-      <div class="tab-pane fade in " id="tab-panel-exome">
-      <!-- TABLE -->
-      <table id="table-panel-exome" class="display table table-hover table-condensed">
-        <thead>
-            <tr>
-             <th>variantInternalId</th>
-             <th>assemblyId</th>
-             <th>refseqId</th>
-             <th>position</th>
-             <th>referenceBases</th>
-             <th>alternateBases</th>
-             <th>QUAL</th>
-             <th>FILTER</th>
-             <th>variantType</th>
-             <th>genomicHGVSId</th>
-             <th>geneIds</th>
-             <th>molecularEffects</th>
-             <th>aminoacidChanges</th>
-             <th>annotationImpact</th>
-             <th>conditionId</th>
-             <th>dbSNP</th>
-             <th>ClinVar</th>
-             <th>clinicalRelevance</th>
-             <th>biosampleId</th>
-            </tr>
-        </thead>
-     </table>
-     </div>
-
-
+        <div class="span3" style="text-align:right;">
+          <button class="btn btn-small" id="btn-clear-filters" style="margin-top:22px;">
+            <i class="icon-remove"></i> Clear filters
+          </button>
+        </div>
       </div>
-
-      <br /><p class="pagination-centered">BFF Browser - Genomic Variations</p> 
+    </div>
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#tab-panel-Invitae_Multi_Cancer" data-toggle="tab">Invitae_Multi_Cancer panel - 84 genes</a></li>
+      <li class=""><a href="#tab-panel-cardiopathy" data-toggle="tab">Cardiopathy panel - 147 genes</a></li>
+      <li class=""><a href="#tab-panel-exome" data-toggle="tab">Exome panel - 19205 genes</a></li>
+    </ul>
+    <div id="myTabContent" class="tab-content">
+      <div class="tab-pane fade in active" id="tab-panel-Invitae_Multi_Cancer">
+        <!-- TABLE -->
+        <table id="table-panel-Invitae_Multi_Cancer" class="display table table-hover table-condensed">
+          <thead>
+            <tr>
+              <th>variantInternalId</th>
+              <th>assemblyId</th>
+              <th>refseqId</th>
+              <th>position</th>
+              <th>referenceBases</th>
+              <th>alternateBases</th>
+              <th>QUAL</th>
+              <th>FILTER</th>
+              <th>variantType</th>
+              <th>genomicHGVSId</th>
+              <th>geneIds</th>
+              <th>molecularEffects</th>
+              <th>aminoacidChanges</th>
+              <th>annotationImpact</th>
+              <th>conditionId</th>
+              <th>dbSNP</th>
+              <th>ClinVar</th>
+              <th>clinicalRelevance</th>
+              <th>biosampleId</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div class="tab-pane fade in " id="tab-panel-cardiopathy">
+        <!-- TABLE -->
+        <table id="table-panel-cardiopathy" class="display table table-hover table-condensed">
+          <thead>
+            <tr>
+              <th>variantInternalId</th>
+              <th>assemblyId</th>
+              <th>refseqId</th>
+              <th>position</th>
+              <th>referenceBases</th>
+              <th>alternateBases</th>
+              <th>QUAL</th>
+              <th>FILTER</th>
+              <th>variantType</th>
+              <th>genomicHGVSId</th>
+              <th>geneIds</th>
+              <th>molecularEffects</th>
+              <th>aminoacidChanges</th>
+              <th>annotationImpact</th>
+              <th>conditionId</th>
+              <th>dbSNP</th>
+              <th>ClinVar</th>
+              <th>clinicalRelevance</th>
+              <th>biosampleId</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div class="tab-pane fade in " id="tab-panel-exome">
+        <!-- TABLE -->
+        <table id="table-panel-exome" class="display table table-hover table-condensed">
+          <thead>
+            <tr>
+              <th>variantInternalId</th>
+              <th>assemblyId</th>
+              <th>refseqId</th>
+              <th>position</th>
+              <th>referenceBases</th>
+              <th>alternateBases</th>
+              <th>QUAL</th>
+              <th>FILTER</th>
+              <th>variantType</th>
+              <th>genomicHGVSId</th>
+              <th>geneIds</th>
+              <th>molecularEffects</th>
+              <th>aminoacidChanges</th>
+              <th>annotationImpact</th>
+              <th>conditionId</th>
+              <th>dbSNP</th>
+              <th>ClinVar</th>
+              <th>clinicalRelevance</th>
+              <th>biosampleId</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+      <br /><p class="pagination-centered">BFF Browser - Genomic Variations</p>
       <hr>
       <!-- FOOTER -->
       <footer>
-                    <p>&copy; 2021-2025 CNAG | Barcelona, Spain </p>
-
+          <p>&copy; 2021-2025 CNAG | Barcelona, Spain </p>
       </footer>
-
     </div><!-- /.container -->
-
   </body>
 </html>

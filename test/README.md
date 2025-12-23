@@ -49,7 +49,7 @@ Once completed, verify that your file `genomicVariationsVcf.json.gz` matches the
 (Where XXXX is the ID of your job)
 
 ```bash
-diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat beacon_166403275914916/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) 
+diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat ref_beacon_166403275914916/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) 
 ```
 
 In Ubuntu, you can install the tool `jq` with the following command:
