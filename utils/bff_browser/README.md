@@ -46,7 +46,7 @@ To generate the necessary files, update your parameters file at the time you **p
 Example:
 
 ```bash
-beacon vcf -i my.vcf -p param.yaml
+bff-tools vcf -i my.vcf -p param.yaml
 ```
 
 Ensure your `param.yaml` includes:
@@ -60,7 +60,7 @@ This will turn off the pipeline **bff2html**.
 By default, the browser processes all `.lst` files in the `paneldir` folder. The `paneldir` folder is set at the `beacon` **configuration file**. You can include your own panels if needed. 
 
 
-Once [beacon script](../bin/README.md) has finished, a static HTML page will be available as `<job_id>/browser/<job_id>.html` directory. This page serves as the input for the **BFF Browser**.
+Once [bff-tools script](../../bin/README.md) has finished, a static HTML page will be available as `<job_id>/browser/<job_id>.html` directory. This page serves as the input for the **BFF Browser**.
 
 ### Features  
 
