@@ -19,7 +19,7 @@
 ![version](https://img.shields.io/badge/version-2.0.11-blue)
 ---
 
-✨ **New documentation:** <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools" target="_blank">https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools</a>
+📄 **Documentation:** <a href="https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools" target="_blank">https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools</a>
 
 🐳 **Docker Hub Image:** <a href="https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags" target="_blank">https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags</a>
 
@@ -101,13 +101,13 @@ A synthetic dataset for testing and demonstration purposes.
               XLSX  |          |
                or   | Metadata | (incl. Phenotypic data)
               JSON  |__________|
-    _________            |
-    |       |            |
-    |  TSV  |            | bff-tools validate
-    |______ |            |
-        |                |                                    Beacon v2
-        | bff-tools tsv  |
-    ____v____        ____v____            __________          ______
+    _________             |
+    |       |             |
+    |  TSV  | ----------  | bff-tools validate
+    |_______|          |  |
+                       |  |                                    Beacon v2
+         bff-tools tsv |  |
+    ________          _v_ v___            __________          ______
     |       |        |       |            |          |        |     | <---- Request
     |  VCF  | -----> |  BFF  | ---------> | Database | <----> | API |
     |_______|        |_ _____|            |__________|        |_____| ----> Response
