@@ -42,10 +42,16 @@ RUN python3 -m pip install --break-system-packages --no-cache-dir -r requirement
     rm -rf /root/.cpanm/work/*
 
 # Add a non-root user
-ARG UID=1000
 ARG GID=1000
-RUN groupadd -g "${GID}" dockeruser && \
-    useradd --create-home --no-log-init -u "${UID}" -g "${GID}" dockeruser
+
+RUN set -eux; \
+    if getent group "${GID}" >/dev/null; then \
+        GROUP_NAME="$(getent group "${GID}" | cut -d: -f1)"; \
+    else \
+        GROUP_NAME="dockeruser"; \
+        groupadd -g "${GID}" "${GROUP_NAME}"; \
+    fi; \
+    useradd --create-home --no-log-init -u "${UID}" -g "${GROUP_NAME}" dockeruser
 
 # Uncomment the following line to run the container as dockeruser
 # USER dockeruser
