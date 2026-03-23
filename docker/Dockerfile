@@ -37,7 +37,7 @@ RUN rm -rf beacon2-cbi-tools/docs/ beacon2-cbi-tools/mkdocs.yml
 
 # Install Python runtime dependencies and Perl dependencies from cpanfile
 WORKDIR /usr/share/beacon2-cbi-tools
-RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+RUN python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt && \
     cpanm --notest --installdeps . && \
     rm -rf /root/.cpanm/work/*
 
