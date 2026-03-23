@@ -40,18 +40,3 @@ WORKDIR /usr/share/beacon2-cbi-tools
 RUN python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt && \
     cpanm --notest --installdeps . && \
     rm -rf /root/.cpanm/work/*
-
-# Add a non-root user
-ARG GID=1000
-
-RUN set -eux; \
-    if getent group "${GID}" >/dev/null; then \
-        GROUP_NAME="$(getent group "${GID}" | cut -d: -f1)"; \
-    else \
-        GROUP_NAME="dockeruser"; \
-        groupadd -g "${GID}" "${GROUP_NAME}"; \
-    fi; \
-    useradd --create-home --no-log-init -u "${UID}" -g "${GROUP_NAME}" dockeruser
-
-# Uncomment the following line to run the container as dockeruser
-# USER dockeruser
