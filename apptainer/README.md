@@ -9,7 +9,7 @@ First, we need to download the necessary databases and software. As with the Doc
 Navigate to a directory with at least **150GB** of available space and run:
 
 ```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/scripts/01_download_external_data.py
+wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/deploy/01_download_external_data.py
 ```
 
 Then execute the script:
@@ -156,7 +156,7 @@ apptainer shell \
 ### Test the Deployment
 
 ```bash
-cd scripts
+cd deploy
 bash 02_test_deployment.sh
 ```
 

@@ -18,7 +18,7 @@ from .output import (
     print_start_banner,
 )
 
-VERSION = "2.0.11_1"
+VERSION = "2.0.12"
 GOODBYES = [
     "Aavjo",
     "Abar Dekha-Hobe",
@@ -102,6 +102,8 @@ def _validate_args(arg: dict[str, object]) -> None:
     inputfile = arg.get("inputfile")
     if mode in {"vcf", "tsv", "full"} and not inputfile:
         raise ConfigError("Modes vcf|tsv|full require an input file")
+    if mode == "vcf" and not arg.get("paramfile"):
+        raise ConfigError("Mode vcf requires a param file")
     if arg.get("configfile") and not Path(str(arg["configfile"])).is_file():
         raise ConfigError("Option --c requires a config file")
     if arg.get("paramfile") and not Path(str(arg["paramfile"])).is_file():
@@ -165,11 +167,11 @@ def _run_pipeline(runner: PipelineRunner, pipeline_name: str, *, debug: int, ver
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "validate":
+        return handle_validate(argv[1:])
+
     parser = build_parser()
     namespace = parser.parse_args(argv)
-
-    if namespace.mode == "validate":
-        return handle_validate(namespace.validate_args)
 
     arg = vars(namespace)
     _validate_args(arg)

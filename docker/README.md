@@ -9,7 +9,7 @@ First, we need to download the necessary databases and software. In contrast to 
 Navigate to a directory with at least **150GB** of available space and run:
 
 ```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/scripts/01_download_external_data.py
+wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/deploy/01_download_external_data.py
 ```
 
 Then execute the script:
@@ -216,7 +216,7 @@ docker exec -ti beacon2-cbi-tools bash
 ### ✅ Test the Deployment
 
 ```bash
-cd scripts
+cd deploy
 bash 02_test_deployment.sh
 ```
 

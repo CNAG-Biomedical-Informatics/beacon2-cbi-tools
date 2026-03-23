@@ -9,7 +9,7 @@ First, we need to download the necessary databases and software.
 Navigate to a directory with at least **150GB** of available space and run:
 
 ```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/scripts/01_download_external_data.py
+wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/deploy/01_download_external_data.py
 ```
 
 Then execute the script:
@@ -61,7 +61,7 @@ mkdir tmp
 First, we need to install a few system components:
 
 ```bash
-sudo apt install gcc make libperl-dev libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev liblzma-dev libcurl4-openssl-dev libssl-dev cpanminus python3-pip perl-doc default-jre
+sudo apt install git wget gcc make libperl-dev libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev liblzma-dev libcurl4-openssl-dev libssl-dev cpanminus perl python3 python3-pip default-jre
 ```
 
 Let's install `mongosh` (only if you plan to load data into MongoDB)
@@ -86,25 +86,31 @@ If you only new to update to the lastest version do:
 git pull
 ```
 
-`bff-tools` is a Perl script (no compilation required) designed to run on the Linux command line. Internally, it acts as a wrapper that submits multiple pipelines through customizable Bash scripts (see an example [here](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/lib/BEACON/bin/run_vcf2bff.sh)). While Perl and Bash are pre-installed on most Linux systems, a few additional dependencies must be installed separately.
+`bff-tools` is a Python command-line wrapper designed to run on Linux. Internally, it still relies on the existing Bash, Perl, and data-processing components, so a non-containerized installation still needs both Python and Perl available on the system.
 
-We use `cpanm` to install the CPAN modules. We'll install the dependencies at `~/perl5`:
-
-```bash
-cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
-cpanm --notest --installdeps .
-```
-
-To ensure Perl recognizes your local modules every time you start a new terminal, run:
-
-```bash
-echo 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)' >> ~/.bashrc
-```
-
-We'll also need a few Python 3 modules:
+Install the core Python dependencies for `bff-tools` and `validate` with:
 
 ```bash
 pip install -r requirements.txt
+```
+
+Install the core Perl dependencies for `bff-tools` and `validate` with:
+
+```bash
+cpanm --notest JSON::XS Path::Tiny Term::ANSIColor YAML::XS PerlIO::gzip Data::Structure::Util List::MoreUtils File::Which JSON::Validator Text::CSV_XS
+```
+
+Optional utilities under `utils/` have extra dependencies:
+
+```bash
+pip install -r utils/bff_browser/requirements.txt
+cpanm --notest Mojolicious MongoDB Minion Minion::Backend::SQLite
+```
+
+If you want to build the project documentation locally, install the MkDocs dependencies with:
+
+```bash
+pip install -r requirements-docs.txt
 ```
 
 ### Step 5: Configure Path in SnpEff
@@ -136,34 +142,38 @@ Replace `mongosh: "/usr/bin/mongosh"` with your path.
 
 - OS/ARCH supported: **linux/amd64** and **linux/arm64**.
 - Ideally a Debian-based distribution (Ubuntu or Mint), but any other (e.g., CentOS, OpenSUSE) should do as well (untested).
-- Perl 5 (>= 5.36 core; installed by default in many Linux distributions). Check the version with `perl -v`
+- Python 3.8+
+- Perl 5 (still required for validator and legacy/internal components used by `bff-tools`)
 - 4GB of RAM (ideally 16GB).
 - \>= 1 core (ideally i7 or Xeon).
 - At least 200GB HDD.
 
-The Perl itself does not need a lot of RAM (max load will reach 400MB), but external tools do (e.g., process `mongod` [MongoDB's daemon]).
+The `bff-tools` wrapper itself does not need a lot of RAM, but external tools do (e.g., process `mongod` [MongoDB's daemon]).
 
 ## Testing the deployment
 
 You may wanna install `jq` for running tests.
 
 ```bash
-cd scripts
+cd deploy
 bash 02_test_deployment.sh
 ```
 
 ### Common errors: Symptoms and treatment
 
-* Perl errors:
-    - Error: Unknown PerlIO layer "gzip" at (eval 10) line XXX
+* Python / environment errors:
+    - Error loading YAML or Python dependencies
 
-      Solution: 
+      Solution:
 
-      `cpanm PerlIO::gzip`
+      `pip install -r requirements.txt`
 
-         ... or ...
+* Perl / environment errors:
+    - Error when running validator or legacy/internal tooling
 
-      `sudo apt install libperlio-gzip-perl`
+      Solution:
+
+      `cpanm --notest JSON::XS Path::Tiny Term::ANSIColor YAML::XS PerlIO::gzip Data::Structure::Util List::MoreUtils File::Which JSON::Validator Text::CSV_XS`
 
 ## References
 

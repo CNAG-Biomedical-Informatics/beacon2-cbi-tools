@@ -1,5 +1,5 @@
-# Use Ubuntu 20.04 as the base image
-FROM ubuntu:20.04
+# Use Ubuntu 24.04 as the base image
+FROM ubuntu:24.04
 
 # Maintainer Information
 LABEL maintainer="Manuel Rueda <manuel.rueda@cnag.eu>"
