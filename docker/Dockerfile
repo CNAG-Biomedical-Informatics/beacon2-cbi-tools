@@ -30,8 +30,11 @@ WORKDIR /usr/share/
 # Clone the repository
 RUN git clone https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools.git
 
-# Remove the .git folder to save space and avoid shipping VCS data
-RUN rm -rf beacon2-cbi-tools/.git
+# Remove Git metadata and CI configs to shrink image and avoid shipping them
+RUN rm -rf beacon2-cbi-tools/.git beacon2-cbi-tools/.github beacon2-cbi-tools/.gitattributes beacon2-cbi-tools/.gitignore
+
+# Remove docs
+RUN rm -rf beacon2-cbi-tools/docs/ beacon2-cbi-tools/mkdocs.yml
 
 # Install Perl dependencies
 WORKDIR /usr/share/beacon2-cbi-tools
