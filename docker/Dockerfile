@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates wget git gnupg cpanminus gcc make libperl-dev \
     libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev \
     liblzma-dev libcurl4-openssl-dev pkg-config libssl-dev \
-    default-jre perl python3 python3-pip && \
+    default-jre perl jq vim python3 python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install mongosh (MongoDB Shell)

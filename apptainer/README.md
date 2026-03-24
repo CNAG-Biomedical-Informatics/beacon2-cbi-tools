@@ -66,13 +66,11 @@ mkdir tmp
 
 2. Open `snpEff.config` with a text editor and find the line containing the `data.dir` variable.
 
-3. Update the `data.dir` variable to reflect the correct path to your downloaded data directory. It should look similar to this:
+3. Update the `data.dir` variable to match the directory path where you plan to mount the data (recommended: `/beacon2-cbi-tools-data/`). It should look like this:
 
 ```bash
-data.dir = /path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/data
+data.dir = /beacon2-cbi-tools-data/soft/NGSutils/snpEff_v5.0/data
 ```
-
-**Important:** Ensure that you use an absolute path and verify that the directory exists to avoid any errors during subsequent analyses.
 
 ## Installation Options
 

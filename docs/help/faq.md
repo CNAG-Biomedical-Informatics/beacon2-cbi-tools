@@ -1,5 +1,22 @@
 # Frequently Asked Questions
 
+## Installation
+
+??? faq "I am getting a SnpEff error inside the Docker container"
+
+    If you see an error like this:
+    ```bash
+      ....
+      # Running SnpEff annotation
+      00:00:00	ERROR while connecting to https://snpeff.blob.core.windows.net/databases/v5_0/snpEff_v5_0_hg19.zip
+      java.lang.RuntimeException: java.net.UnknownHostException: snpeff.blob.core.windows.net
+	at org.snpeff.util.Download.download(Download.java:190)
+    ```
+
+    Please make sure that you have completed [STEP 5](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/docker/README.md#step-5-configure-path-in-snpeff).
+    
+## Coordinates and Input Data
+
 ??? faq "Are Beacon v2 `genomicVariations.variation.location.interval.{start,end}` coordinates 0-based or 1-based?"
     They are [0-based](http://docs.genomebeacons.org/formats-standards/#genome-coordinates).
 
@@ -68,6 +85,8 @@
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
+## Metadata and Validation
+
 ??? faq "Is there an alternative to the Excel file for generating metadata/phenotypic data?"
     Yes. You can use CSV or JSON files directly as input for the `bff-tools validate` (a.k.a., `bff-validator`) utility. For detailed instructions, refer to the [bff-validator manual](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools/tree/main/utils/bff_validator).
     
@@ -79,6 +98,8 @@
     By default, `bff-validator` validates your data against the schemas bundled with your `beacon2-cbi-tools` version. If you encounter warnings (e.g., objects matching multiple possibilities in `oneOf` keywords), simply use the flag `--ignore-validation` when generating your `.json` files.
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
+
+## Ingestion and Performance
 
 ??? faq "Do you load all variations present in a VCF file?"
     Yes, we do not apply filters (e.g., based on `FILTER` or `QUAL` fields) when loading variations, although we store those values in case they are needed later.
@@ -117,6 +138,8 @@
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
 
+## Data Access and Licensing
+
 ??? faq "Where do I get full WGS VCF for the CINECA synthetic cohort EUROPE UK1?"
     For full WGS data (≈20 GB for 2,504 synthetic individuals), request access and download from the [EGA](https://ega-archive.org/datasets/EGAD00001006673). See [this document](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) for details.
     
@@ -126,6 +149,8 @@
     **Yes**, it is free and open source. The data ingestion tools are released under the [GNU General Public License v3.0](https://en.wikipedia.org/wiki/GNU_General_Public_License#Version_3), and the included [CINECA_synthetic_cohort_EUROPE_UK1](https://www.cineca-project.eu/cineca-synthetic-datasets) dataset is under a [CC-BY](https://en.wikipedia.org/wiki/Creative_Commons_licens) license.
     
     ##### last change 2025-03-23 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)
+
+## Project and Usage
 
 ??? faq "Should I update to the `latest` version?"
     Yes. We recommend checking our GitHub repository ([beacon2-cbi-tools](https://github.com/mrueda/beacon2-cbi-tools) for the latest updates.
