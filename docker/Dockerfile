@@ -35,12 +35,10 @@ RUN rm -rf beacon2-cbi-tools/.git beacon2-cbi-tools/.github beacon2-cbi-tools/.g
 # Remove docs
 RUN rm -rf beacon2-cbi-tools/docs/ beacon2-cbi-tools/mkdocs.yml
 
-# Install runtime dependencies for the public bff-tools command
+# Install Python runtime dependencies and Perl dependencies from cpanfile
 WORKDIR /usr/share/beacon2-cbi-tools
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    cpanm --notest \
-      JSON::XS Path::Tiny Term::ANSIColor YAML::XS PerlIO::gzip \
-      Data::Structure::Util List::MoreUtils File::Which JSON::Validator Text::CSV_XS && \
+    cpanm --notest --installdeps . && \
     rm -rf /root/.cpanm/work/*
 
 # Add a non-root user

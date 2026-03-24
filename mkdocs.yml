@@ -12,10 +12,7 @@ extra_javascript: [js/theme_overrides.js]
 plugins:
   - search
   - macros
-  - include-markdown:
-#      dedent: true
-#      preserve_includer_indent: true
-#  - external-markdown # did not work
+  - include-markdown
   - mermaid2:
       arguments:
         startOnLoad: true
@@ -54,7 +51,7 @@ markdown_extensions:
         pygments_lang_class: true
     - pymdownx.inlinehilite
     - pymdownx.snippets:
-        base_path: ["docs", "non-containerized", "docker", "examples", "bin"]
+        base_path: ["docs", "non-containerized", "docker", "apptainer", "examples", "bin"]
         url_download: true
     - pymdownx.superfences:
         custom_fences:
@@ -65,11 +62,13 @@ markdown_extensions:
 nav:
   - "🏠 Introduction": index.md
   - "⬇️  Download & Installation":
-      - "🐳 Docker-based": download-and-installation/docker-based.md
+      - "🐳 Containerized": 
+        - Docker: download-and-installation/docker-based.md
+        - Apptainer: download-and-installation/apptainer-based.md
       - "🛠️ Non-containerized": download-and-installation/non-containerized.md
   - "🚀 Quick Start": quick-start.md
   - "🧪 Examples": 
-      - "🧬 GRCh37 / hg19": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/test/README.md
+      - "🧬 GRCh37 / hg19": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/testdata/README.md
       - "🧬 GRCh38 / hg38": examples/hg38.md
   - "📚 Tutorial": data-beaconization.md
   - "📊 CINECA cohort": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1

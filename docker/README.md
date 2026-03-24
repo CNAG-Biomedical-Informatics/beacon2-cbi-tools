@@ -158,7 +158,7 @@ wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-t
 
 ## Runtime Note
 
-Inside the container, the core Python and Perl runtime dependencies needed by `bff-tools` and `validate` are already provided. Optional utilities under `utils/` and the MkDocs documentation toolchain are not installed by default. The need to install Perl manually only applies to the **non-containerized** setup.
+Inside the container, the core Python runtime dependencies and the Perl dependencies declared in `cpanfile` are already provided. The MkDocs documentation toolchain is not installed by default. The need to install Perl manually only applies to the **non-containerized** setup.
 
 ## Running and Interacting with the Container
 
