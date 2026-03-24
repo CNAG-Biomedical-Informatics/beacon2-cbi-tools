@@ -1,0 +1,84 @@
+[1m[36mBFF-Tools 2.0.11_1 🚀[0m
+[37m  Executable   => .../beacon2-cbi-tools/bin/bff-tools[0m
+[37m  Mode         => vcf[0m
+[37m  Input        => .../testdata/vcf/test_1000G.vcf.gz[0m
+[37m  Project      => .../testdata/vcf/beacon_774359331878296[0m
+[37m  Run ID       => 774359331878296[0m
+[37m  Genome       => hs37[0m
+[37m  Threads      => 11[0m
+
+[1m[33mArguments 🔧[0m
+[37m  --i  => test_1000G.vcf.gz[0m
+[37m  --p  => param.yaml[0m
+[37m  mode => vcf[0m
+
+[1m[34mResolved Configuration ⚙️[0m
+[37m  arch         => x86_64[0m
+[37m  assetsdir    => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/utils/bff_browser/static/assets[0m
+[37m  base         => /media/mrueda/2TBS[0m
+[37m  bash4bff     => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/partial/run_vcf2bff.sh[0m
+[37m  bash4html    => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/partial/run_bff2html.sh[0m
+[37m  bash4mongodb => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/partial/run_bff2mongodb.sh[0m
+[37m  bash4tsv     => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/partial/run_tsv2vcf.sh[0m
+[37m  bcftools     => /media/mrueda/2TBS/NGSutils/bcftools-1.21-103_x86_64/bcftools[0m
+[37m  bff2json     => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/complete/bff2json.pl[0m
+[37m  browserdir   => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/browser[0m
+[37m  dbnsfpset    => all[0m
+[37m  hg19clinvar  => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/clinvar_20250312.vcf.gz[0m
+[37m  hg19cosmic   => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/CosmicCodingMuts.normal.hg19.vcf.gz[0m
+[37m  hg19dbnsfp   => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/dbNSFP4.1a_hg19.txt.gz[0m
+[37m  hg19fasta    => /media/mrueda/2TBS/Databases/genomes/ucsc.hg19.fasta.gz[0m
+[37m  hg38clinvar  => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg38/clinvar_20250312.vcf.gz[0m
+[37m  hg38cosmic   => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg38/CosmicCodingMuts.normal.hg38.vcf.gz[0m
+[37m  hg38dbnsfp   => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg38/dbNSFP4.1a_hg38.txt.gz[0m
+[37m  hg38fasta    => /media/mrueda/2TBS/Databases/genomes/hg38.fa.gz[0m
+[37m  hs37clinvar  => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/clinvar_20250312.vcf.gz[0m
+[37m  hs37cosmic   => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/CosmicCodingMuts.normal.hg19.vcf.gz[0m
+[37m  hs37dbnsfp   => /media/mrueda/2TBS/Databases/snpeff/v5.0/hg19/dbNSFP4.1a_hg19.txt.gz[0m
+[37m  hs37fasta    => /media/mrueda/2TBS/Databases/genomes/hs37d5.fa.gz[0m
+[37m  javabin      => /usr/bin/java[0m
+[37m  json2html    => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/complete/bff2html.pl[0m
+[37m  mem          => 8G[0m
+[37m  mongodburi   => mongodb://root:example@localhost:27017/beacon?authSource=admin[0m
+[37m  mongoimport  => /media/mrueda/2TBS/Soft/mongodb-database-tools-ubuntu2404-x86_64-100.11.0/bin/mongoimport[0m
+[37m  mongosh      => /usr/bin/mongosh[0m
+[37m  mongostat    => /media/mrueda/2TBS/Soft/mongodb-database-tools-ubuntu2404-x86_64-100.11.0/bin/mongostat[0m
+[37m  paneldir     => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/browser/data[0m
+[37m  snpeff       => /usr/bin/java -Xmx8G -jar /media/mrueda/2TBS/NGSutils/snpEff_v5.0/snpEff.jar[0m
+[37m  snpsift      => /usr/bin/java -Xmx8G -jar /media/mrueda/2TBS/NGSutils/snpEff_v5.0/SnpSift.jar[0m
+[37m  tmpdir       => /media/mrueda/2TBS/tmp[0m
+[37m  vcf2bff      => /media/mrueda/2TBS/CNAG/Project_Beacon/beacon2-cbi-tools/lib/internal/complete/vcf2bff.pl[0m
+[37m  version      => 2.0.11_1[0m
+
+[1m[32mInput Parameters 🎬[0m
+[37m  annotate    => True[0m
+[37m  bff         => See beacon_774359331878296/log.json[0m
+[37m  bff2html    => True[0m
+[37m  center      => CNAG[0m
+[37m  datasetid   => default_beacon_1[0m
+[37m  date        => Tue Mar 24 14:35:31 2026[0m
+[37m  genome      => hs37[0m
+[37m  gvvcfjson   => beacon_774359331878296/vcf/genomicVariationsVcf.json.gz[0m
+[37m  hostname    => mrueda-ws5[0m
+[37m  jobid       => 774359331878296[0m
+[37m  log         => beacon_774359331878296/log.json[0m
+[37m  organism    => Homo sapiens[0m
+[37m  pipeline    => See beacon_774359331878296/log.json[0m
+[37m  projectdir  => beacon_774359331878296[0m
+[37m  sampleid    => 23andme_1[0m
+[37m  technology  => Illumina HiSeq 2000[0m
+[37m  threadshost => 12[0m
+[37m  threadsless => 11[0m
+[37m  user        => mrueda[0m
+[37m  zip         => /usr/bin/pigz -p 11[0m
+
+[1m[36mStarting BFF-Tools 🚦[0m
+[37m  Pipeline execution begins now[0m
+
+[1m[37m  🧬 VCF2BFF[0m
+[1m[37m  🌐 BFF2HTML[0m
+[1m[32mBFF-Tools Finished ✅[0m
+[37m  Status       => OK[0m
+[37m  Runtime      => 16s[0m
+[37m  Farewell     => 👋 Abar Dekha-Hobe[0m
+

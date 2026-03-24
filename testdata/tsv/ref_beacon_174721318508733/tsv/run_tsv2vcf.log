@@ -1,0 +1,11 @@
+# Running bcftools convert --tsv2vcf
+Rows total: 	4
+Rows skipped: 	0
+Sites written: 	4
+Missing GTs: 	0
+Hom RR: 	3
+Het RA: 	1
+Hom AA: 	0
+Het AA: 	0
+# Filtering empty ALT
+# Finished OK

@@ -47,7 +47,7 @@
     
     Example with test data:
     ```bash
-    bin/bff-tools tsv test/tsv/input.txt.gz -p test/tsv/param.yaml
+    bin/bff-tools tsv testdata/tsv/input.txt.gz -p testdata/tsv/param.yaml
     ```
 
     ##### last change 2025-05-12 by Manuel Rueda [:fontawesome-brands-github:](https://github.com/mrueda)

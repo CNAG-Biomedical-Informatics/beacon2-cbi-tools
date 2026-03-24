@@ -4,7 +4,7 @@ set -euo pipefail
 echo "Info: Testing <beacon2-cbi-tools> ..."
 
 # Change to the ../test directory relative to the script's location
-cd "$(dirname "$0")/../test/vcf"
+cd "$(dirname "$0")/../testdata/vcf"
 
 # Define paths and reference output
 BFF_TOOLS="../../bin/bff-tools"

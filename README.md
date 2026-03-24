@@ -12,7 +12,7 @@
 [![Docker build](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/docker-build-multi-arch.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/docker-build-multi-arch.yml)
 [![Documentation Status](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools/actions/workflows/documentation.yml/badge.svg)](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools/actions/workflows/documentation.yml)
 ![Maintenance status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-cbi-tools?icon=docker&label=beacon2-cbi-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/)
 [![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-ri-tools?icon=docker&label=deprecated-beacon2-ri-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-ri-tools/)
 [![Docker Pulls EGA-archive](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=deprecated-EGA-archive-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
@@ -41,6 +41,8 @@
   - [Roadmap](#roadmap)
 - [Installation](#installation)
   - [Containerized](#containerized-installation-recommended)
+    - [Docker](#docker)
+    - [Apptainer](#apptainer)
   - [Non-Containerized](#non-containerized-installation)
 - [Citation](#citation)
   - [Author](#author)
@@ -153,7 +155,13 @@ You can install **beacon2-cbi-tools** using one of two methods:
 
 ### Containerized Installation (Recommended)
 
+#### Docker
+
 Follow the guide [here](docker/README.md) to use Docker for a streamlined setup.
+
+#### Apptainer
+
+If you are running on HPC or another environment where Docker is not available, follow the guide [here](apptainer/README.md).
 
 ### Non-Containerized Installation
 

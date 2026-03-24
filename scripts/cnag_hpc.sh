@@ -26,8 +26,8 @@ eval "$(perl -Mlocal::lib=/software/biomed/cbi_perl5)"
 # Variable definition
 BFFTOOLS_DIR="/software/biomed/beacon2-cbi-tools"
 BFFTOOLS="$BFFTOOLS_DIR/bin/bff-tools"
-INPUT="$BFFTOOLS_DIR/test/vcf/test_1000G.vcf.gz"
-PARAM="$BFFTOOLS_DIR/test/vcf/param.yaml"
+INPUT="$BFFTOOLS_DIR/testdata/vcf/test_1000G.vcf.gz"
+PARAM="$BFFTOOLS_DIR/testdata/vcf/param.yaml"
 CONFIG="$BFFTOOLS_DIR/bin/cnag-hpc-config.yaml"
 
 # Job execution

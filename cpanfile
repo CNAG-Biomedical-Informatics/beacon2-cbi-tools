@@ -1,20 +1,18 @@
-# No specific version needed #
+# Core Perl dependencies for bff-tools and validator
 
-# Modules for <beacon2-ri-tools>
-requires 'JSON::XS';                # To deal with JSON files
-requires 'Path::Tiny';              # For I/O
-requires 'Term::ANSIColor';         # To provide colors to STDOU
-requires 'YAML::XS';                # To deal with YAML files
-requires 'PerlIO::gzip';            # For gzip operations
-requires 'Data::Structure::Util';   # Miscellanea utils for data structures
-
-# Additional modules for <beacon2-ri-tools/utils>
-requires 'Mojolicious';             # bff-browser
-requires 'MongoDB';                 # bff-browser
-requires 'Minion';                  # bff-queue
-requires 'Minion::Backend::SQLite'; # bff-queue
+requires 'JSON::XS';                # JSON handling
+requires 'Path::Tiny';              # File I/O
+requires 'Term::ANSIColor';         # Colored CLI output
+requires 'YAML::XS';                # YAML parsing
+requires 'PerlIO::gzip';            # Gzip operations
+requires 'Data::Structure::Util';   # Data structure helpers
+requires 'List::MoreUtils';         # Internal VCF processing helpers
 requires 'File::Which';             # bff-validator
 requires 'JSON::Validator';         # bff-validator
-requires 'List::MoreUtils';         # bff-validator
 requires 'Text::CSV_XS';            # bff-validator
-requires 'Text::Unidecode';         # bff-validator
+
+# Optional Perl dependencies for extra utilities under utils/
+requires 'Mojolicious';             # bff-portal / bff-queue
+requires 'MongoDB';                 # bff-portal
+requires 'Minion';                  # bff-queue
+requires 'Minion::Backend::SQLite'; # bff-queue

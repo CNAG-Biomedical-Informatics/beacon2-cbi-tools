@@ -7,21 +7,16 @@ This guide provides a one-page cheat sheet for common commands:
 bin/bff-tools --help
 ```
 
-```bash
-# Display man for the tool
-bin/bff-tools --man
-```
-
 --8<-- "about/disclaimer.md"
 
 ```bash
 # Convert VCF to BFF
-bin/bff-tools vcf -i test/vcf/test_1000G.vcf.gz -p test/vcf/param.yaml
+bin/bff-tools vcf -i testdata/vcf/test_1000G.vcf.gz -p testdata/vcf/param.yaml
 ```
 
 ```bash
 # ✨ Convert TSV (SNP microarray) to BFF
-bin/bff-tools tsv -i test/tsv/input.txt.gz -p test/tsv/param.yaml
+bin/bff-tools tsv -i testdata/tsv/input.txt.gz -p testdata/tsv/param.yaml
 ```
 
 ```bash

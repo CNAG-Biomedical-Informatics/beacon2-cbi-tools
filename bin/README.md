@@ -155,7 +155,7 @@ Please find below a detailed description of all parameters (alphabetical order):
 
     When the **annotate** parameters is set to `true` (default), the tool will perform annotation on the provided VCF file. This process involves running snpEff to enrich the VCF with annotation data by leveraging databases such as dbNFSP, ClinVar, and COSMIC. In this mode, the tool will generate and populate the ANN fields based on the analysis.
 
-    If the **annotate** parameters is set to `false`, the tool assumes that the VCF file has already been annotated (i.e., it already contains the ANN fields). In this case, it will skip the annotation step and directly parse the existing ANN fields. If you choose this route, please make sure to modify the file `lib/internal/complete/config.yaml` consisting of database versions with your own values.
+    If the **annotate** parameters is set to `false`, the tool assumes that the VCF file has already been annotated (i.e., it already contains the ANN fields). In this case, it will skip the annotation step and directly parse the existing ANN fields. If you choose this route, please make sure to modify the file `pipeline/internal/complete/config.yaml` consisting of database versions with your own values.
 
     One way to use `annotate: false` is to perform `bff2html` without having to re-annotate the VCF with SnpEff.
 
@@ -240,10 +240,10 @@ Once we have all seven files, then we can proceed to load the data into MongoDB.
 
 # COMMON ERRORS: SYMPTOMS AND TREATMENT
 
-    * Perl: 
+    * Python:
             * Execution errors:
-              - Error with YAML::XS
-                Solution: Make sure the YAML (config.yaml or parameters file) is well formatted (e.g., space after param:' ').
+              - Error while reading YAML configuration or parameter files
+                Solution: Make sure the YAML (config.yaml or parameters file) is well formatted (e.g., keep proper indentation and a space after each key colon).
 
     * Bash: 
             (Possible errors that can happen when the embeded Bash scripts are executed)
@@ -272,8 +272,7 @@ Once we have all seven files, then we can proceed to load the data into MongoDB.
 
 ## KNOWN ISSUES
 
-    * Some Linux distributions do not include perldoc and thus Perl's library Pod::Usage will complain.
-      Please, install it (sudo apt install perl-doc) if needed.
+    * If Python dependencies are missing, reinstall them with `pip install -r requirements.txt`.
 
 # CITATION
 

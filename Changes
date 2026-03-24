@@ -1,9 +1,12 @@
 Revision history for beacon2-cbi-tools:
 
-2.0.12  2025-XX-XX
+2.0.12  2026-03-24
 
-    - Foo
-    - Bar
+    - Refactored the Perl 5 wrapper to Python 3 while keeping the existing Perl internals in place
+    - Updated CLI STDOUT formatting, colors, spinner behavior, and final messages
+    - Added Python tests under 'tests/' and renamed integration data directory 'test/' to 'testdata/'
+    - Updated README/docs generation to stop relying on 'pod2markdown'
+    - Reduced install requirements to the core runtime dependencies and split docs dependencies into 'requirements-docs.txt'
 
 2.0.11  2025-12-23
 
@@ -43,14 +46,14 @@ Revision history for beacon2-cbi-tools:
     - 'mongosh' is now installed via apt
     - Updated Dockerfile
     - BEACON => BFF-TOOLS:
-      - 'lib/BEACON/ => 'lib/BFF', 'Beacon.pm' => 'Tools.pm'
+      - 'lib/BEACON/ => 'pipeline/' and 'Beacon.pm' => 'Tools.pm'
       - 'mongodb' mode renamed to 'load'
       - Added 'validate' mode runs 'utils/bff_validator/bff-validator'
       - Now accepts pre-annotated VCFs using `annotate: false` in YAML configuration (requires mandatory ANN fields)
       - Added an 'examples' directory featuring hg38 (GRCh38)
       - Added spinner for interactive execution of 'bin/bff-tools'
       - Added basic tests in 't/' directory
-      - Internal scripts moved from 'lib/BEACON/bin/' to 'lib/internal/{complete,partial}/'
+      - Internal scripts moved from 'lib/BEACON/bin/' to 'pipeline/internal/{complete,partial}/'
       - Updated 'bin/config.yaml' with placeholder `{base}`
       - Added $version, $java, and $arch information to 'log.json'
       - Updated tools versions:
@@ -58,7 +61,7 @@ Revision history for beacon2-cbi-tools:
         - 'mongo-database-tools': ubuntu2004-100.5.1 -> ubuntu2204-100.9.4
         - 'ClinVar' from clinvar_20211218* to clinvar_20250312*
       - VCF2BFF:
-        - Renamed lib/*/.pm
+        - Renamed legacy Perl modules under pipeline/
         - Added t/ and debugging mode 'bff-pretty'
         - Now reads 'annotatedWith' from external 'config.yaml' (fixed typo: toolreferences.dbSNSFP -> dbNSFP)
         - Added Sequence Ontology (SO) terms for calculated variant consequences:
@@ -77,7 +80,7 @@ Revision history for beacon2-cbi-tools:
 
 2.0.5  2025-01-07
     - The 'config.yaml' for the 'beacon' script is now pre-formatted for the Dockerized version
-    - Renamed 'test/param.in' to 'test/param.yaml'
+    - Renamed 'testdata/param.in' to 'testdata/param.yaml'
     - Enforced Browser HTML display using Python3's default HTTP server
 
 2.0.4  2024-12-03
@@ -96,7 +99,7 @@ Revision history for beacon2-cbi-tools:
     - 'utils/bff-validator': Adjusted STDOUT printout details
     - 'test': Sorted 'frequencyInPopulations' by key in 'genomicVariationsVcf.json.gz'
     - Docker Hub location updated to 'manuelrueda/beacon2-ri-tools'
-    - Moved 'BEACON' to 'lib/BEACON'
+    - Moved 'BEACON' to 'pipeline/BEACON'
     - Fixed 'Dockerfile':
         - Changed base image from 'ubuntu' to 'ubuntu:20.04' (thanks to SJD folks)
 
