@@ -1,6 +1,6 @@
 Revision history for beacon2-cbi-tools:
 
-2.0.12  2026-03-2X
+2.0.12  2026-03-25
 
     - Refactored the Perl 5 wrapper to Python 3 while keeping the existing Perl internals in place
     - Updated CLI STDOUT formatting, colors, spinner behavior, and final messages
@@ -8,6 +8,7 @@ Revision history for beacon2-cbi-tools:
     - Updated README/docs generation to stop relying on 'pod2markdown'
     - Reduced install requirements to the core runtime dependencies and split docs dependencies into 'requirements-docs.txt'
     - Renamed 'scripts/' to 'deploy/'
+    - Dockerfile: Updated the base image from Ubuntu 20.04 to Ubuntu 24.04
 
 2.0.11  2025-12-23
 
