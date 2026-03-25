@@ -13,6 +13,9 @@
 [![Documentation Status](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools/actions/workflows/documentation.yml/badge.svg)](https://github.com/cnag-biomedical-informatics/beacon2-cbi-tools/actions/workflows/documentation.yml)
 ![Maintenance status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-cbi-tools?icon=docker&label=beacon2-cbi-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/)
+[![Docker Pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-ri-tools?icon=docker&label=deprecated-beacon2-ri-tools-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-ri-tools/)
+[![Docker Pulls EGA-archive](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=deprecated-EGA-archive-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
 ![version](https://img.shields.io/badge/version-2.0.12-blue)
 
 **beacon2-cbi-tools** is a toolkit for preparing Beacon v2 data around the Beacon Friendly Format (BFF). It helps you validate metadata, convert VCF or SNP-array TSV files into `genomicVariations`, and load BFF collections into MongoDB.
