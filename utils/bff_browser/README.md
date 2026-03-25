@@ -1,134 +1,71 @@
 # BFF Browser
 
-## Overview  
-The BFF Browser is an application that displays BFF files as interactive HTML. It works with the entities `genomicVariations` and `individuals`.
+`bff-browser` is a lightweight web application for browsing BFF data without a database. It works with `genomicVariations`, `individuals`, and a combined view built from both.
 
 ![BFF Dashboard](static/images/snapshot-dashboard-browser.png)
 
-## Installation  
-If you have already installed `beacon2-cbi-tools`, the App should be installed automatically. If not, ensure you have Python 3 installed and then use the provided `requirements.txt` to install necessary dependencies:
+## Install
+
+If `beacon2-cbi-tools` is already installed, no extra setup may be needed. Otherwise:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## How to Run  
-1. Navigate to the App folder:
-    ```bash
-    cd utils/bff_browser
-    ```
-2. Run the application:
-    ```bash
-    python3 app.py
-    ```
-
-   Note that you can run it from any other directory too.
-
-3. Open your web browser and go to:
-    ```
-    http://0.0.0.0:8001
-    ```
-
-The App includes precomputed examples for `genomicVariations` and `individuals` extracted from the **CINECA_synthetic_cohort_EUROPE_UK1** dataset.
-
----
-
-## Browsing `genomicVariations`
-
-To visualize **genomic variations**, an **HTML** file needs to be created and later loaded into the **BFF Browser**. The process involves filtering variants with **HIGH|MODERATE** annotation from the `JSON` file and rendering them in HTML using `JavaScript`.
-
-**Note:** This method works efficiently for up to **5 million** variants. If your dataset exceeds this limit, consider using an alternative visualization method based on a backend database.
-
-### Preparing the Files  
-
-To generate the necessary files, update your parameters file at the time you **process your VCF** using the following command:
-
-Example:
+## Run
 
 ```bash
-bff-tools vcf -i my.vcf -p param.yaml
+cd utils/bff_browser
+python3 app.py
 ```
 
-Ensure your `param.yaml` includes:
+Then open <http://0.0.0.0:8001>.
+
+The application includes example data from `CINECA_synthetic_cohort_EUROPE_UK1`.
+
+## Browse `genomicVariations`
+
+To create the browser input during a `bff-tools vcf` run, enable:
 
 ```yaml
 bff2html: true
 ```
 
-This will turn off the pipeline **bff2html**.
+Example:
 
-By default, the browser processes all `.lst` files in the `paneldir` folder. The `paneldir` folder is set at the `beacon` **configuration file**. You can include your own panels if needed. 
+```bash
+bff-tools vcf -i my.vcf.gz -p param.yaml
+```
 
+After the run, the generated HTML page is available under:
 
-Once [bff-tools script](../../bin/README.md) has finished, a static HTML page will be available as `<job_id>/browser/<job_id>.html` directory. This page serves as the input for the **BFF Browser**.
+```text
+<job_id>/browser/<job_id>.html
+```
 
-### Features  
+This mode works well for small or medium datasets. For larger datasets or live querying, prefer `bff-portal`.
 
-1. **Gene Panel Support**
-   - Variations are displayed in **HTML tabs** organized by gene panels.
-   - **Gene Panels**: Simple text files with a `.lst` extension containing a list of gene names.
-   - **Default Directory**: `$beacon_path/browser/data`.
-   - **Customization**: Modify the directory using the `paneldir` parameter in the `config.yaml` file.
-   - **Extendability**: You can create and add additional gene panels.
+### Features
 
-2. **Dynamic Tables**
-   - The browser generates searchable and sortable tables directly in HTML.
-   - **Key Features**:
-     - Column reordering.
-     - Advanced search with regular expressions. Examples:
-       - `PASS 0/1 pathogenic` — Returns heterozygous variants labeled as *Pathogenic* or *Likely Pathogenic*.
-       - `PASS 1/0 pathogenic` — Same as above, with ALT and REF alleles flipped (e.g. 23andMe format).
-       - `PASS 1/1 Uncertain` — Yields homozygous ALT variants labeled as *VUS*.
-       - `rs12(3|4) (tp53|ace2) splice` — Filters specific variants by ID, gene, and consequence.
-     - Built-in pagination, column visibility controls, and printable views.
-
-3. **Clinician-Friendly Quick Filters**
-   - A **sticky “Quick filters” bar** is shown above the tables for rapid clinical triage.
-   - Available toggles:
-     - **Clinical relevance**: show only variants where `clinicalRelevance` matches `/pathogenic/i`.
-     - **Genotype**: show only variants that are **homozygous ALT** (`1/1` or `1|1` in `biosampleId`).
-     - **Scan aid**: optionally highlight rows with *Pathogenic* clinical relevance without filtering.
-   - Filters are **combinable** (AND logic) and can be cleared instantly with a single button.
-
-4. **Filtered Display**
-   - Only variations with **HIGH** or **MODERATE** annotation impact are included.
-   - Variations are further filtered and displayed according to the `.lst` gene panel definitions in the `paneldir` folder.
-
-5. **Visual Aids for Clinical Review**
-   - Soft background highlighting of *Pathogenic* variants to improve visual scanning.
-   - Manual row selection (click-to-highlight) for ad-hoc review and discussion.
-   - Clean, compact table layout optimized for rapid interpretation by clinicians.
+- searchable and sortable tables
+- gene panel tabs based on `.lst` files in the configured `paneldir`
+- quick filters for common clinical review tasks
+- pagination, column visibility, and printable views
 
 ![BFF Genomic Variations Browser](static/images/snapshot-BFF-genomic-variations-browser.png)
 
----
+## Browse `individuals`
 
-## Browsing `individuals`
-
-When browsing `individuals`, the input file should be a JSON file (e.g., `individuals.json`). The browser will handle this file to display the relevant data interactively.
+Load an `individuals.json` file to inspect individuals interactively in the browser.
 
 ![BFF Individuals Browser](static/images/snapshot-BFF-individuals-browser.png)
 
+## Combined view
 
-## New Feature: Combined Genomic Variations & Individuals Search
+The combined view links `genomicVariations` with `individuals` by individual or biosample identifiers.
 
-- Merge genomic variant data with individual biosample data.
-- **Client-based** interactive, searchable, and paginated table view.
-- Toggle visibility of the variations column.
-
-## How to Use
-
-1. **Combined View by Path**  
-   - Enter paths for `genomicVariations` and `individuals` JSON files.  
-   - View combined results.
-
-2. **Combined Example**  
-   - See a demo with sample data.
-
-## Key Features
-
-- Cross-linked data by Individuals ID.  
-- Toggleable variations column.  
-- Pagination and search for large datasets.
+- provide the paths to both JSON files
+- open the merged table view
+- search, paginate, and optionally hide the variations column
 
 ![BFF Combined Browser](static/images/snapshot-BFF-combined-browser.png)

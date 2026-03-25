@@ -1,158 +1,95 @@
-# NAME
+# bff-validator
 
-bff-validator: A script that validates metadata (XLSX|JSON) against Beacon v2 Models and serializes them to BFF (JSON)
+`bff-validator` validates Beacon v2 metadata and writes it as BFF JSON collections.
 
-# SYNOPSIS
+This README documents the standalone utility in `utils/bff_validator`. In normal `beacon2-cbi-tools` usage, the same validation workflow is usually run through `bff-tools validate`, which wraps this component as part of the main toolkit.
 
-    bff-validator -i <file.xlsx|*.json> [-options]
+## Synopsis
 
-      Arguments:
-        -i | --input <file.xlsx|*.json>   Metadata xlsx file or *.json files
+```text
+bff-validator -i <file.xlsx|*.json> [options]
+```
 
-      Options:
-        -s | --schema-dir <directory>     Directory with JSON schemas (must have JSON pointers de-referenced)
-        -o | --out-dir <directory>        Output (existing) directory for the BFF files (only to be used if input is XLSX)
-        -gv                               Set this option if you want to process <genomicVariations> entity
-        -ignore-validation                Writes JSON collection regardless of results from validation against JSON schemas (AYOR!)
+Main options:
 
-      Experimental:
-        -gv-vcf                           Set this option to read <genomicVariations.json> from <beacon vcf> (with one document per line)
+- `-i`, `--input`: XLSX file or JSON collection files
+- `-s`, `--schema-dir`: directory with dereferenced JSON schemas
+- `-o`, `--out-dir`: output directory for generated BFF files
+- `-gv`: include `genomicVariations`
+- `-ignore-validation`: write output even if validation reports errors
+- `-gv-vcf`: experimental mode for reading `genomicVariations.json` from a Beacon VCF export
 
-      Generic Options:
-        -h | --help                       Brief help message
-        -man                              Full documentation
-        -debug <level>                    Print debugging information (from 1 to 5, with 5 being the max)
-        -verbose                          Enable verbosity
-        -nc | --no-color                  Do not print colors to STDOUT
-        -ne | --no-emoji                  Do not print emojis to STDOUT
+Generic options:
 
-# SUMMARY
+- `-h`, `--help`
+- `-man`
+- `-debug <level>`
+- `-verbose`
+- `-nc`, `--no-color`
+- `-ne`, `--no-emoji`
 
-bff-validator: A tool for validating datasets against the Beacon v2 schema.
+## Inputs
 
-\- **Purpose:** Ensures that submitted data conforms to the Beacon v2 model schema.
+You can validate either:
 
-\- **Key Features:**
-  - Provides a template Excel input file
-  - Also accepts JSON as input
-  - Schema validation for data integrity
-  - Detects structural and format inconsistencies
-  - Essential for data ingestion workflows
+- a multi-sheet XLSX metadata workbook
+- a set of uncompressed BFF JSON files such as `analyses.json`, `biosamples.json`, and `individuals.json`
 
-# INSTALLATION
+The schema directory must contain dereferenced Beacon JSON schemas.
 
-If you got this script from `beacon2-cbi-tools` no action is required from you.
+## Examples
 
-If you want to install ONLY this script then:
+```bash
+./bff-validator -i file.xlsx
+./bff-validator -i file.xlsx -o my_bff_outdir
+./bff-validator -i my_bff_in_dir/*.json -s deref_schemas -o my_bff_out_dir
+./bff-validator -i file.xlsx --gv --schema-dir deref_schemas --out-dir my_bff_out_dir
+bff-tools validate -i file.xlsx -o my_bff_outdir
+```
 
-The script runs on command-line Linux (tested on Debian-based distribution). Perl 5 is installed by default on Linux,
-but we will need to install a few CPAN modules.
+## Install
 
-First we install cpanminus (with sudo privileges):
+If you are using the full `beacon2-cbi-tools` installation, no extra step is required. In that case, the recommended entry point is usually:
 
-    $ sudo apt-get install cpanminus
+```bash
+bff-tools validate -i file.xlsx -o my_bff_outdir
+```
 
-Second we use cpanm to install the CPAN modules:
+Use `bff-validator` directly only if you specifically want to run the standalone utility.
 
-First you need to copy the following [cpanfile](https://raw.githubusercontent.com/mrueda/beacon2-cbi-tools/main/cpanfile) to your current directory.  You have two choose between one of the 2 options below:
+If you want this utility on its own:
 
-**Option 1:** System-level installation:
+```bash
+sudo apt-get install cpanminus
+cpanm --notest --installdeps .
+pip install xlsx2csv
+```
 
-    cpanm --notest --sudo --installdeps .
+You can also install Perl modules into `~/perl5` if you prefer a local Perl environment.
 
-**Option 2:** Install the dependencies at `~/perl5`
+## Tips for the XLSX template
 
-    cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
-    cpanm --notest --installdeps .
+- start from the template in `CINECA_synthetic_cohort_EUROPE_UK1`
+- dot notation represents nested objects
+- underscore notation represents arrays
+- Unicode input is supported
 
-To ensure Perl recognizes your local modules every time you start a new terminal, you should type:
+If you already have CSV sheets, they can be merged into one XLSX file with the included `csv2xlsx` helper.
 
-    echo 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)' >> ~/.bashrc
+## Troubleshooting
 
-Also, we're using _xlsx2csv_, which is a python script.
+If validation fails because of malformed JSON-like values in a cell, check brackets and braces first. `--ignore-validation` can be useful for debugging intermediate output in the directory passed to `-o`.
 
-    $ pip install xlsx2csv
+## Citation
 
-# HOW TO RUN BFF-VALIDATOR
+If you use these tools in published work, please cite:
 
-    <!--how-to-run-start-->
+Rueda, M, Ariosa R. "Beacon v2 Reference Implementation: a toolkit to enable federated sharing of genomic and phenotypic data". _Bioinformatics_, btac568, <https://doi.org/10.1093/bioinformatics/btac568>
 
-For executing `bff-validator` you will need:
+## Author
 
-- Input file:
+Written by Manuel Rueda, PhD. CNAG Biomedical Informatics: <https://www.cnag.eu>
 
-    You have two options:
+## License
 
-    **A)** A XLSX file consisting of multiple sheets. A [template](https://metacpan.org/pod/Beacon-v2-Models_template.xlsx) version of this file is provided with this installation.
-
-    Currently, the file consists of 7 sheets that match the Beacon v2 Models.
-
-    Please use the flag `--gv` should you want to validate the data in the sheet &lt;genomicVariations>.
-
-    _NB:_ If you have multiple CSV files instead of a XLSX file you can use the included utility [csv2xlsx](https://github.com/EGA-archive/beacon2-cbi-tools/blob/main/utils/models2xlsx/csv2xlsx) that will join all CSVs into 1 XLSX.
-
-        $ ./csv2xlsx *csv -o out.xlsx
-
-    **B)** A set of JSON (array) files that follow the Beacon Friendly Format. The files MUST be uncompressed and named &lt;analyses.json>, &lt;biosamples.json>, etc.
-
-- Beacon v2 Models (with JSON pointers dereferenced)
-
-    You should have them at `deref_schemas` directory.
-
-**Examples:**
-
-     $ ./bff-validator -i file.xlsx
-
-     $ $path/bff-validator -i file.xlsx -o my_bff_outdir
-
-     $ $path/bff-validator -i my_bff_in_dir/*json -s deref_schemas -o my_bff_out_dir 
-
-     $ $path/bff-validator -i file.xlsx --gv --schema-dir deref_schemas --out-dir my_bff_out_dir
-    
-
-## TIPS ON FILLING OUT THE EXCEL TEMPLATE
-
-    * Please, before filling in any field, check out the provided template for ../../CINECA_synthetic_cohort_EUROPE_UK1/*xlsx
-    * The script accepts Unicode characters (encoded with utf-8)
-    * Header fields: 
-       - Dots ('.') represent objects: 
-           Examples (values):
-             1 - foo
-             2 - NCIT:C20197
-             3 - true # booleans
-             4 - ["foo","bar","baz"] # arrays are also allowed
-       - Underscores ('_') represent arrays: 
-           * Up to 1D (e.g., individuals->measures_assyCode.id) the values are comma separated
-              Examples (values):
-               1 - measures_assayCode.id
-                   LOINC:35925-4,LOINC:3141-9,LOINC:8308-9
-                  measures_assayCode.label
-                   BMI,Weight,Height-standing
-                   
-           * Others - Values for array fields start with '[' and end with ']'
-              Examples (values): 
-               1 - ["foo":{"bar": "baz"}}]
-               2 - ["foo","bar","baz"]
-
-## COMMON ERRORS AND SOLUTIONS
-
-    * Error message: , or } expected while parsing object/hash, at character offset 574 (before "]")
-      Solution: Make sure you have the right amount of opening or closing keys/brackets.
-
-_NB:_ You can use the flag `--ignore-validation` and check the temporary files at `-o` directory.
-
-    <!--how-to-run-end-->
-
-# CITATION
-
-The author requests that any published work that utilizes **B2RI** includes a cite to the the following reference:
-
-Rueda, M, Ariosa R. "Beacon v2 Reference Implementation: a toolkit to enable federated sharing of genomic and phenotypic data". _Bioinformatics_, btac568, https://doi.org/10.1093/bioinformatics/btac568
-
-# AUTHOR 
-
-Written by Manuel Rueda, PhD. Info about CNAG can be found at [https://www.cnag.eu](https://www.cnag.eu).
-
-# COPYRIGHT
-
-This PERL file is copyrighted. See the LICENSE file included in this distribution.
+See [LICENSE](../../LICENSE).

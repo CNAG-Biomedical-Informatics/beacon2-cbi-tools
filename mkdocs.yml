@@ -1,7 +1,7 @@
 site_name: 'Beacon v2 CBI Tools Documentation'
 site_description: 'Beacon v2 CBI Tools Documentation'
 site_author: 'Manuel Rueda, PhD'
-copyright: '&copy; Copyright 2023-2025, Manuel Rueda, CNAG'
+copyright: '&copy; Copyright 2023-2026, Manuel Rueda, CNAG'
 repo_name: 'beacon2-cbi-tools'
 repo_url: https://github.com/mrueda/beacon2-cbi-tools
 edit_uri: edit/main/docs/
@@ -72,7 +72,7 @@ nav:
       - "🧬 GRCh38 / hg38": examples/hg38.md
   - "📚 Tutorial": data-beaconization.md
   - "📊 CINECA cohort": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1
-  - "🛠️  Utilities": https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils/README.md
+  - "🛠️  Utilities": utilities.md
   - "🆘 Help": 
       - "❓ FAQ": help/faq.md
   - "ℹ️ About":

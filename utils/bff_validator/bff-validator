@@ -103,12 +103,13 @@ sub validate_input_data {
     $ENV{'ANSI_COLORS_DISABLED'} = 1 if $no_color;
 
     my %schema_emoji = (
-        analyses    => ( $no_emoji ? "" : "🗂 " ),
-        biosamples  => ( $no_emoji ? "" : "🧪" ),
-        cohorts     => ( $no_emoji ? "" : "👥" ),
-        datasets    => ( $no_emoji ? "" : "📦" ),
-        individuals => ( $no_emoji ? "" : "🧍" ),
-        runs        => ( $no_emoji ? "" : "🧫" ),
+        analyses          => ( $no_emoji ? "" : "🗂 " ),
+        biosamples        => ( $no_emoji ? "" : "🧪 " ),
+        cohorts           => ( $no_emoji ? "" : "👥 " ),
+        datasets          => ( $no_emoji ? "" : "📦 " ),
+        genomicVariations => ( $no_emoji ? "" : "🧬 " ),
+        individuals       => ( $no_emoji ? "" : "🧍 " ),
+        runs              => ( $no_emoji ? "" : "🧫 " ),
     );
 
     # Define a few more variables
@@ -138,16 +139,21 @@ sub validate_input_data {
     print Dumper \%input if $debug > 2;
 
     # Start printing to STDOUT
-    say BOLD CYAN program_header($version);
+    say BOLD CYAN program_header($version), RESET;
 
     ##############################################
     # START DATA VALIDATION AGAINST JSON SCHEMAs #
     ##############################################
     for my $schema (@schemas) {
-        say BOLD BLUE '==== SCHEMA: ', uc($schema), ' ',
-          $schema_emoji{$schema}, ' ====', RESET;
+        next if ( $input eq 'bff' && !exists $input{bff}{$schema} );
+
+        say schema_header( $schema, $schema_emoji{$schema} );
         my $location = $input{$schema}{location};
-        say "Validating  <$schema> data against => $location JSON schema"
+        say BOLD BLACK . "  schema: $location" . RESET if $verbose;
+        say BOLD BLACK
+          . "  source: "
+          . ( $input eq 'xlsx' ? $input{xlsx} : $input{bff}{$schema} )
+          . RESET
           if $verbose;
 
         # Route 1 - XLSX
@@ -158,9 +164,9 @@ sub validate_input_data {
               validate_xlsx( $schema, $input{xlsx}, $csv, $location );
             if ($ignore_validation) {
                 $ok = 1;
-                print "Ignoring JSON Validation->";
+                say BOLD YELLOW( status_prefix('warn') . "Validation errors ignored; continuing with output write" ), RESET;
             }
-            say( ( $no_emoji ? "" : "📝 " ) . "Writing <$out> file\n" )
+            say BOLD GREEN( status_prefix('write') . "Writing $out" ), RESET
               and write_json( $out, $json )
               if $ok;
         }
@@ -263,7 +269,7 @@ sub validate_xlsx {
 
         # Accumulate errors (if any) at array $errors
         push @{$errors},
-          ( "Row " . $csv->record_number() . ':', join "\n", @$error )
+          "Row " . $csv->record_number() . ":\n" . join( "\n", @$error )
           if defined $error;
 
         # We add each row to the an AoH @json_rows
@@ -283,7 +289,7 @@ sub validate_xlsx {
     ################
 
     # Send to STDOUT the messages (if any)
-    say_errors($errors);
+    say_errors( $sheet, $errors );
 
     # Delete $sheet_csv file
     unlink($sheet_csv) unless $debug;
@@ -351,7 +357,8 @@ sub validate_json {
                 { data => $row, validator => $validator } );
 
             # Accumulate errors (if any) at array $errors
-            push @{$errors}, ( "Row " . $count . ':', join "\n", @$error )
+            push @{$errors},
+              "Row " . $count . ":\n" . join( "\n", @$error )
               if defined $error;
 
             # Increase row
@@ -371,7 +378,8 @@ sub validate_json {
                 { data => $row, validator => $validator } );
 
             # Accumulate errors (if any) at array @json_errors
-            push @{$errors}, ( "Row " . $count . ':', join "\n", @$error )
+            push @{$errors},
+              "Row " . $count . ":\n" . join( "\n", @$error )
               if defined $error;
 
             # Increase row
@@ -383,30 +391,58 @@ sub validate_json {
     }
 
     # Send to STDOUT the messages (if any)
-    say_errors($errors);
+    say_errors( $schema, $errors );
     return 1;
 }
 
 sub say_rows_processed {
 
     my ( $schema, $type, $count ) = @_;
-    say BOLD YELLOW $schema , ' ', uc($type), ' | Rows processed = ', $count
+    say BOLD YELLOW "  progress: $schema " . lc($type) . " rows processed = $count",
+      RESET
       if ( ( $debug || $verbose ) && $count % 10 == 0 );
     return 1;
 }
 
 sub say_errors {
-    my $errors = shift;
+    my ( $schema, $errors ) = @_;
     if ( @{$errors} ) {
+        say BOLD RED(
+            status_prefix('error')
+              . "$schema: "
+              . scalar( @{$errors} )
+              . " validation issue(s) found"
+          ),
+          RESET;
         say BOLD RED( join "\n", @{$errors} ), RESET;
     }
     else {
-        say BOLD GREEN,
-          ( $no_emoji
-            ? "Hurray! No errors found"
-            : "🎉 Hurray! No errors found" ), RESET;
+        say BOLD GREEN( status_prefix('ok') . "$schema: validation passed" ),
+          RESET;
     }
     return 1;
+}
+
+sub status_prefix {
+    my $kind = shift;
+
+    return "" if $no_emoji;
+
+    my %prefix = (
+        ok    => "✓ ",
+        warn  => "⚠ ",
+        error => "✖ ",
+        write => "→ ",
+    );
+
+    return $prefix{$kind} // "";
+}
+
+sub schema_header {
+    my ( $schema, $emoji ) = @_;
+
+    my $label = $emoji . $schema;
+    return BOLD BLUE "\n== $label ==", RESET;
 }
 
 sub row2hash {
@@ -734,24 +770,11 @@ sub check_input_type {
 sub program_header {
     my $version = shift;
 
-    # Define emoji variables that depend on $no_emoji:
-    my $em_beacon   = ( $no_emoji ? "  " : "🧬" );
-    my $em_validate = ( $no_emoji ? "  " : "✅" );
-    my $em_version  = ( $no_emoji ? "  " : "🔢" );
-    my $em_rocket   = ( $no_emoji ? "  " : "🚀" );
-    my $em_author   = ( $no_emoji ? "  " : "🧙" );
-    my $em_mascot   = ( $no_emoji ? "  " : "🐧" );
+    my $prefix = $no_emoji ? "" : "🧬 ";
 
     my $str = <<"EOF";
-****************************************
-*       $em_beacon  beacon2-cbi-tools $em_beacon       *
-*--------------------------------------*
-*       $em_validate BFF-TOOLS VALIDATE  $em_validate      *
-*   (Beacon Friendly Format Validator) *
-*--------------------------------------*
-*       $em_version  Version: $version  $em_rocket         *
-*    $em_author Author: Manuel Rueda, PhD $em_mascot   *
-****************************************
+${prefix}bff-validator  v$version
+Validate Beacon XLSX or JSON input and write BFF JSON collections
 EOF
     return $str;
 }
