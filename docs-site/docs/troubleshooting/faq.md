@@ -4,6 +4,8 @@ title: FAQ
 
 # Frequently Asked Questions
 
+If you are debugging a specific failure, start with the [Troubleshooting index](index.md) first.
+
 ## Installation
 
 <details>

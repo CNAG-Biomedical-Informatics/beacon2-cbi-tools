@@ -64,13 +64,23 @@
   margin-bottom: 0;
 }
 
+.beacon-hero-secondary {
+  margin-left: 0.75rem;
+}
+
 .beacon-feature-card {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 18px;
   padding: 1.25rem;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.beacon-feature-card p {
+  flex: 1 1 auto;
 }
 
 [data-theme='dark'] .beacon-feature-card {
@@ -88,5 +98,11 @@
   .beacon-docs-hero-logo {
     width: 84px;
     height: 84px;
+  }
+
+  .beacon-hero-secondary {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.75rem;
   }
 }

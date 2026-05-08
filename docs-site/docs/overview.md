@@ -30,9 +30,11 @@ Most users follow this sequence:
 If you are new to the toolkit, use this order:
 
 1. Read the [installation overview](getting-started/installation.md) and pick Docker unless your environment requires Apptainer or a direct install.
-2. Run the [Quick Start](getting-started/quick-start.md) with the bundled test data.
-3. Read the [data beaconization tutorial](workflows/data-beaconization.md) before adapting the workflow to your own data.
-4. Keep the [FAQ](troubleshooting/faq.md) open while configuring reference genomes, annotation resources, and MongoDB loading.
+2. Use [What should I run?](getting-started/what-should-i-run.md) to choose the right command for your input.
+3. Run the [Quick Start](getting-started/quick-start.md) with the bundled test data.
+4. Read the [data beaconization tutorial](workflows/data-beaconization.md) before adapting the workflow to your own data.
+5. Check [Outputs](reference/outputs.md) when you need to understand generated files and logs.
+6. Keep the [FAQ](troubleshooting/faq.md) open while configuring reference genomes, annotation resources, and MongoDB loading.
 
 ## What You Need Before Starting
 
@@ -55,15 +57,22 @@ If you are new to the toolkit, use this order:
 
 ### I want the fastest way to try it
 
+- [What should I run?](getting-started/what-should-i-run.md)
 - [Quick Start](getting-started/quick-start.md)
 
 ### I want the full end-to-end explanation
 
 - [Tutorial: data beaconization](workflows/data-beaconization.md)
 
+### I want to understand how it is implemented
+
+- [Implementation overview](implementation/overview.md)
+
 ### I want examples or troubleshooting help
 
 - [GRCh38 / hg38 example](examples/hg38)
+- [Outputs reference](reference/outputs.md)
+- [Troubleshooting index](troubleshooting/index.md)
 - [FAQ](troubleshooting/faq.md)
 
 ## Main Commands

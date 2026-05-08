@@ -71,6 +71,8 @@ Expected result: BFF collections are inserted into MongoDB and indexes are creat
 
 ## Which command do I need?
 
+For more examples, see [What should I run?](what-should-i-run.md).
+
 | Goal | Command |
 |---|---|
 | I only want to validate metadata | `bff-tools validate` |
@@ -81,6 +83,8 @@ Expected result: BFF collections are inserted into MongoDB and indexes are creat
 
 ## Next steps
 
+- If you are not sure which mode matches your data, see [What should I run?](what-should-i-run.md).
+- To understand generated files and logs, see [Outputs](../reference/outputs.md).
 - For the full workflow, continue to the [tutorial](../workflows/data-beaconization.md).
 - For installation details, go back to the [installation overview](installation.md).
 - For troubleshooting and edge cases, see the [FAQ](../troubleshooting/faq.md).

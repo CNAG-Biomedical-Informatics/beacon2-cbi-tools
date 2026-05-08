@@ -6,19 +6,46 @@ import styles from './index.module.css';
 
 const features = [
   {
-    title: 'Start With Test Data',
+    title: 'Run Bundled Test Data',
     description:
       'Run the quick start first to validate metadata, convert bundled genomic input, and see expected outputs.',
+    link: '/docs/getting-started/quick-start',
+    cta: 'Open Quick Start',
   },
   {
-    title: 'Choose Your Runtime',
+    title: 'Choose the Right Command',
     description:
-      'Use Docker, Apptainer, or a direct host installation while keeping large reference data outside the runtime.',
+      'Start from what you already have: XLSX metadata, VCF, TSV, existing BFF files, or MongoDB.',
+    link: '/docs/getting-started/what-should-i-run',
+    cta: 'Decide What to Run',
   },
   {
-    title: 'Move to Real Data',
+    title: 'Understand Outputs',
     description:
-      'Use the data beaconization workflow to adapt reference genomes, metadata, genomic conversion, and MongoDB loading.',
+      'Learn where logs, BFF JSON collections, browser files, and MongoDB loading outputs are written.',
+    link: '/docs/reference/outputs',
+    cta: 'View Outputs',
+  },
+  {
+    title: 'Install the Toolkit',
+    description:
+      'Pick Docker, Apptainer, or a non-containerized install depending on your workstation, server, or HPC environment.',
+    link: '/docs/getting-started/installation',
+    cta: 'Choose Install Path',
+  },
+  {
+    title: 'Prepare Real Data',
+    description:
+      'Follow the end-to-end workflow for metadata validation, genomic conversion, and MongoDB loading.',
+    link: '/docs/workflows/data-beaconization',
+    cta: 'Read Workflow',
+  },
+  {
+    title: 'Troubleshoot a Run',
+    description:
+      'Use the FAQ when reference genomes, annotation resources, validation warnings, or MongoDB loading fail.',
+    link: '/docs/troubleshooting/faq',
+    cta: 'Open FAQ',
   },
 ];
 
@@ -39,6 +66,9 @@ function HomepageHeader() {
           <Link className="button button--primary button--lg" to="/docs/overview">
             Read the Docs
           </Link>
+          <Link className="button button--secondary button--lg beacon-hero-secondary" to="/docs/getting-started/what-should-i-run">
+            What should I run?
+          </Link>
         </div>
       </div>
     </header>
@@ -55,6 +85,9 @@ function FeatureCards() {
               <article className="beacon-feature-card">
                 <Heading as="h3">{feature.title}</Heading>
                 <p>{feature.description}</p>
+                <Link className="button button--outline button--primary" to={feature.link}>
+                  {feature.cta}
+                </Link>
               </article>
             </div>
           ))}

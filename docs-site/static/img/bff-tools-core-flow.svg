@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="760" viewBox="0 0 1120 760" role="img" aria-labelledby="title desc">
+  <title id="title">Beacon v2 CBI Tools core flow</title>
+  <desc id="desc">Metadata, TSV, and VCF inputs are processed by the core bff-tools workflow into BFF, then loaded into MongoDB and exposed through a Beacon API. Optional utilities consume BFF or MongoDB output.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#256d85" />
+    </marker>
+    <marker id="arrowSoft" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#64748b" />
+    </marker>
+    <filter id="shadow" x="-12%" y="-20%" width="124%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+    <style>
+      .bg { fill: #f8fafc; }
+      .lane { fill: #eef6fb; stroke: #d7e8f1; }
+      .box { fill: #ffffff; stroke: #256d85; stroke-width: 2; filter: url(#shadow); }
+      .box-soft { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; filter: url(#shadow); }
+      .box-core { fill: #ecfeff; stroke: #256d85; stroke-width: 2.4; filter: url(#shadow); }
+      .title { font: 700 30px Arial, sans-serif; fill: #102a43; }
+      .label { font: 700 18px Arial, sans-serif; fill: #102a43; }
+      .small { font: 14px Arial, sans-serif; fill: #334155; }
+      .tiny { font: 12px Arial, sans-serif; fill: #64748b; }
+      .cmd { font: 700 13px "Courier New", monospace; fill: #0f766e; }
+      .arrow { stroke: #256d85; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #64748b; stroke-width: 2.4; fill: none; marker-end: url(#arrowSoft); stroke-dasharray: 7 6; }
+      .divider { stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="660" rx="28" />
+  <text class="title" x="560" y="54" text-anchor="middle">Beacon v2 - CBI Tools</text>
+  <text class="small" x="560" y="82" text-anchor="middle">Core bff-tools workflow with optional utilities</text>
+
+  <rect class="lane" x="50" y="118" width="1020" height="450" rx="22" />
+  <text class="tiny" x="78" y="146">Core bff-tools workflow: validate / tsv / vcf / load / full</text>
+
+  <rect class="box" x="88" y="186" width="150" height="78" rx="14" />
+  <text class="label" x="163" y="218" text-anchor="middle">Metadata</text>
+  <text class="small" x="163" y="242" text-anchor="middle">XLSX or JSON</text>
+  <text class="tiny" x="163" y="260" text-anchor="middle">incl. phenotypic data</text>
+
+  <rect class="box" x="88" y="326" width="150" height="78" rx="14" />
+  <text class="label" x="163" y="358" text-anchor="middle">TSV</text>
+  <text class="small" x="163" y="382" text-anchor="middle">SNP-array input</text>
+
+  <rect class="box" x="88" y="462" width="150" height="78" rx="14" />
+  <text class="label" x="163" y="494" text-anchor="middle">VCF</text>
+  <text class="small" x="163" y="518" text-anchor="middle">VCF or VCF.gz</text>
+
+  <rect class="box-core" x="425" y="310" width="170" height="102" rx="18" />
+  <text class="label" x="510" y="348" text-anchor="middle">BFF</text>
+  <text class="small" x="510" y="374" text-anchor="middle">Beacon Friendly</text>
+  <text class="small" x="510" y="394" text-anchor="middle">Format</text>
+
+  <rect class="box" x="730" y="310" width="170" height="102" rx="18" />
+  <text class="label" x="815" y="348" text-anchor="middle">Database</text>
+  <text class="small" x="815" y="374" text-anchor="middle">MongoDB</text>
+  <text class="cmd" x="815" y="396" text-anchor="middle">bff-tools load</text>
+
+  <rect class="box-soft" x="964" y="310" width="104" height="102" rx="18" />
+  <text class="label" x="1016" y="348" text-anchor="middle">API</text>
+  <text class="small" x="1016" y="374" text-anchor="middle">Beacon v2</text>
+
+  <rect class="box-soft" x="424" y="625" width="172" height="82" rx="18" />
+  <text class="label" x="510" y="655" text-anchor="middle">Optional utils</text>
+  <text class="small" x="510" y="679" text-anchor="middle">browser / portal</text>
+  <text class="small" x="510" y="699" text-anchor="middle">queue</text>
+
+  <path class="arrow" d="M238 225 C310 225, 350 274, 425 328" />
+  <text class="cmd" x="314" y="214" text-anchor="middle">bff-tools validate</text>
+  <text class="tiny" x="314" y="233" text-anchor="middle">bff-validator</text>
+
+  <path class="arrow" d="M238 365 C305 365, 350 365, 425 365" />
+  <text class="cmd" x="332" y="350" text-anchor="middle">bff-tools tsv</text>
+  <text class="tiny" x="332" y="383" text-anchor="middle">core conversion</text>
+
+  <path class="arrow" d="M238 501 C312 501, 356 425, 425 392" />
+  <text class="cmd" x="326" y="500" text-anchor="middle">bff-tools vcf</text>
+  <text class="tiny" x="330" y="520" text-anchor="middle">core conversion</text>
+
+  <path class="arrow" d="M595 361 L730 361" />
+  <text class="tiny" x="662" y="346" text-anchor="middle">core load</text>
+  <path class="arrow" d="M900 361 L964 361" />
+  <path class="arrow" d="M964 386 L902 386" />
+  <text class="tiny" x="936" y="335" text-anchor="middle">Request</text>
+  <text class="tiny" x="936" y="410" text-anchor="middle">Response</text>
+
+  <path class="arrow-soft" d="M510 412 L510 625" />
+  <text class="tiny" x="650" y="600" text-anchor="middle">optional utilities consume core output</text>
+
+  <path class="arrow-soft" d="M815 412 C815 610, 645 666, 596 666" />
+  <text class="tiny" x="806" y="600" text-anchor="middle">portal can query MongoDB</text>
+
+  <line class="divider" x1="50" y1="732" x2="1070" y2="732" />
+  <text class="tiny" x="78" y="748">core: validate / tsv / vcf / load / full</text>
+  <text class="tiny" x="936" y="748">Beacon v2 API layer</text>
+</svg>

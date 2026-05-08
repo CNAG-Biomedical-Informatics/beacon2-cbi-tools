@@ -8,6 +8,7 @@ const sidebars: SidebarsConfig = {
       label: 'Getting Started',
       items: [
         'getting-started/installation',
+        'getting-started/what-should-i-run',
         'getting-started/quick-start',
         'getting-started/docker',
         'getting-started/apptainer',
@@ -19,6 +20,15 @@ const sidebars: SidebarsConfig = {
       label: 'Workflows',
       items: [
         'workflows/data-beaconization',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Implementation',
+      items: [
+        'implementation/overview',
+        'implementation/core-toolchain',
+        'implementation/utilities',
       ],
     },
     {
@@ -44,6 +54,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'reference/cli',
         'reference/configuration',
+        'reference/outputs',
         'reference/utilities',
       ],
     },
@@ -51,6 +62,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Troubleshooting',
       items: [
+        'troubleshooting/index',
         'troubleshooting/faq',
       ],
     },
