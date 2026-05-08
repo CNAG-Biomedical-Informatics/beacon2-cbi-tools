@@ -25,11 +25,12 @@
 ## Quick links
 
 - 📚 Documentation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools>
+- 🧭 What should I run?: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/what-should-i-run/>
+- ⚡ Quick start: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/quick-start/>
+- 📦 Outputs: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/reference/outputs/>
+- 🧯 Troubleshooting: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/troubleshooting/>
 - 🐳 Docker image: <https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags>
-- ⚠️ Disclaimer: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer/>
-- 🐳 Docker install: [docker/README.md](docker/README.md)
-- 📦 Apptainer install: [apptainer/README.md](apptainer/README.md)
-- 🛠️ Non-containerized install: [non-containerized/README.md](non-containerized/README.md)
+- ⚠️ Disclaimer: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/about/disclaimer/>
 
 ## What it does
 
@@ -48,6 +49,8 @@ The main entry point is [`bin/bff-tools`](bin/README.md). It provides five modes
 - `validate`: validate metadata and serialize it into BFF JSON collections.
 - `load`: load BFF collections into MongoDB.
 - `full`: run conversion plus loading in one step.
+
+If you are unsure which mode matches your data, start with [What should I run?](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/what-should-i-run/).
 
 ## Utilities
 
