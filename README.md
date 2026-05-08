@@ -24,12 +24,12 @@
 
 ## Quick links
 
-- Documentation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools>
-- Docker image: <https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags>
-- Disclaimer: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer/>
-- Docker install: [docker/README.md](docker/README.md)
-- Apptainer install: [apptainer/README.md](apptainer/README.md)
-- Non-containerized install: [non-containerized/README.md](non-containerized/README.md)
+- 📚 Documentation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools>
+- 🐳 Docker image: <https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags>
+- ⚠️ Disclaimer: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/about/disclaimer/>
+- 🐳 Docker install: [docker/README.md](docker/README.md)
+- 📦 Apptainer install: [apptainer/README.md](apptainer/README.md)
+- 🛠️ Non-containerized install: [non-containerized/README.md](non-containerized/README.md)
 
 ## What it does
 
@@ -82,3 +82,4 @@ Written by Manuel Rueda, PhD. CNAG Biomedical Informatics: <https://www.cnag.eu>
 ## License
 
 The software in this repository is copyrighted. See [LICENSE](LICENSE).
+
