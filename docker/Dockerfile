@@ -32,8 +32,8 @@ RUN git clone https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools.g
 # Remove Git metadata and CI configs to shrink image and avoid shipping them
 RUN rm -rf beacon2-cbi-tools/.git beacon2-cbi-tools/.github beacon2-cbi-tools/.gitattributes beacon2-cbi-tools/.gitignore
 
-# Remove docs
-RUN rm -rf beacon2-cbi-tools/docs/ beacon2-cbi-tools/mkdocs.yml
+# Remove docs site from the runtime image
+RUN rm -rf beacon2-cbi-tools/docs-site/
 
 # Install Python runtime dependencies and Perl dependencies from cpanfile
 WORKDIR /usr/share/beacon2-cbi-tools

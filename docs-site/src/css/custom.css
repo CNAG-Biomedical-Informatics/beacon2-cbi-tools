@@ -1,0 +1,92 @@
+:root {
+  --ifm-color-primary: #256d85;
+  --ifm-color-primary-dark: #1f5d72;
+  --ifm-color-primary-darker: #1b5063;
+  --ifm-color-primary-darkest: #143d4b;
+  --ifm-color-primary-light: #2f819d;
+  --ifm-color-primary-lighter: #3995b5;
+  --ifm-color-primary-lightest: #53adc9;
+  --ifm-background-color: #f7fafc;
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.94);
+  --ifm-footer-background-color: #102a43;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+  --beacon-hero-background: radial-gradient(circle at top left, #dbeafe 0, transparent 34%),
+    linear-gradient(135deg, #f8fafc 0%, #eff6ff 52%, #ecfeff 100%);
+  --beacon-hero-color: #102a43;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #67e8f9;
+  --ifm-color-primary-dark: #22d3ee;
+  --ifm-color-primary-darker: #06b6d4;
+  --ifm-color-primary-darkest: #0891b2;
+  --ifm-color-primary-light: #a5f3fc;
+  --ifm-color-primary-lighter: #cffafe;
+  --ifm-color-primary-lightest: #ecfeff;
+  --ifm-background-color: #07111f;
+  --ifm-background-surface-color: #102033;
+  --ifm-navbar-background-color: rgba(7, 17, 31, 0.92);
+  --ifm-font-color-base: #e5edf5;
+  --ifm-heading-color: #f8fafc;
+  --ifm-card-background-color: #102033;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
+  --beacon-hero-background: radial-gradient(circle at top left, rgba(34, 211, 238, 0.28), transparent 34%),
+    linear-gradient(135deg, #07111f 0%, #102033 58%, #092b35 100%);
+  --beacon-hero-color: #f8fafc;
+}
+
+.navbar {
+  backdrop-filter: blur(10px);
+}
+
+.hero--primary {
+  background: var(--beacon-hero-background);
+  color: var(--beacon-hero-color);
+}
+
+.beacon-docs-hero-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.beacon-docs-hero-logo {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.beacon-docs-hero-title {
+  margin-bottom: 0;
+}
+
+.beacon-feature-card {
+  height: 100%;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme='dark'] .beacon-feature-card {
+  border-color: rgba(226, 232, 240, 0.12);
+  background: rgba(16, 32, 51, 0.78);
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .beacon-docs-hero-brand {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .beacon-docs-hero-logo {
+    width: 84px;
+    height: 84px;
+  }
+}

@@ -71,11 +71,7 @@ pip install -r utils/bff_browser/requirements.txt
 cpanm --notest Mojolicious MongoDB Minion Minion::Backend::SQLite
 ```
 
-Documentation dependencies:
-
-```bash
-pip install -r requirements-docs.txt
-```
+Documentation site dependencies are managed separately under `docs-site/` with Node.js and npm.
 
 ## 5. Configure the toolkit
 

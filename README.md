@@ -1,7 +1,7 @@
 
 <div align="center">
     <a href="https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools">
-        <img src="https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docs/img/logo.png" width="200" alt="beacon2-cbi-tools">
+        <img src="https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docs-site/static/img/logo.png" width="200" alt="beacon2-cbi-tools">
     </a>
 </div>
 
@@ -82,4 +82,3 @@ Written by Manuel Rueda, PhD. CNAG Biomedical Informatics: <https://www.cnag.eu>
 ## License
 
 The software in this repository is copyrighted. See [LICENSE](LICENSE).
-

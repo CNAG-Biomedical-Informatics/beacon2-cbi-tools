@@ -1,8 +1,0 @@
-# Documentation build dependencies
-mkdocs
-mkdocs-material
-mkdocs-macros-plugin
-mkdocs-include-markdown-plugin
-mkdocs-mermaid2-plugin
-pymdown-extensions
-mdx_gh_links

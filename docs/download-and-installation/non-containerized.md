@@ -1,1 +1,0 @@
---8<-- "../non-containerized//README.md"
