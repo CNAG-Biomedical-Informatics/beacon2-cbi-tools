@@ -1,6 +1,8 @@
 # Quick Start
 
-This page shows the shortest path for running `bff-tools` after installation.
+This page shows the shortest path for testing `bff-tools` after installation with bundled files.
+
+Use this page when you want to confirm that the runtime works. Use [What Should I Run?](what-should-i-run.md) when you are deciding which mode matches your own data.
 
 ## Assumptions
 
@@ -55,7 +57,7 @@ Expected result: a run-specific directory containing generated genomic variation
 
 ## 4. Load into MongoDB
 
-Once you have BFF metadata plus genomic variations, load them with:
+Once you have BFF metadata plus genomic variations and MongoDB is configured, load them with:
 
 ```bash
 bin/bff-tools load -p param.yaml
@@ -69,22 +71,10 @@ bin/bff-tools full -i input.vcf.gz -p param.yaml
 
 Expected result: BFF collections are inserted into MongoDB and indexes are created or updated.
 
-## Which command do I need?
-
-For more examples, see [What should I run?](what-should-i-run.md).
-
-| Goal | Command |
-|---|---|
-| I only want to validate metadata | `bff-tools validate` |
-| I want to convert a VCF | `bff-tools vcf` |
-| I want to convert a SNP-array TSV | `bff-tools tsv` |
-| I already have BFF files and want to ingest them | `bff-tools load` |
-| I want conversion and loading in one run | `bff-tools full` |
-
 ## Next steps
 
 - If you are not sure which mode matches your data, see [What should I run?](what-should-i-run.md).
 - To understand generated files and logs, see [Outputs](../reference/outputs.md).
-- For the full workflow, continue to the [tutorial](../workflows/data-beaconization.md).
+- For the full workflow, continue to the [tutorial](../workflows/data-beaconization).
 - For installation details, go back to the [installation overview](installation.md).
 - For troubleshooting and edge cases, see the [FAQ](../troubleshooting/faq.md).

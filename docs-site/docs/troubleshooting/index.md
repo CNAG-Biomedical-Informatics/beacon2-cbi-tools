@@ -23,7 +23,7 @@ For more detailed explanations, continue to the [FAQ](faq.md).
 | VCF contig or reference mismatch | `genome` in `param.yaml` does not match the VCF/reference data naming | `param.yaml`, `run_vcf2bff.log`, [Configuration](../reference/configuration.md) |
 | VCF annotation fields are missing | Annotation was disabled or the input VCF does not contain expected fields | `annotate` in `param.yaml`, `run_vcf2bff.log`, [FAQ](faq.md) |
 | TSV conversion fails | SNP-array file format or genome setting does not match the expected conversion path | `run_tsv2vcf.log`, [What should I run?](../getting-started/what-should-i-run.md) |
-| Metadata validation reports missing fields | Required Beacon model fields are absent in XLSX/JSON input | Validator output, generated JSON, [data beaconization workflow](../workflows/data-beaconization.md) |
+| Metadata validation reports missing fields | Required Beacon model fields are absent in XLSX/JSON input | Validator output, generated JSON, [data beaconization workflow](../workflows/data-beaconization) |
 | Metadata validation reports `oneOf` warnings | Beacon schema ambiguity or a value that matches multiple schema alternatives | Validator output, [FAQ](faq.md) |
 | Output directory already exists | `bff-tools` avoids silently overwriting existing run directories | Choose a new `--projectdir-override` value or move the old output |
 | `genomicVariationsVcf.json.gz` is missing | VCF/TSV conversion failed before final BFF output was written | `run_vcf2bff.log`, [Outputs](../reference/outputs.md) |

@@ -53,6 +53,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: '/docs/workflows/data-beaconization',
+          label: 'Tutorial',
+          position: 'left',
+        },
+        {
           to: '/docs/getting-started/installation',
           label: 'Install',
           position: 'left',

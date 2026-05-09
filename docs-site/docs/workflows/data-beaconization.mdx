@@ -1,4 +1,21 @@
+import excelTemplate from '@site/static/img/excel-template.png';
+import validatorOutput from '@site/static/img/bff-tools-validate.png';
+import vcfWorkflow from '@site/static/img/bff-tools-vcf.png';
+
 # Tutorial: Data Beaconization
+
+<div className="beaconDocHero">
+  <p className="beaconEyebrow">Tutorial</p>
+  <h2>Prepare Beacon v2 data from metadata and genomic input.</h2>
+  <p>
+    This walkthrough follows the standard `beacon2-cbi-tools` path: validate metadata, convert genomic data into BFF `genomicVariations`, and load the resulting collections into MongoDB.
+  </p>
+  <div className="beaconHeroActions">
+    <a className="button button--primary" href="#step-1-validate-metadata">Start tutorial</a>
+    <a className="button button--secondary" href="recipes">Command recipes</a>
+    <a className="button button--secondary" href="../reference/validation-and-reproducibility">Validation notes</a>
+  </div>
+</div>
 
 This tutorial explains the typical end-to-end workflow for preparing Beacon v2 data with `beacon2-cbi-tools`.
 
@@ -20,6 +37,44 @@ Most users follow these three steps:
 1. Validate metadata and generate BFF JSON collections.
 2. Convert genomic input into BFF `genomicVariations`.
 3. Load the resulting BFF collections into MongoDB.
+
+<div className="beaconWorkflowBand">
+  <div>
+    <span>Step 1</span>
+    <strong>Validate metadata</strong>
+    <strong>Write BFF entity JSON</strong>
+  </div>
+  <div>
+    <span>Step 2</span>
+    <strong>Convert VCF or TSV</strong>
+    <strong>Write genomicVariations</strong>
+  </div>
+  <div>
+    <span>Step 3</span>
+    <strong>Load collections</strong>
+    <strong>Index data in MongoDB</strong>
+  </div>
+</div>
+
+## What You Will Produce
+
+<div className="beaconOutputGrid">
+  <div>
+    <span>Metadata</span>
+    <strong>BFF JSON collections</strong>
+    <p>`individuals.json`, `biosamples.json`, `runs.json`, `datasets.json`, and related entity files.</p>
+  </div>
+  <div>
+    <span>Genomics</span>
+    <strong>`genomicVariationsVcf.json.gz`</strong>
+    <p>BFF genomic variation output generated from VCF or SNP-array input.</p>
+  </div>
+  <div>
+    <span>Database</span>
+    <strong>MongoDB collections</strong>
+    <p>Loaded Beacon collections ready for query and downstream deployment work.</p>
+  </div>
+</div>
 
 ## Optional first step: open the runtime environment
 
@@ -56,7 +111,10 @@ In most workflows, users do not manually fill the `genomicVariations` sheet, bec
 
 Map your local metadata into the workbook and then validate it:
 
-![Excel template](/img/excel-template.png)
+<figure className="beaconFigure">
+  <img src={excelTemplate} alt="Beacon v2 metadata workbook template" />
+  <figcaption>Beacon v2 metadata workbook template used before validation.</figcaption>
+</figure>
 
 ```bash
 bin/bff-tools validate -i your_metadata.xlsx --out-dir your_bff_dir
@@ -64,7 +122,10 @@ bin/bff-tools validate -i your_metadata.xlsx --out-dir your_bff_dir
 
 If validation succeeds, the tool writes BFF JSON collections to `your_bff_dir`.
 
-![BFF validator](/img/bff-tools-validate.png)
+<figure className="beaconFigure">
+  <img src={validatorOutput} alt="BFF validation output example" />
+  <figcaption>Validation writes Beacon entity JSON collections and reports structural issues.</figcaption>
+</figure>
 
 ### Common validation behavior
 
@@ -143,7 +204,10 @@ Make sure the genome in the parameter file matches the genome used to produce th
 The workflow is aimed at DNA sequencing VCFs such as WES, WGS, and panel data. Structural variants and copy number variation support are still limited.
 :::
 
-![Beacon to VCF](/img/bff-tools-vcf.png)
+<figure className="beaconFigure">
+  <img src={vcfWorkflow} alt="VCF to BFF genomic variation workflow" />
+  <figcaption>VCF conversion generates BFF genomic variation output and stage logs.</figcaption>
+</figure>
 
 ### SNP-array TSV input
 
@@ -222,10 +286,13 @@ After data preparation:
 
 ## Summary
 
-The standard workflow is:
+Before treating a run as ready, confirm:
 
-1. validate metadata with `bff-tools validate`
-2. convert genomic data with `bff-tools vcf` or `bff-tools tsv`
-3. ingest everything into MongoDB with `bff-tools load` or `bff-tools full`
+- metadata validation produced the expected entity JSON files
+- `param_file.yaml` uses the correct reference genome label
+- `genomicVariationsVcf.json.gz` exists in the run directory
+- `log.json` and stage-specific logs are preserved
+- MongoDB loading completed without import errors
+- a small subset of records has been inspected manually
 
 If you get stuck on installation details or edge cases, continue with the [FAQ](../troubleshooting/faq.md).

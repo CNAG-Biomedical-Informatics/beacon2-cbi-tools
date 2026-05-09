@@ -4,7 +4,9 @@ title: What Should I Run?
 
 # What Should I Run?
 
-Use this page to choose the right `bff-tools` mode from your starting point.
+Use this page to choose the right `bff-tools` mode from your starting point. It is a decision page, not a tutorial.
+
+If you want to run the bundled test data now, go to [Quick Start](quick-start.md). If you already know the mode and want copy-paste commands, use [Command Recipes](../workflows/recipes.md).
 
 ## Decision Table
 
@@ -20,48 +22,47 @@ Use this page to choose the right `bff-tools` mode from your starting point.
 | BFF data already in MongoDB | Query it with a small web/API layer | `bff-portal` |
 | Many repeated jobs | Queue and monitor them locally | `bff-queue` |
 
-## Common Starting Points
+## How to Decide
 
-### I only want to validate metadata
+### Start with `validate` when
 
-```bash
-bin/bff-tools validate -i metadata.xlsx --out-dir bff_out
-```
+- your first input is a Beacon metadata workbook
+- you want to check existing BFF JSON metadata
+- you need `individuals.json`, `biosamples.json`, `runs.json`, or `datasets.json` before loading
 
-Expected output: BFF JSON collections such as `individuals.json`, `biosamples.json`, `runs.json`, and `datasets.json`.
+### Start with `vcf` or `tsv` when
 
-### I have a VCF
+- your first input is genomic data
+- you only need to generate `genomicVariations`
+- MongoDB loading can wait until after you inspect the output
 
-```bash
-bin/bff-tools vcf -i input.vcf.gz -p param.yaml
-```
+Use `vcf` for VCF or VCF.gz. Use `tsv` for SNP-array style TSV or TXT input.
 
-Expected output: a run directory containing BFF genomic variation output, usually under `beacon_*/vcf/`.
+### Start with `load` when
 
-### I have SNP-array data
+- BFF metadata collections already exist
+- genomic variation output already exists, if your Beacon includes genomic data
+- MongoDB is configured and reachable
 
-```bash
-bin/bff-tools tsv -i input.txt.gz -p param.yaml
-```
+### Use `full` when
 
-Expected output: a run directory containing converted VCF-like intermediates and BFF genomic variation output.
+- you already have a working parameter file
+- metadata paths are configured
+- MongoDB settings are configured
+- you want conversion and loading in one run
 
-### I already have BFF files
+For a first real dataset, running `validate`, then `vcf` or `tsv`, then `load` is easier to debug than starting with `full`.
 
-```bash
-bin/bff-tools load -p param.yaml
-```
+## Avoid These Mixups
 
-Expected output: BFF collections imported into MongoDB.
-
-### I want conversion plus loading
-
-```bash
-bin/bff-tools full -i input.vcf.gz -p param.yaml
-```
-
-Expected output: genomic conversion output plus MongoDB import output in one run.
+| Situation | Better choice |
+|---|---|
+| You have not tested the install yet | Run [Quick Start](quick-start.md) first |
+| You only want to see command syntax | Use [Command Recipes](../workflows/recipes.md) |
+| You need file and log locations | Read [Outputs](../reference/outputs.md) |
+| You are reviewing a dataset for sharing | Read [Validation and Reproducibility](../reference/validation-and-reproducibility.md) |
+| You need the complete workflow explanation | Read [Data Beaconization](../workflows/data-beaconization) |
 
 ## Next Step
 
-If you are new to the toolkit, run the [Quick Start](quick-start.md) first. If you already know your mode, continue to the [CLI reference](../reference/cli.md) or the [data beaconization workflow](../workflows/data-beaconization.md).
+If you are new to the toolkit, run the [Quick Start](quick-start.md) first. If you already know your mode, continue to [Command Recipes](../workflows/recipes.md), the [CLI reference](../reference/cli.md), or the [data beaconization workflow](../workflows/data-beaconization).

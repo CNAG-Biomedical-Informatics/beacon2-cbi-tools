@@ -17,9 +17,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Workflows',
+      label: 'Tutorials and Recipes',
       items: [
-        'workflows/data-beaconization',
+        {
+          type: 'doc',
+          id: 'workflows/data-beaconization',
+          label: 'Data Beaconization Tutorial',
+        },
+        {
+          type: 'doc',
+          id: 'workflows/recipes',
+          label: 'Command Recipes',
+        },
       ],
     },
     {
@@ -52,9 +61,11 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Reference',
       items: [
+        'reference/supported-data',
         'reference/cli',
         'reference/configuration',
         'reference/outputs',
+        'reference/validation-and-reproducibility',
         'reference/utilities',
       ],
     },

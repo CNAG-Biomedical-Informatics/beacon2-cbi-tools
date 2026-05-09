@@ -1,30 +1,28 @@
-import clsx from 'clsx';
-import Heading from '@theme/Heading';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import styles from './index.module.css';
 
 const features = [
   {
-    title: 'Run Bundled Test Data',
+    title: 'Run Commands',
     description:
-      'Run the quick start first to validate metadata, convert bundled genomic input, and see expected outputs.',
-    link: '/docs/getting-started/quick-start',
-    cta: 'Open Quick Start',
+      'Use copy-paste recipes for metadata validation, VCF conversion, SNP-array input, MongoDB loading, and inspection.',
+    link: '/docs/workflows/recipes',
+    cta: 'Open Recipes',
   },
   {
-    title: 'Choose the Right Command',
+    title: 'Check Supported Data',
     description:
-      'Start from what you already have: XLSX metadata, VCF, TSV, existing BFF files, or MongoDB.',
-    link: '/docs/getting-started/what-should-i-run',
-    cta: 'Decide What to Run',
+      'Confirm which inputs, outputs, commands, and current limits apply before processing a real cohort.',
+    link: '/docs/reference/supported-data',
+    cta: 'View Matrix',
   },
   {
-    title: 'Understand Outputs',
+    title: 'Review Reproducibility',
     description:
-      'Learn where logs, BFF JSON collections, browser files, and MongoDB loading outputs are written.',
-    link: '/docs/reference/outputs',
-    cta: 'View Outputs',
+      'Understand what schema validation checks, what it cannot prove, and what to keep for reproducibility.',
+    link: '/docs/reference/validation-and-reproducibility',
+    cta: 'Read Guidance',
   },
   {
     title: 'Install the Toolkit',
@@ -38,7 +36,7 @@ const features = [
     description:
       'Follow the end-to-end workflow for metadata validation, genomic conversion, and MongoDB loading.',
     link: '/docs/workflows/data-beaconization',
-    cta: 'Read Workflow',
+    cta: 'Start Tutorial',
   },
   {
     title: 'Troubleshoot a Run',
@@ -51,24 +49,48 @@ const features = [
 
 function HomepageHeader() {
   return (
-    <header className={clsx('hero hero--primary')}>
-      <div className="container">
-        <div className="beacon-docs-hero-brand">
-          <img className="beacon-docs-hero-logo" src="img/logo.png" alt="Beacon v2 CBI Tools" />
-          <Heading as="h1" className="hero__title beacon-docs-hero-title">
-            Beacon v2 CBI Tools
-          </Heading>
+    <header className={styles.hero}>
+      <div className={styles.heroGrid}>
+        <div className={styles.copy}>
+          <p className={styles.kicker}>Beacon v2 CBI Tools</p>
+          <h1>Build Beacon v2-ready datasets from metadata and genomic files.</h1>
+          <p className={styles.lede}>
+            Validate Beacon metadata, convert VCF or SNP-array input into
+            Beacon Friendly Format, and load the resulting collections into
+            MongoDB for Beacon deployments.
+          </p>
+          <div className={styles.actions}>
+            <Link className="button button--primary button--lg" to="/docs/workflows/data-beaconization">
+              Start Tutorial
+            </Link>
+            <Link className="button button--primary button--lg" to="/docs/workflows/recipes">
+              Command Recipes
+            </Link>
+            <Link className="button button--secondary button--lg" to="/docs/getting-started/what-should-i-run">
+              What should I run?
+            </Link>
+          </div>
         </div>
-        <p className="hero__subtitle">
-          Documentation for preparing Beacon v2 deployments with Beacon Friendly Format data.
-        </p>
-        <div>
-          <Link className="button button--primary button--lg" to="/docs/overview">
-            Read the Docs
-          </Link>
-          <Link className="button button--secondary button--lg beacon-hero-secondary" to="/docs/getting-started/what-should-i-run">
-            What should I run?
-          </Link>
+
+        <div className={styles.flow} aria-label="Beacon v2 CBI Tools workflow">
+          <div>
+            <span>Input</span>
+            <strong>XLSX metadata</strong>
+            <strong>BFF JSON</strong>
+            <strong>VCF / SNP-array TSV</strong>
+          </div>
+          <div>
+            <span>Run</span>
+            <strong>validate</strong>
+            <strong>vcf / tsv</strong>
+            <strong>load / full</strong>
+          </div>
+          <div>
+            <span>Output</span>
+            <strong>BFF collections</strong>
+            <strong>genomicVariations</strong>
+            <strong>MongoDB / browser files</strong>
+          </div>
         </div>
       </div>
     </header>
@@ -78,20 +100,14 @@ function HomepageHeader() {
 function FeatureCards() {
   return (
     <section className={styles.features}>
-      <div className="container">
-        <div className="row">
-          {features.map((feature) => (
-            <div className="col col--4" key={feature.title}>
-              <article className="beacon-feature-card">
-                <Heading as="h3">{feature.title}</Heading>
-                <p>{feature.description}</p>
-                <Link className="button button--outline button--primary" to={feature.link}>
-                  {feature.cta}
-                </Link>
-              </article>
-            </div>
-          ))}
-        </div>
+      <div className={styles.cardGrid}>
+        {features.map((feature) => (
+          <Link className={styles.card} to={feature.link} key={feature.title}>
+            <span>{feature.cta}</span>
+            <h2>{feature.title}</h2>
+            <p>{feature.description}</p>
+          </Link>
+        ))}
       </div>
     </section>
   );
@@ -103,8 +119,8 @@ export default function Home() {
       title="Beacon v2 CBI Tools"
       description="Documentation for Beacon v2 CBI Tools"
     >
-      <HomepageHeader />
-      <main>
+      <main className={styles.page}>
+        <HomepageHeader />
         <FeatureCards />
       </main>
     </Layout>

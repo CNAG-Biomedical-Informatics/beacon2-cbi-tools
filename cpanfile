@@ -1,5 +1,4 @@
 # Core Perl dependencies for bff-tools and validator
-
 requires 'JSON::XS';                # JSON handling
 requires 'Path::Tiny';              # File I/O
 requires 'Term::ANSIColor';         # Colored CLI output

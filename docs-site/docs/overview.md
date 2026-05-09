@@ -2,7 +2,18 @@
 title: Overview
 ---
 
-# Beacon v2 CBI Tools Documentation
+<div className="beaconDocHero">
+  <p className="beaconEyebrow">Overview</p>
+  <h2>Build Beacon v2-ready datasets from metadata and genomic files.</h2>
+  <p>
+    `beacon2-cbi-tools` helps validate Beacon metadata, convert VCF or SNP-array input into Beacon Friendly Format, and load the resulting collections into MongoDB.
+  </p>
+  <div className="beaconHeroActions">
+    <a className="button button--primary" href="workflows/recipes">Command recipes</a>
+    <a className="button button--secondary" href="getting-started/what-should-i-run">What should I run?</a>
+    <a className="button button--secondary" href="reference/supported-data">Supported data</a>
+  </div>
+</div>
 
 `beacon2-cbi-tools` helps you prepare data for Beacon v2 deployments based on the Beacon Friendly Format (BFF).
 
@@ -25,16 +36,36 @@ Most users follow this sequence:
 2. Convert genomic data with `bff-tools vcf` or `bff-tools tsv`.
 3. Load the generated BFF collections into MongoDB with `bff-tools load` or `bff-tools full`.
 
+<div className="beaconWorkflowBand">
+  <div>
+    <span>Input</span>
+    <strong>XLSX or BFF metadata</strong>
+    <strong>VCF or SNP-array TSV</strong>
+  </div>
+  <div>
+    <span>Process</span>
+    <strong>validate</strong>
+    <strong>vcf / tsv / load / full</strong>
+  </div>
+  <div>
+    <span>Output</span>
+    <strong>BFF JSON collections</strong>
+    <strong>MongoDB and browser files</strong>
+  </div>
+</div>
+
 ## Recommended Path
 
 If you are new to the toolkit, use this order:
 
 1. Read the [installation overview](getting-started/installation.md) and pick Docker unless your environment requires Apptainer or a direct install.
 2. Use [What should I run?](getting-started/what-should-i-run.md) to choose the right command for your input.
-3. Run the [Quick Start](getting-started/quick-start.md) with the bundled test data.
-4. Read the [data beaconization tutorial](workflows/data-beaconization.md) before adapting the workflow to your own data.
-5. Check [Outputs](reference/outputs.md) when you need to understand generated files and logs.
-6. Keep the [FAQ](troubleshooting/faq.md) open while configuring reference genomes, annotation resources, and MongoDB loading.
+3. Check [Supported Inputs and Outputs](reference/supported-data.md) to confirm your data fits a supported path.
+4. Run the [Quick Start](getting-started/quick-start.md) with the bundled test data.
+5. Use [Command Recipes](workflows/recipes.md) for copy-paste commands.
+6. Read the [data beaconization tutorial](workflows/data-beaconization) before adapting the workflow to your own data.
+7. Check [Validation and Reproducibility](reference/validation-and-reproducibility.md) and [Outputs](reference/outputs.md) when reviewing generated files and logs.
+8. Keep the [FAQ](troubleshooting/faq.md) open while configuring reference genomes, annotation resources, and MongoDB loading.
 
 ## What You Need Before Starting
 
@@ -48,32 +79,38 @@ If you are new to the toolkit, use this order:
 
 ## Choose Your Path
 
-### I want to install the toolkit
-
-- [Installation overview](getting-started/installation.md)
-- [Docker installation](getting-started/docker)
-- [Apptainer installation](getting-started/apptainer)
-- [Non-containerized installation](getting-started/non-containerized)
-
-### I want the fastest way to try it
-
-- [What should I run?](getting-started/what-should-i-run.md)
-- [Quick Start](getting-started/quick-start.md)
-
-### I want the full end-to-end explanation
-
-- [Tutorial: data beaconization](workflows/data-beaconization.md)
-
-### I want to understand how it is implemented
-
-- [Implementation overview](implementation/overview.md)
-
-### I want examples or troubleshooting help
-
-- [GRCh38 / hg38 example](examples/hg38)
-- [Outputs reference](reference/outputs.md)
-- [Troubleshooting index](troubleshooting/index.md)
-- [FAQ](troubleshooting/faq.md)
+<div className="beaconPathGrid">
+  <a href="getting-started/installation">
+    <span>Setup</span>
+    <h3>Install the toolkit</h3>
+    <p>Choose Docker, Apptainer, or a non-containerized setup for your workstation, server, or HPC environment.</p>
+  </a>
+  <a href="workflows/recipes">
+    <span>Run</span>
+    <h3>Copy a command</h3>
+    <p>Use short recipes for validation, VCF conversion, SNP-array input, MongoDB loading, and inspection.</p>
+  </a>
+  <a href="workflows/data-beaconization">
+    <span>Workflow</span>
+    <h3>Prepare real data</h3>
+    <p>Follow the end-to-end data beaconization tutorial before adapting the workflow to your own cohort.</p>
+  </a>
+  <a href="reference/validation-and-reproducibility">
+    <span>Review</span>
+    <h3>Check reproducibility</h3>
+    <p>Understand what validation checks, what it cannot prove, and what to keep when sharing a run.</p>
+  </a>
+  <a href="examples/hg38">
+    <span>Examples</span>
+    <h3>Start from test data</h3>
+    <p>Use the GRCh38 / hg38 example and bundled datasets to confirm that your runtime works.</p>
+  </a>
+  <a href="troubleshooting/">
+    <span>Help</span>
+    <h3>Debug a run</h3>
+    <p>Find the right log file and match common symptoms around reference data, validation, and MongoDB loading.</p>
+  </a>
+</div>
 
 ## Main Commands
 

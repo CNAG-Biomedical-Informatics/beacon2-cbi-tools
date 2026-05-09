@@ -40,6 +40,275 @@
   backdrop-filter: blur(10px);
 }
 
+.beaconDocHero {
+  margin: 0 0 2rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(94, 234, 212, 0.22), transparent 18rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(236, 254, 255, 0.78));
+}
+
+.beaconDocHero h2 {
+  max-width: 820px;
+  margin: 0;
+  color: #102a43;
+  font-size: clamp(1.75rem, 3vw, 2.7rem);
+  line-height: 1.12;
+}
+
+.beaconDocHero p:not(.beaconEyebrow) {
+  max-width: 760px;
+  margin: 1rem 0 1.25rem;
+  color: #334e68;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.beaconEyebrow {
+  margin: 0 0 0.6rem;
+  color: var(--ifm-color-primary-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.beaconHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.beaconWorkflowBand {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.beaconWorkflowBand > div,
+.beaconPathGrid > a {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.beaconWorkflowBand > div {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem;
+}
+
+.beaconWorkflowBand span,
+.beaconPathGrid span {
+  color: var(--ifm-color-primary-dark);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.beaconWorkflowBand strong {
+  color: #102a43;
+  font-size: 0.96rem;
+}
+
+.beaconPathGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0 2rem;
+}
+
+.beaconPathGrid > a {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  color: #102a43;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.beaconPathGrid > a:hover {
+  border-color: rgba(37, 109, 133, 0.38);
+  background: #ffffff;
+  color: #102a43;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.beaconPathGrid h3 {
+  margin: 0;
+  color: #102a43;
+  font-size: 1.08rem;
+}
+
+.beaconPathGrid p {
+  margin: 0;
+  color: #486581;
+  line-height: 1.5;
+}
+
+.beaconOutputGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0 2rem;
+}
+
+.beaconOutputGrid > div {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.beaconOutputGrid span {
+  color: var(--ifm-color-primary-dark);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.beaconOutputGrid strong {
+  color: #102a43;
+  font-size: 1rem;
+}
+
+.beaconOutputGrid p {
+  margin: 0;
+  color: #486581;
+  line-height: 1.5;
+}
+
+.beaconFigure {
+  margin: 1.25rem 0 1.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.beaconFigure img {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 6px;
+}
+
+.beaconFigure figcaption {
+  margin-top: 0.65rem;
+  color: #486581;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.about-hero {
+  margin: 1rem 0 2rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(94, 234, 212, 0.18), transparent 18rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(236, 254, 255, 0.72));
+}
+
+.about-hero p {
+  max-width: 820px;
+  margin: 0;
+  color: #334e68;
+  font-size: 1.06rem;
+  line-height: 1.65;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0 2rem;
+}
+
+.about-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.about-kicker {
+  color: var(--ifm-color-primary-dark);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.about-card h3 {
+  margin: 0;
+  color: #102a43;
+  font-size: 1.08rem;
+}
+
+.about-card p {
+  margin: 0;
+  color: #486581;
+  line-height: 1.5;
+}
+
+[data-theme='dark'] .beaconDocHero {
+  border-color: rgba(226, 232, 240, 0.12);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(34, 211, 238, 0.16), transparent 18rem),
+    linear-gradient(135deg, rgba(16, 32, 51, 0.86), rgba(7, 17, 31, 0.72));
+}
+
+[data-theme='dark'] .beaconDocHero h2,
+[data-theme='dark'] .beaconWorkflowBand strong,
+[data-theme='dark'] .beaconPathGrid > a,
+[data-theme='dark'] .beaconPathGrid > a:hover,
+[data-theme='dark'] .beaconPathGrid h3 {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .beaconDocHero p:not(.beaconEyebrow),
+[data-theme='dark'] .beaconPathGrid p,
+[data-theme='dark'] .beaconOutputGrid p,
+[data-theme='dark'] .beaconFigure figcaption,
+[data-theme='dark'] .about-hero p,
+[data-theme='dark'] .about-card p {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .beaconWorkflowBand > div,
+[data-theme='dark'] .beaconPathGrid > a,
+[data-theme='dark'] .beaconOutputGrid > div,
+[data-theme='dark'] .beaconFigure,
+[data-theme='dark'] .about-card,
+[data-theme='dark'] .about-hero {
+  border-color: rgba(226, 232, 240, 0.1);
+  background: rgba(16, 32, 51, 0.72);
+}
+
+[data-theme='dark'] .beaconOutputGrid strong,
+[data-theme='dark'] .about-card h3 {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .about-kicker {
+  color: var(--ifm-color-primary-light);
+}
+
+[data-theme='dark'] .beaconPathGrid > a:hover {
+  border-color: rgba(103, 232, 249, 0.36);
+  background: rgba(16, 32, 51, 0.9);
+}
+
 .hero--primary {
   background: var(--beacon-hero-background);
   color: var(--beacon-hero-color);
@@ -68,6 +337,19 @@
   margin-left: 0.75rem;
 }
 
+.beacon-workflow-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  max-width: 980px;
+  margin: 2rem auto 0;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+  color: rgba(16, 42, 67, 0.78);
+  font-size: 0.92rem;
+}
+
 .beacon-feature-card {
   display: flex;
   flex-direction: column;
@@ -89,7 +371,16 @@
   box-shadow: none;
 }
 
+[data-theme='dark'] .beacon-workflow-strip {
+  border-top-color: rgba(226, 232, 240, 0.16);
+  color: rgba(229, 237, 245, 0.76);
+}
+
 @media (max-width: 640px) {
+  .beaconWorkflowBand {
+    grid-template-columns: 1fr;
+  }
+
   .beacon-docs-hero-brand {
     flex-direction: column;
     gap: 0.5rem;
