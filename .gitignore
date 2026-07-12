@@ -2,6 +2,8 @@
 *.old
 *.swp
 *.pyc
+.pytest_cache/
+__pycache__/
 bck/
 old/
 /bin/mrueda_ws1_config.yaml

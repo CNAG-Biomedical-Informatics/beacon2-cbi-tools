@@ -6,23 +6,23 @@ In addition to `bff-tools`, the project includes a few optional utilities for br
 
 | Tool | Use it when | Data source |
 |---|---|---|
-| `bff-browser` | You want to browse static BFF output without a database | local JSON or generated HTML |
 | `bff-portal` | You want live queries over BFF data stored in MongoDB | MongoDB |
 | `bff-queue` | You want to run and monitor many ingestion jobs on a workstation | local command queue |
 
-## `bff-browser`
+## BFF GenomicVariations Browser
 
-`bff-browser` is a lightweight web UI for browsing static BFF output such as `genomicVariations` and `individuals`.
+The browser is a standalone HTML report generated directly by `bff-tools` for
+browsing static BFF `genomicVariations` output. It is no longer a utility or a
+Flask application.
 
 Use it when:
 
-- you want a simple local viewer
+- you want a single portable report that opens directly in a browser
 - you do not want to depend on MongoDB
-- you want to inspect generated HTML or JSON output
+- you do not want to run a local web server
 
-For installation and usage details, see:
-
-- [utils/bff_browser/README.md](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/utils/bff_browser)
+Enable it with `bff2html: true`; the report is written under
+`<projectdir>/browser/<job-id>.html`.
 
 ## `bff-portal`
 
@@ -60,4 +60,5 @@ These utilities are optional. The main data-preparation workflow still goes thro
 2. convert genomic input
 3. load BFF collections into MongoDB
 
-Use the utilities only when you need browsing, lightweight querying, or job orchestration around that core workflow.
+Use the optional utilities only when you need database-backed querying or job
+orchestration around that core workflow.

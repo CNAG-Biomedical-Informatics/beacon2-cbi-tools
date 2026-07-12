@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import gzip
 import json
+import re
+import shlex
+import shutil
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
+
+from .browser import BrowserError, generate_browser_report
+from .redaction import redact_mapping
 
 
 class ExecutionError(RuntimeError):
@@ -21,11 +27,23 @@ def write_executable(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
-def submit_cmd(cmd: str, job: Path, log: Path) -> None:
+def submit_cmd(command: Sequence[str], job: Path, log: Path, *, cwd: Path | None = None) -> None:
     try:
-        subprocess.run(cmd, shell=True, check=True)
-    except subprocess.CalledProcessError as exc:
+        with log.open("w", encoding="utf-8") as log_handle:
+            subprocess.run(
+                list(command),
+                cwd=cwd,
+                check=True,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+    except (OSError, subprocess.CalledProcessError) as exc:
         raise ExecutionError(f"Failed to execute: {job}\nPlease check this file:\n{log}\n") from exc
+
+
+def shell_value(value: Any) -> str:
+    return shlex.quote(str(value))
 
 
 def create_dbnsfp4_fields(selection: str, file_path: str) -> str:
@@ -59,7 +77,11 @@ class PipelineRunner:
         self.projectdir = Path(param["projectdir"])
 
     def make_log_payload(self) -> dict[str, Any]:
-        return {"arg": self.arg, "config": self.config, "param": self.param}
+        return {
+            "arg": redact_mapping(self.arg),
+            "config": redact_mapping(self.config),
+            "param": redact_mapping(self.param),
+        }
 
     def prepare(self) -> None:
         self.projectdir.mkdir(parents=False, exist_ok=False)
@@ -71,21 +93,26 @@ class PipelineRunner:
         template = Path(self.config["bash4tsv"])
         content = template.read_text(encoding="utf-8")
         replacements = "\n".join([
-            f"export TMPDIR={self.config['tmpdir']}",
-            f"ZIP='{self.param['zip']}'",
-            f"BCFTOOLS={self.config['bcftools']}",
-            f"SAMPLE_ID={self.param['sampleid']}",
-            f"GENOME='{('hg19' if self.param['genome'] == 'hs37' else self.param['genome'])}'",
-            f"REF={self.config[self.param['genome'] + 'fasta']}",
-            f"DATASETID={self.param['datasetid']}",
-            f"PROJECTDIR={self.param['projectdir']}",
+            f"export TMPDIR={shell_value(self.config['tmpdir'])}",
+            f"ZIP={shell_value(self.param['zip'])}",
+            f"BCFTOOLS={shell_value(self.config['bcftools'])}",
+            f"THREADS={shell_value(self.param['threads'])}",
+            f"SAMPLE_ID={shell_value(self.param['sampleid'])}",
+            f"GENOME={shell_value('hg19' if self.param['genome'] == 'hs37' else self.param['genome'])}",
+            f"REF={shell_value(self.config[self.param['genome'] + 'fasta'])}",
+            f"DATASETID={shell_value(self.param['datasetid'])}",
+            f"PROJECTDIR={shell_value(self.param['projectdir'])}",
         ])
         content = content.replace("#____WRAPPER_VARIABLES____#", replacements)
         script_path = target_dir / template.name
         log_path = target_dir / template.name.replace(".sh", ".log")
         write_executable(script_path, content)
-        cmd = f"cd {target_dir} && bash {script_path.name} {Path(self.arg['inputfile']).resolve()} > {log_path.name} 2>&1"
-        submit_cmd(cmd, script_path, log_path)
+        submit_cmd(
+            ["bash", script_path.name, str(Path(self.arg["inputfile"]).resolve())],
+            script_path,
+            log_path,
+            cwd=target_dir,
+        )
         self.arg["inputfile"] = str((target_dir / f"{self.param['sampleid']}.filtered.vcf.gz").resolve())
 
     def run_vcf2bff(self) -> None:
@@ -95,19 +122,22 @@ class PipelineRunner:
         content = template.read_text(encoding="utf-8")
         genome = "hg19" if self.param["genome"] == "hs37" else self.param["genome"]
         replacements = "\n".join([
-            f"export TMPDIR={self.config['tmpdir']}",
-            f"ZIP='{self.param['zip']}'",
-            f"SNPEFF='{self.config['snpeff']}'",
-            f"SNPSIFT='{self.config['snpsift']}'",
-            f"BCFTOOLS={self.config['bcftools']}",
-            f"VCF2BFF={self.config['vcf2bff']}",
-            f"GENOME='{genome}'",
-            f"REF={self.config[self.param['genome'] + 'fasta']}",
-            f"COSMIC={self.config[self.param['genome'] + 'cosmic']}",
-            f"DBNSFP={self.config[self.param['genome'] + 'dbnsfp']}",
-            f"DATASETID={self.param['datasetid']}",
-            f"PROJECTDIR={self.param['projectdir']}",
-            f"CLINVAR={self.config[self.param['genome'] + 'clinvar']}",
+            f"export TMPDIR={shell_value(self.config['tmpdir'])}",
+            f"ZIP={shell_value(self.param['zip'])}",
+            f"JAVA={shell_value(self.config['javabin'])}",
+            f"MEM={shell_value(self.config['mem'])}",
+            f"SNPEFF={shell_value(self.config['snpeff'])}",
+            f"SNPSIFT={shell_value(self.config['snpsift'])}",
+            f"BCFTOOLS={shell_value(self.config['bcftools'])}",
+            f"THREADS={shell_value(self.param['threads'])}",
+            f"VCF2BFF={shell_value(self.config['vcf2bff'])}",
+            f"GENOME={shell_value(genome)}",
+            f"REF={shell_value(self.config[self.param['genome'] + 'fasta'])}",
+            f"COSMIC={shell_value(self.config[self.param['genome'] + 'cosmic'])}",
+            f"DBNSFP={shell_value(self.config[self.param['genome'] + 'dbnsfp'])}",
+            f"DATASETID={shell_value(self.param['datasetid'])}",
+            f"PROJECTDIR={shell_value(self.param['projectdir'])}",
+            f"CLINVAR={shell_value(self.config[self.param['genome'] + 'clinvar'])}",
         ])
         fields = create_dbnsfp4_fields(self.config["dbnsfpset"], self.config[self.param["genome"] + "dbnsfp"])
         content = content.replace("#____WRAPPER_VARIABLES____#", replacements)
@@ -117,76 +147,138 @@ class PipelineRunner:
         write_executable(script_path, content)
         annotate = "true" if self.param.get("annotate") else "false"
         inputfile = Path(self.arg["inputfile"]).resolve()
-        cmd = f"cd {target_dir} && bash {script_path.name} {inputfile} {annotate} > {log_path.name} 2>&1"
-        submit_cmd(cmd, script_path, log_path)
+        submit_cmd(
+            ["bash", script_path.name, str(inputfile), annotate],
+            script_path,
+            log_path,
+            cwd=target_dir,
+        )
 
     def run_bff2html(self) -> None:
         target_dir = self.projectdir / "browser"
         target_dir.mkdir()
-        template = Path(self.config["bash4html"])
-        content = template.read_text(encoding="utf-8")
-        replacements = "\n".join([
-            f"export TMPDIR={self.config['tmpdir']}",
-            f"BFF2JSON={self.config['bff2json']}",
-            f"JSON2HTML={self.config['json2html']}",
-            f"ASSETSDIR={self.config['assetsdir']}",
-            f"PANELDIR={self.config['paneldir']}",
-        ])
-        content = content.replace("#____WRAPPER_VARIABLES____#", replacements)
-        script_path = target_dir / template.name
-        log_path = target_dir / template.name.replace(".sh", ".log")
-        write_executable(script_path, content)
         gvvcfjson = Path(self.param["gvvcfjson"]).resolve()
-        cmd = f"cd {target_dir} && bash {script_path.name} {gvvcfjson} {self.projectdir} {self.param['jobid']} > {log_path.name} 2>&1"
-        submit_cmd(cmd, script_path, log_path)
+        output_path = target_dir / f"{self.param['jobid']}.html"
+        log_path = target_dir / "run_bff2html.log"
+        try:
+            summary = generate_browser_report(
+                gvvcfjson,
+                Path(self.config["paneldir"]),
+                output_path,
+                project_id=self.projectdir.name,
+                job_id=str(self.param["jobid"]),
+            )
+        except BrowserError as exc:
+            log_path.write_text(str(exc) + "\n", encoding="utf-8")
+            raise ExecutionError(
+                f"Failed to generate BFF browser report\nPlease check this file:\n{log_path}\n"
+            ) from exc
+        log_path.write_text(
+            "Generated standalone BFF browser report\n"
+            f"Output: {output_path}\n"
+            f"Selected variants: {summary['variants']}\n"
+            f"Panels with hits: {summary['panels']}\n",
+            encoding="utf-8",
+        )
 
     def run_bff2mongodb(self) -> None:
         target_dir = self.projectdir / "mongodb"
         target_dir.mkdir()
-        template = Path(self.config["bash4mongodb"])
-        content = template.read_text(encoding="utf-8")
-        replacements = [
-            f"export TMPDIR={self.config['tmpdir']}",
-            f"ZIP='{self.param['zip']}'",
-            f"MONGOIMPORT={self.config['mongoimport']}",
-            f"MONGODBURI={self.config['mongodburi']}",
-            f"MONGOSH={self.config['mongosh']}",
-        ]
-        collections = []
-        for collection, value in self.param.get("bff", {}).items():
-            if collection in {"metadatadir", "genomicVariationsVcf"}:
-                continue
-            collections.append(f'["{collection}"]="{Path(value).resolve()}"')
-        replacements.append("declare -A collections=(" + " ".join(collections) + ")")
-        content = content.replace("#____WRAPPER_VARIABLES____#", "\n".join(replacements))
+        log_path = target_dir / "run_bff2mongodb.log"
+        mongoimport = str(self.config["mongoimport"])
+        mongosh = str(self.config["mongosh"])
+        mongodb_uri = str(self.config["mongodburi"])
 
+        collections = {
+            collection: Path(value).resolve()
+            for collection, value in self.param.get("bff", {}).items()
+            if collection not in {"metadatadir", "genomicVariationsVcf"}
+        }
         gv_path = self.param.get("bff", {}).get("genomicVariationsVcf")
-        gv_block = ""
         if gv_path:
-            gv_resolved = Path(gv_path).resolve()
-            gv_block = (
-                "\n"
-                'echo "Loading collection...genomicVariations[Vcf]"\n'
-                f'$ZIP -dc {gv_resolved} | $MONGOIMPORT --jsonArray --uri "$MONGODBURI" --collection genomicVariations || echo "Could not load <{gv_resolved}> for <genomicVariations>"\n'
-                'echo "Indexing collection...genomicVariations[Vcf]"\n'
-                '$MONGOSH "$MONGODBURI"<<EOF\n'
-                'disableTelemetry()\n'
-                '/* Single field indexes */\n'
-                'db.genomicVariations.createIndex( {"\\$**": 1}, {name: "single_field_genomicVariations"} )\n'
-                '/* Text indexes */\n'
-                'db.genomicVariations.createIndex( {"\\$**": "text"}, {name: "text_genomicVariations"} )\n'
-                'quit()\n'
-                'EOF'
-            )
-        content = content.replace("\n#__WRAPPER_GENOMIC_VARIATIONS_VARIABLES__#", gv_block)
-        script_path = target_dir / template.name
-        log_path = target_dir / template.name.replace(".sh", ".log")
-        write_executable(script_path, content)
-        cmd = f"cd {target_dir} && bash {script_path.name} > {log_path.name} 2>&1"
-        submit_cmd(cmd, script_path, log_path)
-        text = log_path.read_text(encoding="utf-8", errors="replace")
-        if "document(s) failed to import" in text:
-            raise ExecutionError(f"There was an error with <mongoimport>. Please check <{log_path}>")
+            collections["genomicVariations"] = Path(gv_path).resolve()
+        if not collections:
+            raise ExecutionError("No BFF collections were configured for MongoDB loading")
+
+        try:
+            with log_path.open("w", encoding="utf-8") as log_handle:
+                for collection, source_path in sorted(collections.items()):
+                    log_handle.write(f"Loading collection: {collection} from {source_path}\n")
+                    log_handle.flush()
+                    command = [
+                        mongoimport,
+                        "--jsonArray",
+                        "--uri",
+                        mongodb_uri,
+                        "--collection",
+                        collection,
+                    ]
+                    if source_path.suffix == ".gz":
+                        self._run_streamed_import(command, source_path, log_handle)
+                    else:
+                        subprocess.run(
+                            [*command, "--file", str(source_path)],
+                            check=True,
+                            stdout=log_handle,
+                            stderr=subprocess.STDOUT,
+                            text=True,
+                        )
+                    self._create_mongodb_indexes(
+                        mongosh=mongosh,
+                        mongodb_uri=mongodb_uri,
+                        collection=collection,
+                        log_handle=log_handle,
+                    )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise ExecutionError(
+                f"MongoDB loading failed\nPlease check this file:\n{log_path}\n"
+            ) from exc
+
+    @staticmethod
+    def _run_streamed_import(command: list[str], source_path: Path, log_handle: Any) -> None:
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+        )
+        assert process.stdin is not None
+        try:
+            with gzip.open(source_path, "rb") as source:
+                shutil.copyfileobj(source, process.stdin, length=1024 * 1024)
+        except BrokenPipeError:
+            pass
+        finally:
+            process.stdin.close()
+        return_code = process.wait()
+        if return_code:
+            raise subprocess.CalledProcessError(return_code, command)
+
+    @staticmethod
+    def _create_mongodb_indexes(
+        *,
+        mongosh: str,
+        mongodb_uri: str,
+        collection: str,
+        log_handle: Any,
+    ) -> None:
+        collection_json = json.dumps(collection)
+        index_suffix = re.sub(r"[^A-Za-z0-9_]", "_", collection)
+        script = (
+            "disableTelemetry();\n"
+            f"const collection = db.getCollection({collection_json});\n"
+            f'collection.createIndex({{"$**": 1}}, {{name: "single_field_{index_suffix}"}});\n'
+            f'collection.createIndex({{"$**": "text"}}, {{name: "text_{index_suffix}"}});\n'
+            "quit();\n"
+        )
+        subprocess.run(
+            [mongosh, mongodb_uri],
+            input=script,
+            check=True,
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
 
     def run_named(self, pipeline_name: str) -> None:
         if pipeline_name == "tsv2vcf":

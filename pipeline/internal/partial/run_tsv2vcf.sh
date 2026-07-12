@@ -44,9 +44,9 @@ BASE=$(basename "$INPUT_TSV" .vcf.gz)
 
 echo "# Running bcftools convert --tsv2vcf"
 # 23andMe outputs alleles alphabetically, so unphased hets may appear as 0/1 or 1/0
-$BCFTOOLS convert --tsv2vcf "$INPUT_TSV" -f "$REF" -s "$SAMPLE_ID" -Oz -o "$SAMPLE_ID.vcf.gz"
+"$BCFTOOLS" convert --threads "$THREADS" --tsv2vcf "$INPUT_TSV" -f "$REF" -s "$SAMPLE_ID" -Oz -o "$SAMPLE_ID.vcf.gz"
 
 echo "# Filtering empty ALT"
-$BCFTOOLS view -e 'ALT="."' "$SAMPLE_ID.vcf.gz" -Oz -o "$SAMPLE_ID.filtered.vcf.gz"
+"$BCFTOOLS" view --threads "$THREADS" -e 'ALT="."' "$SAMPLE_ID.vcf.gz" -Oz -o "$SAMPLE_ID.filtered.vcf.gz"
 
 echo "# Finished OK"

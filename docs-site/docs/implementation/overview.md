@@ -27,5 +27,6 @@ title: Implementation
 
 - Use `bin/bff-tools` for normal data preparation.
 - Treat `utils/bff_validator/bff-validator` as part of the core `bff-tools` validation path.
-- Use `utils/bff_browser`, `utils/bff_portal`, or `utils/bff_queue` only when you need browsing, querying, or job orchestration.
+- Enable `bff2html` when you need a standalone BFF GenomicVariations Browser report.
+- Use `utils/bff_portal` or `utils/bff_queue` only when you need database-backed querying or job orchestration.
 - The shell and Perl pipeline helpers are implementation details called by `bff-tools`.

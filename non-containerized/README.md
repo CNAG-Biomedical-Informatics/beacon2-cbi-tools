@@ -67,9 +67,11 @@ cpanm --notest --installdeps .
 Optional utility dependencies:
 
 ```bash
-pip install -r utils/bff_browser/requirements.txt
 cpanm --notest Mojolicious MongoDB Minion Minion::Backend::SQLite
 ```
+
+The standalone BFF GenomicVariations Browser has no additional runtime
+dependencies; its table assets are bundled into each generated report.
 
 Documentation site dependencies are managed separately under `docs-site/` with Node.js and npm.
 

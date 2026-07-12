@@ -36,6 +36,14 @@ class CliTests(unittest.TestCase):
                 }
             )
 
+    def test_main_reports_config_error_without_traceback(self) -> None:
+        stderr = io.StringIO()
+        with mock.patch("bff_tools.cli.read_config_file", side_effect=cli.ConfigError("bad config")):
+            with contextlib.redirect_stderr(stderr):
+                result = cli.main(["load"])
+        self.assertEqual(result, 1)
+        self.assertEqual(stderr.getvalue().strip(), "Error: bad config")
+
     def test_goodbye_list_is_not_empty(self) -> None:
         self.assertTrue(cli.GOODBYES)
 

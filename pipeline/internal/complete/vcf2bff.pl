@@ -100,8 +100,8 @@ sub vcf2bff {
     my $annotated_with = $config->{annotatedWith}
       or die "[vcf2bff] Missing 'annotatedWith' key in $config_file";
 
-    chomp( my $threadshost = qx{/usr/bin/nproc} // 1 );
-    $threadshost = 0 + $threadshost;    # Coerce to number
+    chomp( my $detected_threads = qx{/usr/bin/nproc} // 1 );
+    my $threadshost = $cli->{threads} // ( 0 + $detected_threads );
     my $skip_structural_variation = 1;
 
     # Decide fileout
@@ -357,6 +357,7 @@ sub parse_cli_args {
         'project-dir|p=s' => \$opts{project_dir},    # string
         'genome|g=s'      => \$opts{genome},         # string
         'out-dir=s'       => \$opts{out_dir},        # string
+        'threads|t=i'     => \$opts{threads},        # positive integer
         'help|?'          => \$opts{help},           # flag
         'man'             => \$opts{man},            # flag
         'debug=i'         => \$opts{debug},          # integer
@@ -366,6 +367,11 @@ sub parse_cli_args {
             exit;
         }
     ) or pod2usage(2);
+
+    pod2usage(
+        -message => "Please specify a positive integer for --threads\n",
+        -exitval => 1
+    ) if ( defined $opts{threads} && $opts{threads} < 1 );
 
     # Now do usage checks
     pod2usage(1)                              if $opts{help};

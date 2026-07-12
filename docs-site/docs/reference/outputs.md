@@ -82,6 +82,10 @@ beacon_*/browser/
 
 This output is useful for local inspection without MongoDB.
 
+The browser directory contains a standalone `<job-id>.html` report and
+`run_bff2html.log`. Open the HTML file directly; it embeds the selected data,
+styles, filters, and table logic and does not require a local server.
+
 ## MongoDB Loading Output
 
 `bff-tools load` and `bff-tools full` usually write MongoDB import logs under:

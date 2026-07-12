@@ -35,7 +35,24 @@ class ConfigTests(unittest.TestCase):
         params = read_param_file({"mode": "vcf"})
         self.assertIn("jobid", params)
         self.assertIn("log", params)
+        self.assertIn("threads", params)
         self.assertIsInstance(params, dict)
+
+    def test_requested_threads_control_runtime_parameters(self) -> None:
+        params = read_param_file({"mode": "vcf", "threads": 4})
+        self.assertEqual(params["threads"], 4)
+        self.assertEqual(params["threadsless"], 4)
+        if "pigz" in params["zip"]:
+            self.assertEqual(params["zip"], "/usr/bin/pigz")
+
+    def test_full_mode_routes_tsv_input_through_tsv2vcf(self) -> None:
+        params = read_param_file({"mode": "full", "inputfile": "cohort.tsv.gz"})
+        self.assertEqual(params["pipeline"]["tsv2vcf"], 1)
+        self.assertEqual(params["pipeline"]["vcf2bff"], 1)
+
+    def test_full_mode_does_not_preprocess_vcf_as_tsv(self) -> None:
+        params = read_param_file({"mode": "full", "inputfile": "cohort.vcf.gz"})
+        self.assertEqual(params["pipeline"]["tsv2vcf"], 0)
 
     def test_default_config_path_uses_host_override(self) -> None:
         with mock.patch("bff_tools.config.socket.gethostname", return_value="mrueda-ws5"):

@@ -41,8 +41,13 @@ class ConfigError(RuntimeError):
 
 
 def load_yaml_file(path: Path, allowed_keys: Iterable[str] | None = None) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as handle:
-        data = yaml.safe_load(handle) or {}
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {}
+    except OSError as exc:
+        raise ConfigError(f"Cannot read YAML file <{path}>: {exc}") from exc
+    except yaml.YAMLError as exc:
+        raise ConfigError(f"Cannot parse YAML file <{path}>: {exc}") from exc
     if not isinstance(data, dict):
         raise ConfigError(f"Expected a mapping in {path}")
     if allowed_keys is not None:
@@ -104,23 +109,17 @@ def read_config_file(config_file: str | None) -> dict[str, Any]:
     internal_dir = ROOT_DIR / "pipeline" / "internal"
     complete_dir = internal_dir / "complete"
     partial_dir = internal_dir / "partial"
-    javabin = config["javabin"]
-    config["snpeff"] = f"{javabin} -Xmx{config['mem']} -jar {config['snpeff']}"
-    config["snpsift"] = f"{javabin} -Xmx{config['mem']} -jar {config['snpsift']}"
     config["bash4bff"] = str(partial_dir / "run_vcf2bff.sh")
-    config["bash4html"] = str(partial_dir / "run_bff2html.sh")
-    config["bash4mongodb"] = str(partial_dir / "run_bff2mongodb.sh")
     config["bash4tsv"] = str(partial_dir / "run_tsv2vcf.sh")
     config["vcf2bff"] = str(complete_dir / "vcf2bff.pl")
-    config["bff2json"] = str(complete_dir / "bff2json.pl")
-    config["json2html"] = str(complete_dir / "bff2html.pl")
-    config["browserdir"] = str(ROOT_DIR / "browser")
-    config["assetsdir"] = str(ROOT_DIR / "utils" / "bff_browser" / "static" / "assets")
-    config.setdefault("paneldir", str(Path(config["browserdir"]) / "data"))
+    config.setdefault("paneldir", str(ROOT_DIR / "browser" / "data"))
 
-    for key in ("bash4bff", "bash4html", "bash4mongodb", "bash4tsv", "vcf2bff", "bff2json", "json2html"):
+    for key in ("bash4bff", "bash4tsv", "vcf2bff"):
         if not os.access(config[key], os.X_OK):
             raise ConfigError(f"You don't have +x permission for script <{config[key]}>")
+
+    if not Path(config["paneldir"]).is_dir():
+        raise ConfigError(f"Gene panel directory does not exist: <{config['paneldir']}>")
 
     if config["dbnsfpset"] not in {"all", "cnag"}:
         raise ConfigError("Sorry only [cnag|all] values are accepted for <dbnsfpset>")
@@ -153,6 +152,7 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         param.update(loaded)
 
     threads_host = os.cpu_count() or 1
+    requested_threads = int(arg.get("threads") or max(1, threads_host - 1))
     jobid = f"{int(time.time())}{os.getpid():05d}"[-15:]
     param["jobid"] = jobid
     param["date"] = time.ctime()
@@ -171,14 +171,18 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
     param["hostname"] = socket.gethostname()
     param["user"] = os.environ.get("LOGNAME") or os.environ.get("USER") or "unknown"
     param["threadshost"] = int(threads_host)
-    param["threadsless"] = threads_host - 1 if threads_host > 1 else 1
-    param["zip"] = f"/usr/bin/pigz -p {param['threadsless']}" if os.access("/usr/bin/pigz", os.X_OK) else "/bin/gzip"
+    param["threads"] = requested_threads
+    param["threadsless"] = requested_threads
+    param["zip"] = "/usr/bin/pigz" if os.access("/usr/bin/pigz", os.X_OK) else "/bin/gzip"
     if str(param.get("organism", "")).lower() == "human":
         param["organism"] = "Homo sapiens"
     param["gvvcfjson"] = str(Path(param["projectdir"]) / "vcf" / "genomicVariationsVcf.json.gz")
     param["sampleid"] = str(param["sampleid"]).replace(" ", "_")
 
-    if arg["mode"] == "tsv" and not bool(param["annotate"]):
+    input_name = str(arg.get("inputfile") or "").lower()
+    input_is_tsv = input_name.endswith((".tsv", ".txt", ".tsv.gz", ".txt.gz"))
+
+    if (arg["mode"] == "tsv" or (arg["mode"] == "full" and input_is_tsv)) and not bool(param["annotate"]):
         raise ConfigError("'annotate' must be set to true when using tsv mode")
 
     if param["genome"] == "b37":
@@ -190,7 +194,7 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         "full": {
             "vcf2bff": 1,
             "bff2html": int(bool(param.get("bff2html"))),
-            "tsv2vcf": int(bool(param.get("tsv2vcf"))),
+            "tsv2vcf": int(input_is_tsv),
             "bff2mongodb": 1,
         },
         "vcf": {

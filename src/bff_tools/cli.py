@@ -172,32 +172,30 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = build_parser()
     namespace = parser.parse_args(argv)
-
     arg = vars(namespace)
-    _validate_args(arg)
-
     start = time.time()
-    config = read_config_file(arg.get("configfile"))
-    config["version"] = VERSION
-    param = read_param_file(arg)
-
-    executable = Path(sys.argv[0]).resolve()
-    print_run_summary(
-        arg=arg,
-        config=config,
-        param=param,
-        version=VERSION,
-        executable=executable,
-        no_color=bool(arg.get("nocolor")),
-        no_emoji=bool(arg.get("noemoji")),
-    )
-    print_start_banner(
-        no_color=bool(arg.get("nocolor")),
-        no_emoji=bool(arg.get("noemoji")),
-    )
-
-    runner = PipelineRunner(arg=arg, config=config, param=param)
     try:
+        _validate_args(arg)
+        config = read_config_file(arg.get("configfile"))
+        config["version"] = VERSION
+        param = read_param_file(arg)
+
+        executable = Path(sys.argv[0]).resolve()
+        print_run_summary(
+            arg=arg,
+            config=config,
+            param=param,
+            version=VERSION,
+            executable=executable,
+            no_color=bool(arg.get("nocolor")),
+            no_emoji=bool(arg.get("noemoji")),
+        )
+        print_start_banner(
+            no_color=bool(arg.get("nocolor")),
+            no_emoji=bool(arg.get("noemoji")),
+        )
+
+        runner = PipelineRunner(arg=arg, config=config, param=param)
         runner.prepare()
         for pipeline_name in ("tsv2vcf", "vcf2bff", "bff2html", "bff2mongodb"):
             if param["pipeline"].get(pipeline_name):
@@ -213,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
                     verbose=bool(arg.get("verbose")),
                     no_emoji=bool(arg.get("noemoji")),
                 )
-    except (ConfigError, ExecutionError, FileExistsError) as exc:
+    except (ConfigError, ExecutionError, FileExistsError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 

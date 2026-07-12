@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 from typing import Mapping, Any
 
+from .redaction import redact_mapping
+
 ARROW = "=>"
 
 RESET = "[0m"
@@ -94,7 +96,7 @@ def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], para
     _row("Project", short_path(param.get("projectdir")), use_color=use_color)
     _row("Run ID", param.get("jobid"), use_color=use_color)
     _row("Genome", param.get("genome"), use_color=use_color)
-    _row("Threads", arg.get("threads") or param.get("threadsless"), use_color=use_color)
+    _row("Threads", param.get("threads") or param.get("threadsless"), use_color=use_color)
     print()
 
     display_arg = {"mode": arg.get("mode")}
@@ -115,9 +117,9 @@ def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], para
             display_arg[label] = value
 
     _print_mapping("Arguments", display_arg, YELLOW, use_color=use_color)
-    _print_mapping("Resolved Configuration", config, BLUE, use_color=use_color)
+    _print_mapping("Resolved Configuration", redact_mapping(config), BLUE, use_color=use_color)
 
-    display_param = dict(param)
+    display_param = redact_mapping(param)
     for nested in ("pipeline", "bff"):
         if nested in display_param:
             display_param[nested] = f"See {_plain(param.get('log'))}"

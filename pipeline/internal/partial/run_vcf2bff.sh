@@ -47,21 +47,29 @@ INPUT_VCF=$1
 ANNOTATION=${2:-false}
 BASE=$(basename "$INPUT_VCF" .vcf.gz)
 
+function compress {
+    if [[ "$ZIP" == *pigz ]]; then
+        "$ZIP" -p "$THREADS"
+    else
+        "$ZIP"
+    fi
+}
+
 if [ "$ANNOTATION" == "true" ]; then
     echo "# Running bcftools normalization"
-    $BCFTOOLS norm -cs -m -both "$INPUT_VCF" -f "$REF" -Oz -o "$BASE.norm.vcf.gz"
+    "$BCFTOOLS" norm --threads "$THREADS" -cs -m -both "$INPUT_VCF" -f "$REF" -Oz -o "$BASE.norm.vcf.gz"
     
     echo "# Running SnpEff annotation"
-    $SNPEFF -noStats -i vcf -o vcf "$GENOME" "$BASE.norm.vcf.gz" | $ZIP > "$BASE.norm.ann.vcf.gz"
+    "$JAVA" "-Xmx$MEM" -jar "$SNPEFF" -noStats -i vcf -o vcf "$GENOME" "$BASE.norm.vcf.gz" | compress > "$BASE.norm.ann.vcf.gz"
     
     echo "# Running SnpSift dbNSFP annotation"
-    $SNPSIFT dbnsfp -v -db "$DBNSFP" -f #____WRAPPER_FIELDS____# "$BASE.norm.ann.vcf.gz" | $ZIP > "$BASE.norm.ann.dbnsfp.vcf.gz"
+    "$JAVA" "-Xmx$MEM" -jar "$SNPSIFT" dbnsfp -v -db "$DBNSFP" -f #____WRAPPER_FIELDS____# "$BASE.norm.ann.vcf.gz" | compress > "$BASE.norm.ann.dbnsfp.vcf.gz"
     
     echo "# Running SnpSift ClinVar annotation"
-    $SNPSIFT annotate "$CLINVAR" -name CLINVAR_ "$BASE.norm.ann.dbnsfp.vcf.gz" | $ZIP > "$BASE.norm.ann.dbnsfp.clinvar.vcf.gz"
+    "$JAVA" "-Xmx$MEM" -jar "$SNPSIFT" annotate "$CLINVAR" -name CLINVAR_ "$BASE.norm.ann.dbnsfp.vcf.gz" | compress > "$BASE.norm.ann.dbnsfp.clinvar.vcf.gz"
     
     echo "# Running SnpSift COSMIC annotation"
-    $SNPSIFT annotate "$COSMIC" -name COSMIC_ "$BASE.norm.ann.dbnsfp.clinvar.vcf.gz" | $ZIP > "$BASE.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
+    "$JAVA" "-Xmx$MEM" -jar "$SNPSIFT" annotate "$COSMIC" -name COSMIC_ "$BASE.norm.ann.dbnsfp.clinvar.vcf.gz" | compress > "$BASE.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
     
     # Use the fully annotated VCF file as input for vcf2bff
     VCF2BFF_INPUT="$BASE.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
@@ -71,6 +79,6 @@ else
 fi
 
 echo "# Running vcf2bff conversion"
-$VCF2BFF -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" -verbose
+"$VCF2BFF" -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" --threads "$THREADS" -verbose
 
 echo "# Finished OK"
