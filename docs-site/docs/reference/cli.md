@@ -1,130 +1,108 @@
 ---
-title: CLI Reference
+title: CLI
 ---
 
-# CLI Reference
+```text
+bff-tools {validate,vcf,tsv} [options]
+```
 
-The main entry point is `bin/bff-tools`.
+Run `bff-tools <command> --help` for the installed version. Conversion creates a new project directory and never overwrites an existing one.
+
+## `validate`
+
+Export the packaged template:
 
 ```bash
-bin/bff-tools --help
+bff-tools validate --template-out metadata.xlsx
 ```
 
-Most users only need one mode at a time. Start from the data you already have, then choose the matching command.
-
-## Modes
-
-| Mode | Use when | Main output |
-|---|---|---|
-| `validate` | You have XLSX metadata or existing BFF JSON collections | BFF JSON metadata collections |
-| `vcf` | You have VCF or VCF.gz genomic input | BFF `genomicVariations` |
-| `tsv` | You have SNP-array TSV or TXT input | VCF-like intermediates and BFF `genomicVariations` |
-| `load` | You already have BFF files and want MongoDB collections | imported MongoDB collections |
-| `full` | You want genomic conversion plus MongoDB loading in one run | BFF output and imported MongoDB collections |
-
-## Command Model
-
-Most commands follow this shape:
+Validate and serialize a workbook:
 
 ```bash
-bin/bff-tools <mode> -i <input> -p <param.yaml> [options]
+bff-tools validate -i metadata.xlsx -o bff
 ```
 
-`validate` is the exception because it can validate metadata without a genomic parameter file:
+Validate one or more collection files:
 
 ```bash
-bin/bff-tools validate -i metadata.xlsx --out-dir bff_out
+bff-tools validate -i individuals.json biosamples.json
 ```
 
-## Common Commands
+| Option | Meaning |
+|---|---|
+| `-i`, `--input FILE ...` | One XLSX workbook or one or more named JSON collections |
+| `--template-out PATH` | Export a fresh metadata workbook instead of validating |
+| `-o`, `--out-dir DIR` | XLSX serialization destination; created when absent |
+| `-s`, `--schema-dir DIR` | Override the packaged dereferenced schemas |
+| `--gv` | Include the workbook `genomicVariations` sheet or JSON collection |
+| `--gv-vcf` | Stream a generated `genomicVariations[Vcf].json[.gz]` array |
+| `--ignore-validation` | Write workbook output despite validation issues |
+| `--verbose` | Print progress for large inputs |
 
-### Validate Metadata
+Validation exits nonzero when schema issues are found, unless they are explicitly ignored.
+
+## `vcf`
+
+Annotate and convert raw VCF input:
 
 ```bash
-bin/bff-tools validate -i metadata.xlsx --out-dir bff_out
+bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 -c config.yaml
 ```
 
-Use this before genomic conversion or MongoDB loading. It catches structural metadata problems early and writes BFF entity collections.
-
-### Convert VCF
+Annotation is enabled by default because the converter requires a compatible SnpEff `ANN` header. Pass `--no-annotate` only when the input VCF is already annotated. Raw input requires the external annotation bundle and `config.yaml`.
 
 ```bash
-bin/bff-tools vcf -t 4 -i input.vcf.gz -p param.yaml
+bff-tools vcf -i cohort.annotated.vcf.gz \
+  --genome hg38 --dataset-id cohort-1 --no-annotate
 ```
 
-Use this for sequencing VCFs. The `genome` value in `param.yaml` must match the input reference build.
+The input may be plain `.vcf` or gzip/BGZF-compressed `.vcf.gz`. Single-sample and multi-sample VCFs are supported. gVCFs must first be genotyped or converted to a standard variant VCF.
 
-### Convert SNP-array TSV
+## `tsv`
 
 ```bash
-bin/bff-tools tsv -i input.txt.gz -p param.yaml
+bff-tools tsv -i genotypes.txt.gz --sample-id sample-1 --genome hg19
 ```
 
-Use this for SNP-array style files. This mode creates VCF-like intermediates before generating BFF genomic variation output.
+TSV conversion creates a VCF intermediate, annotates it, and then uses the same VCF-to-BFF converter. Annotation cannot be disabled for TSV input.
 
-### Load BFF Collections
+## Conversion Options
 
-```bash
-bin/bff-tools load -p param.yaml
-```
+| Option | Meaning |
+|---|---|
+| `-i`, `--input FILE` | Input VCF, TSV, or supported compressed equivalent |
+| `-p`, `--param FILE` | Optional YAML parameters |
+| `-c`, `--config FILE` | External tool and annotation-resource configuration |
+| `-o`, `--project-dir DIR` | Explicit new run directory |
+| `-t`, `--threads N` | Positive thread count passed to external stages and compression |
+| `--genome NAME` | `hg19`, `hg38`, `hs37`, or `b37` |
+| `--dataset-id ID` | Dataset identifier embedded in BFF records |
+| `--sample-id ID` | Sample identifier used by TSV conversion |
+| `--annotate`, `--no-annotate` | Annotation is enabled by default; disable only for a compatibly annotated VCF |
+| `--browser`, `--no-browser` | Enable or disable standalone HTML generation |
+| `--verbose` | Stream stage output rather than showing the interactive spinner |
 
-Use this after metadata and genomic variation files exist. The parameter file must point to the BFF collections and MongoDB configuration.
+Values supplied directly on the command line override parameter YAML values. YAML values override built-in defaults.
 
-### Convert and Load
+The Python VCF-to-BFF conversion itself is single-process and streaming. Increasing `-t` helps only stages that support threads; it does not partition records across Python workers.
 
-```bash
-bin/bff-tools full -t 4 -i input.vcf.gz -p param.yaml
-```
+## Common Options
 
-Use this when the parameter file already points to the metadata collections and MongoDB settings.
+| Option | Meaning |
+|---|---|
+| `--verbose` | Print stage output and converter progress instead of the interactive spinner |
+| `--debug N` | Preserve detailed execution output for diagnosis |
+| `-nc`, `--no-color` | Disable ANSI colors |
+| `-ne`, `--no-emoji` | Disable emoji output |
+| `-V`, `--version` | Print the application version |
 
-## Options You Will Use Often
+## Exit Behavior
 
-| Option | Applies to | Purpose |
-|---|---|---|
-| `-i FILE` | `validate`, `vcf`, `tsv`, `full` | input workbook, VCF, TSV, or genomic file |
-| `-p FILE` | `vcf`, `tsv`, `load`, `full` | runtime parameter file |
-| `-t N` | `vcf`, `full` | number of threads for supported stages |
-| `--out-dir DIR` | `validate` | metadata validation output directory |
-| `--projectdir-override DIR` | `vcf`, `tsv`, `load`, `full` | explicit run directory name |
-| `--ignore-validation` | `validate` | write generated JSON for inspection even when validation is noisy |
+- argument, configuration, preflight, and pipeline failures exit nonzero;
+- validation issues exit nonzero unless `--ignore-validation` was explicitly supplied;
+- a VCF without a usable SnpEff ANN header exits nonzero with instructions to annotate it;
+- stage failures name the generated log file to inspect.
 
-## Parameter File Essentials
+## Removed Commands
 
-Minimal VCF or TSV conversion:
-
-```yaml
-genome: hg38
-```
-
-Generate static browser output as part of the run:
-
-```yaml
-genome: hg38
-bff2html: true
-```
-
-Load BFF files into MongoDB:
-
-```yaml
-bff:
-  metadatadir: bff_out
-  runs: runs.json
-  cohorts: cohorts.json
-  biosamples: biosamples.json
-  individuals: individuals.json
-  analyses: analyses.json
-  datasets: datasets.json
-  genomicVariationsVcf: beacon_my_project/vcf/genomicVariationsVcf.json.gz
-```
-
-## Choosing the Wrong Mode
-
-| If you have... | Do not start with | Use |
-|---|---|---|
-| only metadata | `vcf` or `full` | `validate` |
-| only a VCF and no metadata paths configured | `load` | `vcf` first |
-| existing BFF collections | `validate` only | `load` after validating if needed |
-| a failed conversion directory | rerunning into the same directory | a new `--projectdir-override` value |
-
-For copy-paste workflows, see [Command Recipes](../workflows/recipes.md). For an end-to-end explanation, see [Data Beaconization](../workflows/data-beaconization).
+The former `load` and `full` commands were retired in `2.0.13`. Data preparation remains in `bff-tools`; database deployment remains independent. See [MongoDB Import](./mongodb) for the preserved indexing and loading procedure.

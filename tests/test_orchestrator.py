@@ -108,8 +108,8 @@ class OrchestratorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             projectdir = Path(tmpdir) / "beacon_job"
             runner = PipelineRunner(
-                arg={"mode": "load"},
-                config={"mongodburi": "mongodb://root:secret@mongo:27017/beacon"},
+                arg={"mode": "vcf"},
+                config={"service_uri": "https://root:secret@example.org/api"},
                 param={"projectdir": str(projectdir), "log": str(projectdir / "log.json")},
             )
             runner.prepare()
@@ -171,7 +171,8 @@ class OrchestratorTests(unittest.TestCase):
                     "mem": "8G",
                     "snpeff": "/opt/snpEff.jar",
                     "snpsift": "/opt/SnpSift.jar",
-                    "vcf2bff": "vcf2bff.pl",
+                    "pythonbin": "/usr/bin/python3",
+                    "vcf_converter": "/opt/bff_tools/vcf_converter.py",
                     "dbnsfpset": "cnag",
                     "hs37fasta": "/ref/hs37.fa.gz",
                     "hs37cosmic": "/ref/cosmic.vcf.gz",
@@ -193,13 +194,50 @@ class OrchestratorTests(unittest.TestCase):
                     runner.run_vcf2bff()
             script_path = runner.projectdir / "vcf" / "run_vcf2bff.sh"
             content = script_path.read_text(encoding="utf-8")
-            self.assertIn("VCF2BFF=vcf2bff.pl", content)
+            self.assertIn("PYTHON=/usr/bin/python3", content)
+            self.assertIn("VCF_CONVERTER=/opt/bff_tools/vcf_converter.py", content)
             self.assertIn("THREADS=5", content)
             self.assertIn("JAVA=/usr/bin/java", content)
             self.assertIn("SNPEFF=/opt/snpEff.jar", content)
             self.assertIn("FIELD1,FIELD2", content)
             submit_mock.assert_called_once()
             self.assertNotIn("shell", submit_mock.call_args.kwargs)
+
+    def test_run_vcf2bff_without_annotation_needs_no_reference_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            template = tmp / "run_vcf2bff.sh"
+            template.write_text(
+                "#____WRAPPER_VARIABLES____#\n#____WRAPPER_FIELDS____#\n",
+                encoding="utf-8",
+            )
+            inputfile = tmp / "input.vcf.gz"
+            inputfile.write_text("dummy", encoding="utf-8")
+            runner = PipelineRunner(
+                arg={"inputfile": str(inputfile)},
+                config={
+                    "bash4bff": str(template),
+                    "tmpdir": "/tmp",
+                    "pythonbin": "/usr/bin/python3",
+                    "vcf_converter": "/opt/bff_tools/vcf_converter.py",
+                },
+                param={
+                    "projectdir": str(tmp / "job"),
+                    "zip": "/bin/gzip",
+                    "threads": 2,
+                    "genome": "hg19",
+                    "datasetid": "ds1",
+                    "annotate": False,
+                },
+            )
+            runner.projectdir.mkdir()
+            with mock.patch("bff_tools.orchestrator.submit_cmd") as submit_mock:
+                with mock.patch("bff_tools.orchestrator.create_dbnsfp4_fields") as fields_mock:
+                    runner.run_vcf2bff()
+            fields_mock.assert_not_called()
+            submit_mock.assert_called_once()
+            content = (runner.projectdir / "vcf" / "run_vcf2bff.sh").read_text(encoding="utf-8")
+            self.assertNotIn("SNPEFF=", content)
 
     def test_run_bff2html_generates_standalone_report_and_log(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -238,77 +276,6 @@ class OrchestratorTests(unittest.TestCase):
             log = (projectdir / "browser" / "run_bff2html.log").read_text(encoding="utf-8")
             self.assertIn("Selected variants: 3", log)
 
-    def test_run_bff2mongodb_checks_import_and_index_commands(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            projectdir = tmp / "job"
-            projectdir.mkdir()
-            individuals = tmp / "individuals.json"
-            individuals.write_text("[]\n", encoding="utf-8")
-            runner = PipelineRunner(
-                arg={},
-                config={
-                    "mongoimport": "/usr/bin/mongoimport",
-                    "mongosh": "/usr/bin/mongosh",
-                    "mongodburi": "mongodb://root:secret@mongo:27017/beacon",
-                },
-                param={
-                    "projectdir": str(projectdir),
-                    "bff": {"individuals": str(individuals)},
-                },
-            )
-            with mock.patch("bff_tools.orchestrator.subprocess.run") as run_mock:
-                runner.run_bff2mongodb()
-
-            self.assertEqual(run_mock.call_count, 2)
-            import_command = run_mock.call_args_list[0].args[0]
-            self.assertEqual(import_command[0], "/usr/bin/mongoimport")
-            self.assertIn("--file", import_command)
-            self.assertIn("individuals", import_command)
-            index_command = run_mock.call_args_list[1].args[0]
-            self.assertEqual(index_command[0], "/usr/bin/mongosh")
-            self.assertFalse((projectdir / "mongodb" / "run_bff2mongodb.sh").exists())
-
-    def test_run_bff2mongodb_propagates_import_failure(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            projectdir = tmp / "job"
-            projectdir.mkdir()
-            individuals = tmp / "individuals.json"
-            individuals.write_text("[]\n", encoding="utf-8")
-            runner = PipelineRunner(
-                arg={},
-                config={
-                    "mongoimport": "/usr/bin/mongoimport",
-                    "mongosh": "/usr/bin/mongosh",
-                    "mongodburi": "mongodb://mongo:27017/beacon",
-                },
-                param={
-                    "projectdir": str(projectdir),
-                    "bff": {"individuals": str(individuals)},
-                },
-            )
-            failure = subprocess.CalledProcessError(1, ["mongoimport"])
-            with mock.patch("bff_tools.orchestrator.subprocess.run", side_effect=failure):
-                with self.assertRaises(ExecutionError):
-                    runner.run_bff2mongodb()
-
-    def test_run_bff2mongodb_requires_at_least_one_collection(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            projectdir = Path(tmpdir) / "job"
-            projectdir.mkdir()
-            runner = PipelineRunner(
-                arg={},
-                config={
-                    "mongoimport": "/usr/bin/mongoimport",
-                    "mongosh": "/usr/bin/mongosh",
-                    "mongodburi": "mongodb://mongo:27017/beacon",
-                },
-                param={"projectdir": str(projectdir), "bff": {}},
-            )
-            with self.assertRaises(ExecutionError):
-                runner.run_bff2mongodb()
-
     def test_run_executes_pipelines_in_order(self) -> None:
         runner = PipelineRunner(
             arg={},
@@ -319,7 +286,6 @@ class OrchestratorTests(unittest.TestCase):
                     "tsv2vcf": 1,
                     "vcf2bff": 1,
                     "bff2html": 0,
-                    "bff2mongodb": 1,
                 },
             },
         )
@@ -327,7 +293,7 @@ class OrchestratorTests(unittest.TestCase):
         with mock.patch.object(runner, "prepare", side_effect=lambda: calls.append("prepare")):
             with mock.patch.object(runner, "run_named", side_effect=lambda name: calls.append(name)):
                 runner.run()
-        self.assertEqual(calls, ["prepare", "tsv2vcf", "vcf2bff", "bff2mongodb"])
+        self.assertEqual(calls, ["prepare", "tsv2vcf", "vcf2bff"])
 
 
 if __name__ == "__main__":

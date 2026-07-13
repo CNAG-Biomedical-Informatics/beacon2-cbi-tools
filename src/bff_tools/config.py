@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 import platform
+import shutil
 import socket
+import sys
 import time
 from pathlib import Path
 from typing import Any, Iterable
@@ -11,29 +13,7 @@ import yaml
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-
-REQUIRED_CONFIG_KEYS = {
-    "hs37fasta",
-    "hg19fasta",
-    "hg38fasta",
-    "hg19clinvar",
-    "hg38clinvar",
-    "hg19cosmic",
-    "hg38cosmic",
-    "hg19dbnsfp",
-    "hg38dbnsfp",
-    "javabin",
-    "snpeff",
-    "snpsift",
-    "bcftools",
-    "mem",
-    "tmpdir",
-    "mongoimport",
-    "mongostat",
-    "mongodburi",
-    "mongosh",
-    "dbnsfpset",
-}
+PACKAGE_DIR = Path(__file__).resolve().parent
 
 
 class ConfigError(RuntimeError):
@@ -66,15 +46,46 @@ def default_config_path() -> Path:
     return ROOT_DIR / "bin" / "config.yaml"
 
 
-def read_config_file(config_file: str | None) -> dict[str, Any]:
-    config_path = Path(config_file).resolve() if config_file else default_config_path()
-    config = load_yaml_file(config_path)
+def _require_config_value(config: dict[str, Any], key: str, context: str) -> str:
+    value = config.get(key)
+    if value in {None, ""}:
+        raise ConfigError(f"Configuration key '{key}' is required for {context}")
+    return str(value)
 
-    missing = REQUIRED_CONFIG_KEYS.difference(config.keys())
-    if missing:
-        raise ConfigError(
-            f"Missing required parameter(s) in configuration file: {', '.join(sorted(missing))}"
-        )
+
+def _require_file(config: dict[str, Any], key: str, context: str) -> None:
+    value = _require_config_value(config, key, context)
+    if not Path(value).is_file():
+        raise ConfigError(f"Configured {key} file does not exist: {value}")
+
+
+def _require_directory(config: dict[str, Any], key: str, context: str) -> None:
+    value = _require_config_value(config, key, context)
+    if not Path(value).is_dir():
+        raise ConfigError(f"Configured {key} directory does not exist: {value}")
+
+
+def _require_executable(config: dict[str, Any], key: str, context: str) -> None:
+    value = _require_config_value(config, key, context)
+    candidate = Path(value)
+    if candidate.parent != Path("."):
+        available = candidate.is_file() and os.access(candidate, os.X_OK)
+    else:
+        available = shutil.which(value) is not None
+    if not available:
+        raise ConfigError(f"Configured {key} executable is not available: {value}")
+
+
+def read_config_file(
+    config_file: str | None,
+    *,
+    mode: str = "vcf",
+    annotate: bool = False,
+    genome: str = "hg19",
+    browser: bool = False,
+) -> dict[str, Any]:
+    config_path = Path(config_file).resolve() if config_file else default_config_path()
+    config = load_yaml_file(config_path) if config_path.is_file() else {}
 
     arch = platform.machine()
     if arch == "x86_64":
@@ -83,46 +94,58 @@ def read_config_file(config_file: str | None) -> dict[str, Any]:
         arch = "arm64"
     config["arch"] = arch
 
-    base = config.get("base")
-    if not base:
-        raise ConfigError("Missing 'base' in configuration")
+    base = config.get("base", "")
 
     for key, value in list(config.items()):
         if isinstance(value, str):
             config[key] = value.replace("{arch}", arch).replace("{base}", str(base))
 
-    config["hs37cosmic"] = config["hg19cosmic"]
-    config["hs37dbnsfp"] = config["hg19dbnsfp"]
-    config["hs37clinvar"] = config["hg19clinvar"]
+    for suffix in ("cosmic", "dbnsfp", "clinvar"):
+        hg19_key = f"hg19{suffix}"
+        if hg19_key in config:
+            config.setdefault(f"hs37{suffix}", config[hg19_key])
     config.setdefault("tmpdir", "/tmp")
     config.setdefault("mem", "8G")
     config.setdefault("dbnsfpset", "all")
+    config.setdefault("pythonbin", sys.executable)
 
-    for key, value in config.items():
-        if key in {"mem", "dbnsfpset", "mongodburi", "arch"}:
-            continue
-        if not Path(str(value)).exists():
-            raise ConfigError(
-                f"We could not find <{value}> files\nPlease check for typos? in your <{config_path}> file"
-            )
-
-    internal_dir = ROOT_DIR / "pipeline" / "internal"
-    complete_dir = internal_dir / "complete"
-    partial_dir = internal_dir / "partial"
+    pipeline_dir = PACKAGE_DIR / "pipeline"
+    partial_dir = pipeline_dir / "partial"
     config["bash4bff"] = str(partial_dir / "run_vcf2bff.sh")
     config["bash4tsv"] = str(partial_dir / "run_tsv2vcf.sh")
-    config["vcf2bff"] = str(complete_dir / "vcf2bff.pl")
-    config.setdefault("paneldir", str(ROOT_DIR / "browser" / "data"))
+    config["vcf_converter"] = str(PACKAGE_DIR / "vcf_converter.py")
+    config.setdefault("paneldir", str(PACKAGE_DIR / "panels"))
 
-    for key in ("bash4bff", "bash4tsv", "vcf2bff"):
-        if not os.access(config[key], os.X_OK):
-            raise ConfigError(f"You don't have +x permission for script <{config[key]}>")
+    _require_file(config, "bash4bff", "VCF conversion")
+    _require_file(config, "vcf_converter", "VCF conversion")
+    _require_executable(config, "pythonbin", "VCF conversion")
 
-    if not Path(config["paneldir"]).is_dir():
-        raise ConfigError(f"Gene panel directory does not exist: <{config['paneldir']}>")
+    if mode == "tsv":
+        _require_file(config, "bash4tsv", "TSV conversion")
+        _require_executable(config, "bcftools", "TSV conversion")
+        _require_file(config, f"{genome}fasta", "TSV conversion")
+        _require_directory(config, "tmpdir", "TSV conversion")
+
+    if annotate:
+        context = "the annotation profile"
+        _require_executable(config, "bcftools", context)
+        _require_executable(config, "javabin", context)
+        for key in (
+            "snpeff",
+            "snpsift",
+            f"{genome}fasta",
+            f"{genome}clinvar",
+            f"{genome}cosmic",
+            f"{genome}dbnsfp",
+        ):
+            _require_file(config, key, context)
+        _require_directory(config, "tmpdir", context)
+
+    if browser:
+        _require_directory(config, "paneldir", "browser report generation")
 
     if config["dbnsfpset"] not in {"all", "cnag"}:
-        raise ConfigError("Sorry only [cnag|all] values are accepted for <dbnsfpset>")
+        raise ConfigError("Only [cnag|all] values are accepted for 'dbnsfpset'")
 
     return config
 
@@ -130,7 +153,6 @@ def read_config_file(config_file: str | None) -> dict[str, Any]:
 def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
     param: dict[str, Any] = {
         "annotate": True,
-        "bff": {},
         "center": "CNAG",
         "datasetid": "default_beacon_1",
         "genome": "hg19",
@@ -140,7 +162,6 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         "pipeline": {
             "vcf2bff": 0,
             "bff2html": 0,
-            "bff2mongodb": 0,
             "tsv2vcf": 0,
         },
         "sampleid": "23andme_1",
@@ -150,6 +171,20 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
     if arg.get("paramfile"):
         loaded = load_yaml_file(Path(arg["paramfile"]).resolve(), allowed_keys=param.keys())
         param.update(loaded)
+
+    cli_overrides = {
+        "annotate": arg.get("annotate"),
+        "bff2html": arg.get("browser"),
+        "datasetid": arg.get("datasetid"),
+        "genome": arg.get("genome"),
+        "sampleid": arg.get("sampleid"),
+    }
+    for key, value in cli_overrides.items():
+        if value is not None:
+            param[key] = value
+
+    if arg["mode"] == "tsv" and not bool(param["annotate"]):
+        raise ConfigError("'annotate' must be enabled when using tsv mode")
 
     threads_host = os.cpu_count() or 1
     requested_threads = int(arg.get("threads") or max(1, threads_host - 1))
@@ -179,62 +214,25 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
     param["gvvcfjson"] = str(Path(param["projectdir"]) / "vcf" / "genomicVariationsVcf.json.gz")
     param["sampleid"] = str(param["sampleid"]).replace(" ", "_")
 
-    input_name = str(arg.get("inputfile") or "").lower()
-    input_is_tsv = input_name.endswith((".tsv", ".txt", ".tsv.gz", ".txt.gz"))
-
-    if (arg["mode"] == "tsv" or (arg["mode"] == "full" and input_is_tsv)) and not bool(param["annotate"]):
-        raise ConfigError("'annotate' must be set to true when using tsv mode")
-
     if param["genome"] == "b37":
         param["genome"] = "hs37"
     if param["genome"] not in {"hg19", "hg38", "hs37"}:
         raise ConfigError("Please select a valid reference genome. The options are [hg19 hg38 hs37]")
 
     modes = {
-        "full": {
-            "vcf2bff": 1,
-            "bff2html": int(bool(param.get("bff2html"))),
-            "tsv2vcf": int(input_is_tsv),
-            "bff2mongodb": 1,
-        },
         "vcf": {
             "vcf2bff": 1,
             "bff2html": int(bool(param.get("bff2html"))),
             "tsv2vcf": 0,
-            "bff2mongodb": 0,
         },
         "tsv": {
             "vcf2bff": 1,
             "bff2html": int(bool(param.get("bff2html"))),
             "tsv2vcf": 1,
-            "bff2mongodb": 0,
         },
-        "load": {"vcf2bff": 0, "bff2html": 0, "bff2mongodb": 1, "tsv2vcf": 0},
     }
     if arg["mode"] not in modes:
         raise ConfigError(f"Invalid mode: {arg['mode']}")
     param["pipeline"].update(modes[arg["mode"]])
-
-    if arg["mode"] in {"load", "full"}:
-        collections = {"runs", "cohorts", "biosamples", "individuals", "genomicVariations", "analyses", "datasets"}
-        if arg["mode"] == "load":
-            collections.add("genomicVariationsVcf")
-        user_collections = sorted(k for k in param.get("bff", {}).keys() if k != "metadatadir")
-        metadata_dir = Path(param.get("bff", {}).get("metadatadir", ""))
-        for collection in user_collections:
-            if collection not in collections:
-                raise ConfigError(
-                    f"Collection: <{collection}> is not a valid value for bff:\nAllowed values are <{' '.join(sorted(collections))}>"
-                )
-            if collection == "genomicVariationsVcf":
-                candidate = Path(param["bff"][collection])
-            else:
-                candidate = metadata_dir / param["bff"][collection]
-            if not candidate.is_file():
-                raise ConfigError(f"Collection: <{collection}> does not have a valid file <{candidate}>")
-            param["bff"][collection] = str(candidate)
-
-    if arg["mode"] == "full":
-        param.setdefault("bff", {})["genomicVariationsVcf"] = param["gvvcfjson"]
 
     return param

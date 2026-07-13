@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beacon2-cbi-tools"
+version = "2.0.13.dev0"
+description = "Validate and convert data to Beacon v2 Beacon Friendly Format"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+authors = [
+  {name = "Manuel Rueda", email = "manuel.rueda@cnag.eu"},
+]
+keywords = ["GA4GH", "Beacon", "bioinformatics", "genomics", "VCF"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Science/Research",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+  "jsonschema>=4.18",
+  "openpyxl>=3.1",
+  "orjson>=3.10",
+  "PyYAML>=6",
+  "isal>=1.7",
+]
+
+[project.urls]
+Documentation = "https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/"
+Issues = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/issues"
+Repository = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools"
+
+[project.scripts]
+bff-tools = "bff_tools.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+bff_tools = [
+  "browser_assets/*.html",
+  "browser_assets/vendor/*",
+  "panels/*",
+  "pipeline/partial/*.sh",
+  "resources/*.xlsx",
+  "schemas/*/*.json",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

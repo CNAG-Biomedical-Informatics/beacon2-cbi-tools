@@ -1,80 +1,135 @@
-# Quick Start
+---
+title: Quick Start
+---
 
-This page shows the shortest path for testing `bff-tools` after installation with bundled files.
+This path validates metadata and shows the normal raw-VCF workflow, the explicit shortcut for compatible pre-annotated VCFs, and SNP-array conversion.
 
-Use this page when you want to confirm that the runtime works. Use [What Should I Run?](what-should-i-run.md) when you are deciding which mode matches your own data.
+## Which Command Do I Need?
 
-## Assumptions
+| Starting data | Command |
+|---|---|
+| XLSX workbook or BFF JSON | `bff-tools validate` |
+| Raw or annotated VCF | `bff-tools vcf` |
+| Supported SNP-array TSV/TXT | `bff-tools tsv` |
 
-This page assumes you are running commands from the repository root or from a container where the repository is available at the current working directory. If you installed with Docker or Apptainer, open the runtime shell first and then run the commands below.
+Raw VCF and TSV input is annotated by default and requires the external annotation data. Only an already annotated VCF can use `--no-annotate`.
 
-If you have not installed the toolkit yet, start with one of these pages:
-
-- [Docker installation](docker)
-- [Apptainer installation](apptainer)
-- [Non-containerized installation](non-containerized)
-
-:::warning[Research-use disclaimer]
-This toolkit is intended for research use. Do not use generated annotations or results for medical decisions.
+:::info[Two YAML files]
+The optional **parameter file** (`-p`) stores run choices such as `genome`, `datasetid`, and `bff2html`. The annotation **configuration file** (`-c`) stores executable and database paths. A parameter file does not replace the annotation configuration required for raw VCF or TSV input.
 :::
 
-## 1. Check the command
+:::warning[Research use]
+The toolkit prepares research data and annotations. It is not a medical device and its output must not be used by itself for clinical or medical decisions. See the [full disclaimer](../about/disclaimer).
+:::
+
+## 1. Check the Command
 
 ```bash
-bin/bff-tools --help
+bff-tools --version
+bff-tools --help
 ```
 
-Expected result: the command prints available modes such as `validate`, `vcf`, `tsv`, `load`, and `full`.
+The public commands are `validate`, `vcf`, and `tsv`.
 
-## 2. Validate metadata
+## 2. Create and Validate Metadata
+
+Export the packaged Beacon workbook template:
 
 ```bash
-mkdir bff_out
-bin/bff-tools validate -i utils/bff_validator/Beacon-v2-Models_template.xlsx --out-dir bff_out
+bff-tools validate --template-out metadata.xlsx
 ```
 
-This validates metadata and writes BFF JSON collections to `bff_out`.
-
-Expected result: JSON collections such as `individuals.json`, `biosamples.json`, `runs.json`, and `datasets.json`.
-
-## 3. Convert genomic data
-
-### VCF input
+After filling the workbook, write validated BFF collections:
 
 ```bash
-bin/bff-tools vcf -i testdata/vcf/test_1000G.vcf.gz -p testdata/vcf/param.yaml
+bff-tools validate -i metadata.xlsx -o bff
 ```
 
-### SNP-array TSV input
+The output directory contains collections such as `individuals.json`, `biosamples.json`, `analyses.json`, and `datasets.json`. Files are written only when their rows pass the corresponding Beacon v2 schema, unless `--ignore-validation` is explicitly used.
+
+You can validate existing JSON directly:
 
 ```bash
-bin/bff-tools tsv -i testdata/tsv/input.txt.gz -p testdata/tsv/param.yaml
+bff-tools validate -i bff/individuals.json bff/biosamples.json
 ```
 
-Use `vcf` for VCF or VCF.gz input. Use `tsv` for SNP-array style TSV or TXT input.
+## 3. Convert and Annotate Variants
 
-Expected result: a run-specific directory containing generated genomic variation output, usually under `beacon_*/vcf/` or `beacon_*/tsv/`.
-
-## 4. Load into MongoDB
-
-Once you have BFF metadata plus genomic variations and MongoDB is configured, load them with:
+For most raw VCFs, first prepare the [annotation data](annotation-data), then run:
 
 ```bash
-bin/bff-tools load -p param.yaml
+bff-tools vcf \
+  -i cohort.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  --annotate \
+  -c config.yaml \
+  -o cohort-bff
 ```
 
-If you want conversion plus loading in one step, use:
+For a repeatable run, put the same choices in an optional parameter file:
+
+```yaml title="cohort.yaml"
+genome: hg38
+datasetid: cohort-1
+projectdir: cohort-bff
+annotate: true
+bff2html: true
+```
+
+Then keep the command shorter:
 
 ```bash
-bin/bff-tools full -i input.vcf.gz -p param.yaml
+bff-tools vcf -i cohort.vcf.gz -p cohort.yaml -c config.yaml
 ```
 
-Expected result: BFF collections are inserted into MongoDB and indexes are created or updated.
+CLI options override values from `cohort.yaml`. See [Configuration](../reference/configuration) for all accepted keys and defaults.
 
-## Next steps
+If the VCF already contains a compatible SnpEff `ANN` header and annotations, disable re-annotation explicitly. dbNSFP and ClinVar fields are still strongly recommended for complete output:
 
-- If you are not sure which mode matches your data, see [What should I run?](what-should-i-run.md).
-- To understand generated files and logs, see [Outputs](../reference/outputs.md).
-- For the full workflow, continue to the [tutorial](../workflows/data-beaconization).
-- For installation details, go back to the [installation overview](installation.md).
-- For troubleshooting and edge cases, see the [FAQ](../troubleshooting/faq.md).
+```bash
+bff-tools vcf -i cohort.annotated.vcf.gz \
+  --genome hg38 --dataset-id cohort-1 --no-annotate -o cohort-bff
+```
+
+The primary output is:
+
+```text
+cohort-bff/vcf/genomicVariationsVcf.json.gz
+```
+
+Add `--browser` to generate a standalone HTML report alongside the BFF output:
+
+```bash
+bff-tools vcf -i cohort.vcf.gz \
+  --genome hg38 --dataset-id cohort-1 \
+  -c config.yaml --browser -o cohort-bff-browser
+```
+
+## 4. Convert SNP-Array Data
+
+TSV/TXT conversion needs a sample identifier, the matching reference assembly, and the annotation configuration:
+
+```bash
+bff-tools tsv \
+  -i genotypes.txt.gz \
+  --sample-id sample-1 \
+  --genome hg19 \
+  --dataset-id cohort-1 \
+  -c config.yaml \
+  -o sample-1-bff
+```
+
+The command creates a VCF intermediate, annotates it, and converts it through the same production VCF-to-BFF path. `--no-annotate` is not accepted for TSV input.
+
+## 5. Verify Annotation and Output
+
+Annotation-enabled runs retain normalized and annotated VCF intermediates. Inspect representative ANN, dbNSFP, ClinVar, and COSMIC fields and record every database version with the run.
+
+```bash
+bff-tools validate -i cohort-bff/vcf/genomicVariationsVcf.json.gz --gv-vcf
+```
+
+See [Configuration](../reference/configuration) for the profile, [Annotation Data](annotation-data) for the complete setup and integration test, and [Outputs](../reference/outputs) for the resulting directory layout.
+
+For a connected metadata-and-variants workflow, continue with the [end-to-end tutorial](../workflows/data-beaconization). The [GRCh38 worked example](../examples/hg38) shows how the included 1000 Genomes subset was prepared, and the [FAQ](../troubleshooting/faq) retains common errors and fixes.

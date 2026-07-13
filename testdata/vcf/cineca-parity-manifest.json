@@ -1,0 +1,23 @@
+{
+  "annotationInfoFields": 449,
+  "expectedOutput": "genomicVariationsVcf.json.gz",
+  "expectedPerlBffRecords": 1109368,
+  "externalFixtureRoot": "/media/mrueda/2TBS/CNAG/Project_Beacon/CINECA",
+  "externalPerlGolden": "beacon2-cbi-tools-parity/perl/genomicVariationsVcf.json.gz",
+  "externalPerlGoldenSha256": "91397b7af249d46c9a6096c02b4ef6365b74da2b86f027f1ab2e3ab354e1dd78",
+  "fullyAnnotatedVcf": "chr22.Test.1000G.phase3.joint.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz",
+  "genotypesInFirst100Records": {
+    "homozygousAlternate": 767,
+    "missing": 5658,
+    "phased": 0,
+    "unphased": 250400
+  },
+  "records": 1110240,
+  "samples": 2504,
+  "variantShapes": {
+    "indel": 44866,
+    "multiallelic": 0,
+    "snv": 1064502,
+    "symbolic": 872
+  }
+}

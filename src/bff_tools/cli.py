@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import random
-import subprocess
 import sys
 import threading
 import time
@@ -17,8 +16,9 @@ from .output import (
     print_run_summary,
     print_start_banner,
 )
+from .validator import ValidatorError, export_template, print_report, validate_inputs
 
-VERSION = "2.0.12"
+VERSION = "2.0.13-dev"
 GOODBYES = [
     "Aavjo",
     "Abar Dekha-Hobe",
@@ -73,15 +73,37 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("-V", "--version", action="version", version=VERSION)
     subparsers = parser.add_subparsers(dest="mode", required=True)
 
-    for mode in ("vcf", "tsv", "full"):
+    for mode in ("vcf", "tsv"):
         sub = subparsers.add_parser(mode)
         _add_common_options(sub, require_input=True)
 
-    load = subparsers.add_parser("load")
-    _add_common_options(load, require_input=False)
-
-    validate = subparsers.add_parser("validate", add_help=False)
-    validate.add_argument("validate_args", nargs=argparse.REMAINDER)
+    validate = subparsers.add_parser(
+        "validate",
+        help="validate Beacon metadata and write BFF JSON collections",
+    )
+    input_group = validate.add_mutually_exclusive_group(required=True)
+    input_group.add_argument(
+        "-i",
+        "--input",
+        dest="input_files",
+        nargs="+",
+        metavar="FILE",
+        help="XLSX workbook or BFF JSON collection file(s)",
+    )
+    input_group.add_argument(
+        "--template-out",
+        metavar="PATH",
+        help="write a fresh Beacon metadata workbook template",
+    )
+    validate.add_argument("-s", "--schema-dir")
+    validate.add_argument("-o", "--out-dir", default=".")
+    validate.add_argument("-gv", "--gv", action="store_true")
+    validate.add_argument("-gv-vcf", "--gv-vcf", action="store_true")
+    validate.add_argument("--ignore-validation", action="store_true")
+    validate.add_argument("--debug", type=int, default=0)
+    validate.add_argument("--verbose", action="store_true")
+    validate.add_argument("-nc", "--no-color", action="store_true")
+    validate.add_argument("-ne", "--no-emoji", action="store_true")
     return parser
 
 
@@ -90,20 +112,39 @@ def _add_common_options(parser: argparse.ArgumentParser, *, require_input: bool)
     parser.add_argument("-c", "--config", dest="configfile")
     parser.add_argument("-p", "--param", dest="paramfile")
     parser.add_argument("-t", "--threads", dest="threads", type=int)
+    parser.add_argument("--genome", choices=("b37", "hs37", "hg19", "hg38"))
+    parser.add_argument("--dataset-id", dest="datasetid")
+    parser.add_argument("--sample-id", dest="sampleid")
+    parser.add_argument(
+        "--annotate",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="annotate raw input with SnpEff/SnpSift (default: enabled)",
+    )
+    parser.add_argument(
+        "--browser",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="generate a standalone HTML variant report",
+    )
     parser.add_argument("--debug", dest="debug", type=int, default=0)
     parser.add_argument("--verbose", dest="verbose", action="store_true")
     parser.add_argument("-nc", "--no-color", dest="nocolor", action="store_true")
     parser.add_argument("-ne", "--no-emoji", dest="noemoji", action="store_true")
-    parser.add_argument("-po", "--projectdir-override", dest="projectdir_override")
+    parser.add_argument(
+        "-o",
+        "-po",
+        "--project-dir",
+        "--projectdir-override",
+        dest="projectdir_override",
+    )
 
 
 def _validate_args(arg: dict[str, object]) -> None:
     mode = arg["mode"]
     inputfile = arg.get("inputfile")
-    if mode in {"vcf", "tsv", "full"} and not inputfile:
-        raise ConfigError("Modes vcf|tsv|full require an input file")
-    if mode == "vcf" and not arg.get("paramfile"):
-        raise ConfigError("Mode vcf requires a param file")
+    if mode in {"vcf", "tsv"} and not inputfile:
+        raise ConfigError("Modes vcf|tsv require an input file")
     if arg.get("configfile") and not Path(str(arg["configfile"])).is_file():
         raise ConfigError("Option --c requires a config file")
     if arg.get("paramfile") and not Path(str(arg["paramfile"])).is_file():
@@ -116,16 +157,29 @@ def _validate_args(arg: dict[str, object]) -> None:
         allowed = {
             "vcf": (".vcf", ".vcf.gz"),
             "tsv": (".tsv", ".txt", ".tsv.gz", ".txt.gz"),
-            "full": (".vcf", ".vcf.gz", ".tsv", ".txt", ".tsv.gz", ".txt.gz"),
         }
         if mode in allowed and not any(value.endswith(suffix) for suffix in allowed[mode]):
             raise ConfigError(f"Mode '{mode}' requires a valid input extension")
 
 
-def handle_validate(validate_args: list[str]) -> int:
-    validator = Path(__file__).resolve().parents[2] / "utils" / "bff_validator" / "bff-validator"
-    result = subprocess.run([str(validator), *validate_args])
-    return result.returncode
+def handle_validate(arg: dict[str, object]) -> int:
+    template_out = arg.get("template_out")
+    if template_out:
+        destination = export_template(Path(str(template_out)).resolve())
+        print(f"Wrote {destination}")
+        return 0
+
+    report = validate_inputs(
+        [Path(str(path)) for path in arg.get("input_files") or []],
+        schema_dir=Path(str(arg["schema_dir"])) if arg.get("schema_dir") else None,
+        output_dir=Path(str(arg.get("out_dir") or ".")),
+        include_genomic=bool(arg.get("gv")),
+        streamed_genomic=bool(arg.get("gv_vcf")),
+        ignore_validation=bool(arg.get("ignore_validation")),
+        verbose=bool(arg.get("verbose")) or bool(arg.get("debug")),
+    )
+    print_report(report, ignore_validation=bool(arg.get("ignore_validation")))
+    return 0 if report.ok or bool(arg.get("ignore_validation")) else 1
 
 
 def _spinner_worker(*, stop_event: threading.Event, no_emoji: bool) -> None:
@@ -167,18 +221,28 @@ def _run_pipeline(runner: PipelineRunner, pipeline_name: str, *, debug: int, ver
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] == "validate":
-        return handle_validate(argv[1:])
-
     parser = build_parser()
     namespace = parser.parse_args(argv)
     arg = vars(namespace)
+    if arg["mode"] == "validate":
+        try:
+            return handle_validate(arg)
+        except ValidatorError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+
     start = time.time()
     try:
         _validate_args(arg)
-        config = read_config_file(arg.get("configfile"))
-        config["version"] = VERSION
         param = read_param_file(arg)
+        config = read_config_file(
+            arg.get("configfile"),
+            mode=str(arg["mode"]),
+            annotate=bool(param.get("annotate")),
+            genome=str(param["genome"]),
+            browser=bool(param.get("bff2html")),
+        )
+        config["version"] = VERSION
 
         executable = Path(sys.argv[0]).resolve()
         print_run_summary(
@@ -197,7 +261,7 @@ def main(argv: list[str] | None = None) -> int:
 
         runner = PipelineRunner(arg=arg, config=config, param=param)
         runner.prepare()
-        for pipeline_name in ("tsv2vcf", "vcf2bff", "bff2html", "bff2mongodb"):
+        for pipeline_name in ("tsv2vcf", "vcf2bff", "bff2html"):
             if param["pipeline"].get(pipeline_name):
                 print_pipeline_status(
                     pipeline_name,

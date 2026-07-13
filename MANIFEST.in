@@ -1,0 +1,5 @@
+exclude README
+prune CINECA_synthetic_cohort_EUROPE_UK1
+prune testdata
+prune tests
+prune tools

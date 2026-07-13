@@ -1,5 +1,6 @@
 ---
 genome: hg38
+annotate: true
 
 # Optional parameters
 #bff2html: true

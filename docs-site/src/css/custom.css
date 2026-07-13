@@ -208,6 +208,54 @@
   text-align: center;
 }
 
+.faqLead {
+  margin: 0 0 1.5rem;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid var(--ifm-color-primary);
+  background: rgba(37, 109, 133, 0.07);
+  color: #334e68;
+  line-height: 1.6;
+}
+
+.faqList {
+  margin: 0.75rem 0 2rem;
+}
+
+.faqList details {
+  margin: 0 0 0.65rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.faqList details[open] {
+  border-color: rgba(37, 109, 133, 0.34);
+  background: #ffffff;
+}
+
+.faqList summary {
+  padding: 0.85rem 1rem;
+  color: #102a43;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.faqList summary code {
+  white-space: normal;
+}
+
+.faqList details > :not(summary) {
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+
+.faqList details > :last-child {
+  margin-bottom: 1rem;
+}
+
 .about-hero {
   margin: 1rem 0 2rem;
   padding: 1.25rem;
@@ -280,6 +328,7 @@
 [data-theme='dark'] .beaconPathGrid p,
 [data-theme='dark'] .beaconOutputGrid p,
 [data-theme='dark'] .beaconFigure figcaption,
+[data-theme='dark'] .faqLead,
 [data-theme='dark'] .about-hero p,
 [data-theme='dark'] .about-card p {
   color: #cbd5e1;
@@ -289,10 +338,24 @@
 [data-theme='dark'] .beaconPathGrid > a,
 [data-theme='dark'] .beaconOutputGrid > div,
 [data-theme='dark'] .beaconFigure,
+[data-theme='dark'] .faqList details,
 [data-theme='dark'] .about-card,
 [data-theme='dark'] .about-hero {
   border-color: rgba(226, 232, 240, 0.1);
   background: rgba(16, 32, 51, 0.72);
+}
+
+[data-theme='dark'] .faqLead {
+  background: rgba(34, 211, 238, 0.08);
+}
+
+[data-theme='dark'] .faqList details[open] {
+  border-color: rgba(103, 232, 249, 0.3);
+  background: rgba(16, 32, 51, 0.9);
+}
+
+[data-theme='dark'] .faqList summary {
+  color: #f8fafc;
 }
 
 [data-theme='dark'] .beaconOutputGrid strong,
@@ -377,6 +440,35 @@
 }
 
 @media (max-width: 640px) {
+  .main-wrapper .container > .row > .col,
+  .main-wrapper article {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .main-wrapper article {
+    width: calc(100vw - 2rem);
+  }
+
+  .theme-doc-markdown {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .theme-doc-markdown table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .theme-doc-markdown :not(pre) > code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .beaconWorkflowBand {
     grid-template-columns: 1fr;
   }

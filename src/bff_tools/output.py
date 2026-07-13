@@ -120,7 +120,7 @@ def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], para
     _print_mapping("Resolved Configuration", redact_mapping(config), BLUE, use_color=use_color)
 
     display_param = redact_mapping(param)
-    for nested in ("pipeline", "bff"):
+    for nested in ("pipeline",):
         if nested in display_param:
             display_param[nested] = f"See {_plain(param.get('log'))}"
     _print_mapping("Input Parameters", display_param, GREEN, use_color=use_color)
@@ -139,7 +139,6 @@ def print_pipeline_status(pipeline: str, *, no_color: bool = False, no_emoji: bo
         'tsv2vcf': '📄',
         'vcf2bff': '🧬',
         'bff2html': '🌐',
-        'bff2mongodb': '📥',
     }
     prefix = '' if no_emoji else f"{emoji_map.get(pipeline, '')} "
     print(_colorize(f"  {prefix}{pipeline.upper()}", BOLD, WHITE, use_color=use_color))

@@ -12,7 +12,13 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from bff_tools.config import ConfigError, default_config_path, load_yaml_file, read_param_file  # noqa: E402
+from bff_tools.config import (  # noqa: E402
+    ConfigError,
+    default_config_path,
+    load_yaml_file,
+    read_config_file,
+    read_param_file,
+)
 
 
 class ConfigTests(unittest.TestCase):
@@ -36,7 +42,38 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("jobid", params)
         self.assertIn("log", params)
         self.assertIn("threads", params)
+        self.assertTrue(params["annotate"])
         self.assertIsInstance(params, dict)
+
+    def test_cli_values_override_parameter_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "params.yaml"
+            path.write_text("annotate: true\ngenome: hg19\ndatasetid: from-yaml\n", encoding="utf-8")
+            params = read_param_file(
+                {
+                    "mode": "vcf",
+                    "paramfile": str(path),
+                    "annotate": False,
+                    "genome": "hg38",
+                    "datasetid": "from-cli",
+                }
+            )
+        self.assertFalse(params["annotate"])
+        self.assertEqual(params["genome"], "hg38")
+        self.assertEqual(params["datasetid"], "from-cli")
+
+    def test_basic_vcf_config_needs_no_external_reference_bundle(self) -> None:
+        with mock.patch("bff_tools.config.default_config_path", return_value=Path("/missing/config.yaml")):
+            config = read_config_file(None, mode="vcf", annotate=False)
+        self.assertTrue(Path(config["bash4bff"]).is_file())
+        self.assertTrue(Path(config["vcf_converter"]).is_file())
+        self.assertTrue(Path(config["pythonbin"]).is_file())
+        self.assertNotIn("hg19fasta", config)
+
+    def test_annotation_profile_reports_missing_configuration(self) -> None:
+        with mock.patch("bff_tools.config.default_config_path", return_value=Path("/missing/config.yaml")):
+            with self.assertRaisesRegex(ConfigError, "bcftools"):
+                read_config_file(None, mode="vcf", annotate=True)
 
     def test_requested_threads_control_runtime_parameters(self) -> None:
         params = read_param_file({"mode": "vcf", "threads": 4})
@@ -45,14 +82,20 @@ class ConfigTests(unittest.TestCase):
         if "pigz" in params["zip"]:
             self.assertEqual(params["zip"], "/usr/bin/pigz")
 
-    def test_full_mode_routes_tsv_input_through_tsv2vcf(self) -> None:
-        params = read_param_file({"mode": "full", "inputfile": "cohort.tsv.gz"})
+    def test_tsv_mode_routes_input_through_tsv2vcf(self) -> None:
+        params = read_param_file({"mode": "tsv", "inputfile": "cohort.tsv.gz"})
         self.assertEqual(params["pipeline"]["tsv2vcf"], 1)
         self.assertEqual(params["pipeline"]["vcf2bff"], 1)
 
-    def test_full_mode_does_not_preprocess_vcf_as_tsv(self) -> None:
-        params = read_param_file({"mode": "full", "inputfile": "cohort.vcf.gz"})
-        self.assertEqual(params["pipeline"]["tsv2vcf"], 0)
+    def test_tsv_mode_requires_annotation(self) -> None:
+        with self.assertRaisesRegex(ConfigError, "annotate.*enabled"):
+            read_param_file(
+                {
+                    "mode": "tsv",
+                    "inputfile": "cohort.tsv.gz",
+                    "annotate": False,
+                }
+            )
 
     def test_default_config_path_uses_host_override(self) -> None:
         with mock.patch("bff_tools.config.socket.gethostname", return_value="mrueda-ws5"):

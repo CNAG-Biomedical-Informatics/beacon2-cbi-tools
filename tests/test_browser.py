@@ -120,6 +120,8 @@ class BrowserTests(unittest.TestCase):
             self.assertIn("paginationSizeSelector: [25, 50, 100, 250]", text)
             self.assertIn("https://www.ncbi.nlm.nih.gov/snp/", text)
             self.assertIn("https://gnomad.broadinstitute.org/variant/", text)
+            self.assertIn('"gnomad_r2_1"', text)
+            self.assertIn('"gnomad_r4"', text)
             self.assertNotIn("flask", text.lower())
             self.assertNotIn("cdn.jsdelivr.net", text)
 

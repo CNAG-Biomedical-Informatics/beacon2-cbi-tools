@@ -2,47 +2,36 @@ import excelTemplate from '@site/static/img/excel-template.png';
 import validatorOutput from '@site/static/img/bff-tools-validate.png';
 import vcfWorkflow from '@site/static/img/bff-tools-vcf.png';
 
-# Tutorial: Data Beaconization
+# Tutorial: Beaconize a Dataset
 
 <div className="beaconDocHero">
-  <p className="beaconEyebrow">Tutorial</p>
-  <h2>Prepare Beacon v2 data from metadata and genomic input.</h2>
+  <p className="beaconEyebrow">End-to-end tutorial</p>
+  <h2>Prepare metadata and variants as portable Beacon v2 BFF files.</h2>
   <p>
-    This walkthrough follows the standard `beacon2-cbi-tools` path: validate metadata, convert genomic data into BFF `genomicVariations`, and load the resulting collections into MongoDB.
+    Start with an XLSX workbook and a VCF, validate each output, and finish with files that can be reviewed or handed to a Beacon implementation.
   </p>
   <div className="beaconHeroActions">
-    <a className="button button--primary" href="#step-1-validate-metadata">Start tutorial</a>
-    <a className="button button--secondary" href="recipes">Command recipes</a>
-    <a className="button button--secondary" href="../reference/validation-and-reproducibility">Validation notes</a>
+    <a className="button button--primary" href="#1-prepare-metadata">Start tutorial</a>
+    <a className="button button--secondary" href="../getting-started/installation">Install first</a>
+    <a className="button button--secondary" href="../reference/validation-and-reproducibility">Quality checks</a>
   </div>
 </div>
 
-This tutorial explains the typical end-to-end workflow for preparing Beacon v2 data with `beacon2-cbi-tools`.
+You need:
 
-Before starting, complete one of the installation guides:
+- metadata for Beacon entities such as individuals, biosamples, analyses, runs, cohorts, and datasets;
+- a VCF/VCF.gz file, or a supported SNP-array TSV/TXT file;
+- the correct assembly name for the genomic input.
 
-- [Docker installation](../getting-started/docker)
-- [Apptainer installation](../getting-started/apptainer)
-- [Non-containerized installation](../getting-started/non-containerized)
-
-In the simplest case, you start with:
-
-- metadata, including phenotypic or clinical information
-- a VCF file or a SNP-array TSV file
-
-## Workflow overview
-
-Most users follow these three steps:
-
-1. Validate metadata and generate BFF JSON collections.
-2. Convert genomic input into BFF `genomicVariations`.
-3. Load the resulting BFF collections into MongoDB.
+:::warning[Research use]
+The toolkit prepares research data and annotations. It is not a medical device and its output must not be used by itself for clinical or medical decisions. See the [full disclaimer](../about/disclaimer).
+:::
 
 <div className="beaconWorkflowBand">
   <div>
     <span>Step 1</span>
-    <strong>Validate metadata</strong>
-    <strong>Write BFF entity JSON</strong>
+    <strong>Map metadata</strong>
+    <strong>Validate BFF entities</strong>
   </div>
   <div>
     <span>Step 2</span>
@@ -51,248 +40,250 @@ Most users follow these three steps:
   </div>
   <div>
     <span>Step 3</span>
-    <strong>Load collections</strong>
-    <strong>Index data in MongoDB</strong>
+    <strong>Validate and inspect</strong>
+    <strong>Preserve provenance</strong>
   </div>
 </div>
 
-## What You Will Produce
+## 1. Prepare Metadata
 
-<div className="beaconOutputGrid">
-  <div>
-    <span>Metadata</span>
-    <strong>BFF JSON collections</strong>
-    <p>`individuals.json`, `biosamples.json`, `runs.json`, `datasets.json`, and related entity files.</p>
-  </div>
-  <div>
-    <span>Genomics</span>
-    <strong>`genomicVariationsVcf.json.gz`</strong>
-    <p>BFF genomic variation output generated from VCF or SNP-array input.</p>
-  </div>
-  <div>
-    <span>Database</span>
-    <strong>MongoDB collections</strong>
-    <p>Loaded Beacon collections ready for query and downstream deployment work.</p>
-  </div>
-</div>
-
-## Optional first step: open the runtime environment
-
-If you installed the toolkit with Docker and the container is already running:
+Export the workbook shipped with the installed package:
 
 ```bash
-docker exec -ti beacon2-cbi-tools bash
+bff-tools validate --template-out metadata.xlsx
 ```
 
-If you are using Apptainer or a non-containerized installation, adapt the commands below to your own environment.
-
-## Step 1: validate metadata
-
-Metadata is usually prepared in an XLSX workbook that follows the Beacon v2 data model. The toolkit validates that workbook and converts it into BFF JSON collections.
-
-As input, you can use the provided template:
-
-- [Beacon-v2-Models template](https://github.com/mrueda/beacon2-cbi-tools/blob/main/utils/bff_validator/Beacon-v2-Models_template.xlsx)
-
-You can also use the synthetic cohort workbook as a reference:
-
-- [CINECA synthetic cohort workbook](https://github.com/mrueda/beacon2-cbi-tools/blob/main/CINECA_synthetic_cohort_EUROPE_UK1/Beacon-v2-Models_CINECA_UK1.xlsx)
-
-:::info[About the XLSX template]
-The workbook contains sheets corresponding to Beacon entities such as `analyses`, `biosamples`, `cohorts`, `datasets`, `individuals`, and `runs`.
-
-Header names indicate structure:
-
-- `.` usually represents nested objects
-- `_` usually represents arrays
-
-In most workflows, users do not manually fill the `genomicVariations` sheet, because genomic variations are generated later from VCF or TSV input.
-:::
-
-Map your local metadata into the workbook and then validate it:
+The [CINECA synthetic workbook](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/CINECA_synthetic_cohort_EUROPE_UK1/Beacon-v2-Models_CINECA_UK1.xlsx) is a populated reference.
 
 <figure className="beaconFigure">
   <img src={excelTemplate} alt="Beacon v2 metadata workbook template" />
-  <figcaption>Beacon v2 metadata workbook template used before validation.</figcaption>
+  <figcaption>Each worksheet represents one Beacon entity collection.</figcaption>
 </figure>
 
-```bash
-bin/bff-tools validate -i your_metadata.xlsx --out-dir your_bff_dir
-```
+Workbook headers encode JSON structure:
 
-If validation succeeds, the tool writes BFF JSON collections to `your_bff_dir`.
+- `sex.id` creates a nested object;
+- `measures_assayCode.id` creates a one-dimensional array of objects;
+- values beginning with `[` or `{` are parsed as JSON;
+- numeric and boolean strings are serialized as JSON numbers and booleans.
+
+Most projects leave the workbook `genomicVariations` sheet empty because VCF or TSV conversion creates that collection in Step 2. Use `--gv` only when you intentionally maintain complementary genomic-variation records in the workbook or as a named JSON collection.
+
+Validate the completed workbook:
+
+```bash
+bff-tools validate -i metadata.xlsx -o bff
+```
 
 <figure className="beaconFigure">
   <img src={validatorOutput} alt="BFF validation output example" />
-  <figcaption>Validation writes Beacon entity JSON collections and reports structural issues.</figcaption>
+  <figcaption>Valid worksheets become deterministic BFF JSON collections.</figcaption>
 </figure>
 
-### Common validation behavior
+### Diagnose a Failed Workbook Row
 
-- Errors usually indicate missing required fields, invalid values, or formatting mismatches.
-- Warnings may also appear, especially around evolving schema rules such as some `oneOf` validations.
-- It is normal to run validation multiple times while refining the workbook.
+The report names the collection, the actual workbook row, and the path in the generated JSON. It is normal to validate repeatedly while mapping a local data model.
+
+<div className="faqList">
 
 <details>
-<summary>Example errors</summary>
-
-**Example 1**
+<summary>The ontology identifier is not a CURIE</summary>
 
 ```text
-Row 1:
-/ethnicity/id: String does not match ^\w[^:]+:.+$.
+individuals: 1 validation issue(s)
+  row 2: ethnicity.id: 'European' does not match '^\w[^:]+:.+$'
 ```
 
-This usually means the value does not follow the expected CURIE format.
-
-**Example 2**
-
-```text
-Row 1:
-/id: Missing property.
-```
-
-This means a required `id` field is missing.
-
-**Example 3: warning rather than error**
-
-```text
-Row 1:
-/diseases/0/ageOfOnset: oneOf rules 0, 1 match.
-```
-
-Some schema warnings are expected and can reflect ambiguity in the current schema definitions rather than bad input data.
+The `.id` cell needs a real ontology identifier in `PREFIX:TERM` form. Put human-readable text in the matching `.label` cell. Do not invent an identifier merely to satisfy the pattern.
 
 </details>
 
-:::danger[About Unicode and debugging]
-Unicode input is allowed. If validation errors are difficult to interpret, you can use `--ignore-validation` to inspect the generated JSON output and then correct the source workbook before validating again normally.
-:::
+<details>
+<summary>A required identifier is missing</summary>
 
-At the end of this step, you typically have several metadata JSON collections in BFF format.
+```text
+individuals: 1 validation issue(s)
+  row 2: $: 'id' is a required property
+```
 
-## Step 2: convert genomic data
+Add a stable, unique entity identifier to the `id` cell on workbook row 2. The row number is the Excel row, including the header row.
 
-The second step is to generate BFF `genomicVariations` from genomic input.
+</details>
 
-### VCF input
+<details>
+<summary>A oneOf value matches multiple schema alternatives</summary>
 
-Use `bff-tools vcf` for VCF or VCF.gz input:
+```text
+row 2: diseases.0.ageOfOnset: ... is valid under each of ...
+```
+
+`oneOf` requires exactly one representation. Inspect the generated object and remove mixed age, range, date, ontology, quantity, or measurement alternatives. Some Beacon v2 branches overlap; `--ignore-validation` may expose the intermediate JSON for diagnosis, but it does not turn that output into a validation pass.
+
+</details>
+
+</div>
+
+Values beginning with `[` or `{` must be valid JSON. Unicode is supported, but pasted non-breaking spaces, typographic quotes, and invisible control characters can make a cell difficult to diagnose. Correct the workbook and rerun without `--ignore-validation` before using the output.
+
+A successful metadata run normally writes six collections: `analyses.json`, `biosamples.json`, `cohorts.json`, `datasets.json`, `individuals.json`, and `runs.json`. Empty worksheets are omitted.
+
+## 2. Convert Variants
+
+Most raw VCFs should use the fully configured annotation workflow:
 
 ```bash
-bin/bff-tools vcf -t 4 -i input.vcf.gz -p param_file.yaml
+bff-tools vcf \
+  -i cohort.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  --annotate \
+  -c config.yaml \
+  -o cohort-bff
 ```
 
-Minimal parameter file example:
+This normalizes the VCF and applies SnpEff, dbNSFP, ClinVar, and COSMIC resources before the production converter maps common fields, genotypes, ANN consequences, prediction data, and clinical interpretations.
 
-```yaml
-genome: hs37
-```
+`--dataset-id` must identify the same dataset represented in `datasets.json` and referenced by the connected metadata. For multi-sample VCFs, sample names become `biosampleId` values in `caseLevelData`; verify that they match your biosample identifiers.
 
-If you also want HTML output for later browsing with `bff-browser`:
-
-```yaml
-genome: hs37
-bff2html: true
-```
-
-:::info[About reference genomes]
-Make sure the genome in the parameter file matches the genome used to produce the VCF. Common values are `hg19`, `hg38`, `hs37`, and `b37`.
-:::
-
-:::info[About supported VCF content]
-The workflow is aimed at DNA sequencing VCFs such as WES, WGS, and panel data. Structural variants and copy number variation support are still limited.
-:::
+The production mapping targets DNA-sequencing SNVs and nucleotide insertions/deletions from single-sample or multi-sample VCFs. Symbolic structural and copy-number alleles are currently skipped; see [Supported Data](../reference/supported-data) before processing an SV-focused callset.
 
 <figure className="beaconFigure">
   <img src={vcfWorkflow} alt="VCF to BFF genomic variation workflow" />
-  <figcaption>VCF conversion generates BFF genomic variation output and stage logs.</figcaption>
+  <figcaption>Conversion writes compressed BFF genomic variations plus a reproducibility log.</figcaption>
 </figure>
 
-### SNP-array TSV input
+The assembly must match the input. `b37` is normalized to `hs37`; `hg19`, `hs37`, and `hg38` remain distinct because contig conventions and coordinates can differ.
 
-Use `bff-tools tsv` for SNP-array style TSV or TXT input:
+### Already Annotated Input
 
-```bash
-bin/bff-tools tsv -i input.txt.gz -p param_file.yaml
-```
-
-This mode is useful for microarray-style data such as 23andMe exports.
-
-### Notes on runtime and disk usage
-
-- Processing time depends on both the number of variants and the number of samples.
-- During VCF processing, several intermediate files may be created.
-- Plan disk space generously. Temporary and output files can be several times larger than the original input.
-
-At the end of this step, you should have the genomic variations BFF output, typically under a run-specific project directory such as:
-
-```text
-beacon_XXXXXXX/vcf/genomicVariationsVcf.json.gz
-```
-
-## Step 3: load BFF collections into MongoDB
-
-Once you have both:
-
-- the metadata BFF collections from Step 1
-- the genomic variations BFF output from Step 2
-
-you can load them into MongoDB with `bff-tools load`.
-
-Example parameter file:
-
-```yaml
-bff:
-  metadatadir: my_bff_dir
-  runs: runs.json
-  cohorts: cohorts.json
-  biosamples: biosamples.json
-  individuals: individuals.json
-  analyses: analyses.json
-  datasets: datasets.json
-  genomicVariationsVcf: beacon_XXXXXXX/vcf/genomicVariationsVcf.json.gz
-```
-
-Run the load step:
+Skip the external stages only when the VCF already contains a compatible SnpEff `ANN` header and annotations. dbNSFP and ClinVar fields are still strongly recommended for complete BFF records:
 
 ```bash
-bin/bff-tools load -p param_file.yaml
+bff-tools vcf \
+  -i cohort.annotated.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  --no-annotate \
+  -o cohort-bff
 ```
 
-If everything is configured correctly, the BFF collections will be ingested into MongoDB.
-
-:::info[About MongoDB]
-The `load` step performs ingestion and indexing. Once data is in MongoDB, you can explore it with `mongosh`, Mongo Express, your own MongoDB clients, or optional utilities such as `bff-portal`.
+:::info[CINECA chr22 conversion benchmark]
+On a 6-core ARM64 Linux workstation, the single-process converter processed an already fully annotated CINECA chr22 VCF with 2,504 samples and 1,110,240 input records in **1 minute 47 seconds**, producing 1,109,368 BFF records with about **20 MB peak RAM**. This measures only VCF-to-BFF conversion; SnpEff/SnpSift annotation and standalone report generation are separate stages. CPU and storage performance will affect runtime.
 :::
 
-## Optional alternative: use `full`
+Resource versions materially affect output and must be recorded with every annotation-enabled run. Complete setup and the download-backed integration test are documented under [Annotation Data](../getting-started/annotation-data).
 
-If you want to combine conversion plus loading in a single command, use:
+### Diagnose a Failed VCF Run
+
+Start with the log path printed by `bff-tools`; the generated stage script records the exact command that failed.
+
+<div className="faqList">
+
+<details>
+<summary>The VCF has no usable SnpEff ANN header</summary>
+
+Raw VCF input must run annotation, which is enabled by default. This error usually means `--no-annotate` or `annotate: false` was used on an unannotated file. Remove that override and supply the [annotation configuration](../getting-started/annotation-data).
+
+</details>
+
+<details>
+<summary>bcftools reports missing contigs or reference mismatches</summary>
+
+Compare input contigs with the selected FASTA index:
 
 ```bash
-bin/bff-tools full -i input.vcf.gz -p param_file.yaml
+bcftools query -f '%CHROM\n' cohort.vcf.gz | head
+cut -f1 /path/to/reference.fa.gz.fai | head
 ```
 
-This is convenient when your metadata files are already prepared and your parameter file already points to the correct BFF inputs.
+Select resources with matching coordinates and names. `chr22` versus `22` is a contig convention; changing the text does not perform a liftover or make hg19 and hs37 interchangeable.
 
-## Optional browsing and follow-up
+</details>
 
-After data preparation:
+<details>
+<summary>SnpEff tries to download a database</summary>
 
-- use `bff-browser` if you want lightweight browsing of static BFF output
-- use `bff-portal` if you want live queries over MongoDB
-- use `bff-queue` if you need to run many jobs on a workstation
+The local genome database is missing or `data.dir` in `snpEff.config` points to the host path rather than the path visible inside the container. Set it to the mounted bundle path, for example `/beacon2-cbi-tools-data/databases/snpeff/v5.0`.
 
-## Summary
+</details>
 
-Before treating a run as ready, confirm:
+<details>
+<summary>bcftools names a malformed INFO tag</summary>
 
-- metadata validation produced the expected entity JSON files
-- `param_file.yaml` uses the correct reference genome label
-- `genomicVariationsVcf.json.gz` exists in the run directory
-- `log.json` and stage-specific logs are preserved
-- MongoDB loading completed without import errors
-- a small subset of records has been inspected manually
+Fix the producer or VCF header when possible. If the named tag is disposable, remove only that tag with `bcftools annotate -x INFO/TAG`, preserve the original, and record the transformation. The historical `INFO/IDREP` command is retained in the [FAQ](../troubleshooting/faq#vcf-coordinates-and-assemblies).
 
-If you get stuck on installation details or edge cases, continue with the [FAQ](../troubleshooting/faq.md).
+</details>
+
+<details>
+<summary>The requested output directory already exists</summary>
+
+Runs never overwrite an existing project directory. Choose a new path with `-o`, or archive and move the previous run before retrying.
+
+</details>
+
+</div>
+
+:::warning[Plan working storage]
+Annotation retains normalized, SnpEff, dbNSFP, ClinVar, and COSMIC VCF intermediates plus the final BFF JSON. Reserve up to **10 times the compressed input VCF size** as a planning estimate, in addition to the annotation bundle. Preserve the final annotated VCF, logs, scripts, checksums, and resource versions before deleting intermediates.
+:::
+
+### SNP-Array Input
+
+For a supported TSV/TXT export:
+
+```bash
+bff-tools tsv \
+  -i genotypes.txt.gz \
+  --sample-id sample-1 \
+  --genome hg19 \
+  --dataset-id cohort-1
+```
+
+TSV conversion requires bcftools, the matching reference FASTA, and the full annotation profile. It cannot use `--no-annotate` because the generated VCF has no SnpEff ANN data.
+
+## 3. Validate Genomic Output
+
+The primary variant output is:
+
+```text
+cohort-bff/vcf/genomicVariationsVcf.json.gz
+```
+
+Validate its records without loading the whole collection into memory:
+
+```bash
+bff-tools validate \
+  -i cohort-bff/vcf/genomicVariationsVcf.json.gz \
+  --gv-vcf
+```
+
+## 4. Inspect and Hand Off
+
+Generate the standalone **BFF GenomicVariations Browser** during conversion:
+
+```bash
+bff-tools vcf -i cohort.vcf.gz \
+  --genome hg38 --dataset-id cohort-1 \
+  -c config.yaml --browser -o cohort-bff-browser
+```
+
+Open the generated HTML file directly. It includes searching, sorting, column controls, pagination for large tables, gene panels, and assembly-aware links to external variant databases.
+
+Before handing the BFF files to a Beacon implementation, confirm:
+
+- metadata and genomic collections pass schema validation;
+- the selected assembly and contig convention match the source data;
+- expected sample, variant, and entity counts are present;
+- a representative set of variants and annotations has been inspected;
+- `log.json`, parameter YAML, annotation resource versions, and source checksums are retained.
+
+## 5. Connect to a Beacon Backend
+
+`bff-tools` deliberately stops at portable BFF files. A backend can consume them without being bundled into the data-preparation application.
+
+- Follow [MongoDB Import](../reference/mongodb) for indexes, repeatable upserts, and large streamed collections.
+- See [EGA Beacon v2 PI API](https://github.com/EGA-archive/beacon2-pi-api) or [Progenetix bycon](https://codeberg.org/Progenetix/bycon/) for complete Beacon server implementations.
+
+MongoDB clients are external to the application and Docker image. The current compatibility archive may still contain legacy copies, but `bff-tools` does not use them; the next versioned annotation bundle will omit them.
+
+Continue with [Validation and Reproducibility](../reference/validation-and-reproducibility) for the release checklist or the [FAQ](../troubleshooting/faq) for failed runs.

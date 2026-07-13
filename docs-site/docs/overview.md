@@ -3,129 +3,78 @@ title: Overview
 ---
 
 <div className="beaconDocHero">
-  <p className="beaconEyebrow">Overview</p>
-  <h2>Build Beacon v2-ready datasets from metadata and genomic files.</h2>
+  <p className="beaconEyebrow">Beacon v2 data preparation</p>
+  <h2>Turn metadata and genomic files into portable BFF collections.</h2>
   <p>
-    `beacon2-cbi-tools` helps validate Beacon metadata, convert VCF or SNP-array input into Beacon Friendly Format, and load the resulting collections into MongoDB.
+    Validate XLSX or JSON metadata, convert VCF and SNP-array data, and inspect the result before connecting it to a Beacon implementation.
   </p>
   <div className="beaconHeroActions">
-    <a className="button button--primary" href="workflows/recipes">Command recipes</a>
-    <a className="button button--secondary" href="getting-started/what-should-i-run">What should I run?</a>
+    <a className="button button--primary" href="workflows/data-beaconization">Start the tutorial</a>
+    <a className="button button--secondary" href="getting-started/quick-start">Quick start</a>
     <a className="button button--secondary" href="reference/supported-data">Supported data</a>
   </div>
 </div>
 
-`beacon2-cbi-tools` helps you prepare data for Beacon v2 deployments based on the Beacon Friendly Format (BFF).
-
-With this toolkit you can:
-
-- validate metadata from XLSX or JSON files against Beacon v2 schemas
-- convert VCF or SNP-array TSV input into BFF `genomicVariations`
-- load BFF collections into MongoDB
-- optionally inspect the resulting data with lightweight utilities
-
-:::warning[Research-use disclaimer]
-This toolkit is intended for research use. Do not use generated annotations or results for medical decisions.
-:::
-
-## Typical Workflow
-
-Most users follow this sequence:
-
-1. Prepare and validate metadata with `bff-tools validate`.
-2. Convert genomic data with `bff-tools vcf` or `bff-tools tsv`.
-3. Load the generated BFF collections into MongoDB with `bff-tools load` or `bff-tools full`.
+`beacon2-cbi-tools` does one job: it prepares data in the Beacon Friendly Format (BFF) for Beacon v2.
 
 <div className="beaconWorkflowBand">
   <div>
-    <span>Input</span>
-    <strong>XLSX or BFF metadata</strong>
+    <span>Prepare</span>
+    <strong>XLSX or BFF JSON metadata</strong>
     <strong>VCF or SNP-array TSV</strong>
   </div>
   <div>
-    <span>Process</span>
+    <span>Run</span>
     <strong>validate</strong>
-    <strong>vcf / tsv / load / full</strong>
+    <strong>vcf or tsv</strong>
   </div>
   <div>
-    <span>Output</span>
-    <strong>BFF JSON collections</strong>
-    <strong>MongoDB and browser files</strong>
+    <span>Review</span>
+    <strong>Schema-valid BFF collections</strong>
+    <strong>Optional standalone HTML report</strong>
   </div>
 </div>
 
-## Recommended Path
-
-If you are new to the toolkit, use this order:
-
-1. Read the [installation overview](getting-started/installation.md) and pick Docker unless your environment requires Apptainer or a direct install.
-2. Use [What should I run?](getting-started/what-should-i-run.md) to choose the right command for your input.
-3. Check [Supported Inputs and Outputs](reference/supported-data.md) to confirm your data fits a supported path.
-4. Run the [Quick Start](getting-started/quick-start.md) with the bundled test data.
-5. Use [Command Recipes](workflows/recipes.md) for copy-paste commands.
-6. Read the [data beaconization tutorial](workflows/data-beaconization) before adapting the workflow to your own data.
-7. Check [Validation and Reproducibility](reference/validation-and-reproducibility.md) and [Outputs](reference/outputs.md) when reviewing generated files and logs.
-8. Keep the [FAQ](troubleshooting/faq.md) open while configuring reference genomes, annotation resources, and MongoDB loading.
-
-## What You Need Before Starting
-
-| Requirement | Why it matters |
-|---|---|
-| Metadata in XLSX or BFF JSON | Required for Beacon entities such as `individuals`, `biosamples`, `runs`, and `datasets` |
-| VCF, VCF.gz, or SNP-array TSV input | Used to generate BFF `genomicVariations` |
-| Reference genome choice | Must match your genomic input, for example `hg19`, `hg38`, `hs37`, or `b37` |
-| External reference data | Required by the genomic conversion workflow |
-| MongoDB | Required only when you want to load and query BFF collections |
-
-## Choose Your Path
+## Choose a Starting Point
 
 <div className="beaconPathGrid">
-  <a href="getting-started/installation">
-    <span>Setup</span>
-    <h3>Install the toolkit</h3>
-    <p>Choose Docker, Apptainer, or a non-containerized setup for your workstation, server, or HPC environment.</p>
-  </a>
-  <a href="workflows/recipes">
-    <span>Run</span>
-    <h3>Copy a command</h3>
-    <p>Use short recipes for validation, VCF conversion, SNP-array input, MongoDB loading, and inspection.</p>
+  <a href="getting-started/quick-start">
+    <span>Five minutes</span>
+    <h3>Validate metadata</h3>
+    <p>Export the workbook template and produce your first BFF JSON collections.</p>
   </a>
   <a href="workflows/data-beaconization">
-    <span>Workflow</span>
-    <h3>Prepare real data</h3>
-    <p>Follow the end-to-end data beaconization tutorial before adapting the workflow to your own cohort.</p>
+    <span>Complete workflow</span>
+    <h3>Beaconize a dataset</h3>
+    <p>Follow metadata and variants from source files through validation and review.</p>
   </a>
   <a href="reference/validation-and-reproducibility">
-    <span>Review</span>
-    <h3>Check reproducibility</h3>
-    <p>Understand what validation checks, what it cannot prove, and what to keep when sharing a run.</p>
+    <span>Quality control</span>
+    <h3>Build trust in the output</h3>
+    <p>Check schema results, provenance, biological assumptions, and reproducibility.</p>
   </a>
   <a href="examples/hg38">
-    <span>Examples</span>
-    <h3>Start from test data</h3>
-    <p>Use the GRCh38 / hg38 example and bundled datasets to confirm that your runtime works.</p>
+    <span>Worked input</span>
+    <h3>Run the GRCh38 example</h3>
+    <p>Recreate and beaconize the included 1000 Genomes chromosome 22 subset.</p>
   </a>
-  <a href="troubleshooting/">
+  <a href="troubleshooting/faq">
     <span>Help</span>
-    <h3>Debug a run</h3>
-    <p>Find the right log file and match common symptoms around reference data, validation, and MongoDB loading.</p>
+    <h3>Resolve a failed run</h3>
+    <p>Find focused answers for workbooks, VCF conversion, annotation, and reports.</p>
   </a>
 </div>
 
-## Main Commands
+## Core Commands
 
-The main entry point is `bff-tools`.
+| Command | Use it for |
+|---|---|
+| `bff-tools validate` | Validate XLSX or JSON metadata and write BFF collections |
+| `bff-tools vcf` | Convert a VCF or VCF.gz file into BFF `genomicVariations` |
+| `bff-tools tsv` | Convert supported SNP-array text data through VCF into BFF |
 
-- `bff-tools validate`: validate metadata and write BFF JSON collections
-- `bff-tools vcf`: convert a VCF or VCF.gz file into BFF
-- `bff-tools tsv`: convert a SNP-array TSV file into BFF
-- `bff-tools load`: load BFF collections into MongoDB
-- `bff-tools full`: run conversion plus loading in one step
+Raw VCF and SNP-array workflows require the [full annotation data](getting-started/annotation-data.md) to add ANN, dbNSFP, ClinVar, and COSMIC fields before conversion. Annotation is enabled by default. Use `--no-annotate` only for a VCF that already contains a compatible SnpEff `ANN` header and annotations.
 
-## Utilities
-
-The toolkit also includes optional utilities for browsing or queueing jobs:
-
-- `bff-browser`: browse static BFF files without a database
-- `bff-portal`: query BFF data stored in MongoDB
-- `bff-queue`: run and monitor many ingestion jobs on a workstation
+:::warning[Research use]
+The toolkit prepares and validates data structures. It does not establish clinical validity and must not be used by itself for medical decisions.
+:::

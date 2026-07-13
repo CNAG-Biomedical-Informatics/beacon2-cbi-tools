@@ -1,122 +1,152 @@
-# Containerized Installation with Apptainer
+# Containerized Installation with Apptainer or Singularity
 
-This setup is intended for environments that use Apptainer or Singularity, including HPC systems. As with Docker, the large reference data stays outside the image.
+Apptainer is the recommended installation for HPC systems. It runs an immutable image without a Docker daemon and binds cluster filesystems directly into interactive sessions and scheduler jobs.
 
-## 1. Prepare external data
+The image does **not** contain MongoDB or the large annotation databases. Store reference data once on shared high-throughput storage.
 
-Work in a directory with at least 150 GB of free space:
+## Requirements
 
-```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/deploy/01_download_external_data.py
-python3 01_download_external_data.py
-md5sum -c data.tar.gz.md5
-cat data.tar.gz.part-?? > data.tar.gz
-tar -xzvf data.tar.gz
-mkdir tmp
-```
+- Linux on `amd64` or `arm64`;
+- Apptainer or Singularity, commonly supplied as an environment module;
+- project storage for the SIF, cache, annotation bundle, intermediates, and BFF output;
+- scheduler memory sized above the configured Java heap.
 
-If Google Drive blocks the download, use the URL printed by the script and fetch the file manually.
-
-Then edit:
-
-```text
-/path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/snpEff.config
-```
-
-Set:
-
-```text
-data.dir = /beacon2-cbi-tools-data/soft/NGSutils/snpEff_v5.0/data
-```
-
-## 2. Pull the image
-
-If your system uses environment modules:
+## 1. Load the Runtime
 
 ```bash
 module load apptainer
+apptainer --version
 ```
 
-Then pull the image once:
+Use `singularity` in place of `apptainer` on clusters that retain the older command name.
+
+## 2. Pull the Image
+
+Put cache and temporary files on project storage rather than a small home directory:
 
 ```bash
-apptainer pull beacon2-cbi-tools_latest.sif docker://manuelrueda/beacon2-cbi-tools:latest
+export APPTAINER_CACHEDIR=/path/to/project/cache
+export APPTAINER_TMPDIR=/path/to/project/tmp
+
+apptainer pull beacon2-cbi-tools.sif \
+  docker://manuelrueda/beacon2-cbi-tools:latest
 ```
 
-## 3. Run the image
+For reproducible work, record the application version and SIF checksum:
 
-Interactive shell:
+```bash
+apptainer exec beacon2-cbi-tools.sif bff-tools --version
+sha256sum beacon2-cbi-tools.sif
+```
+
+## 3. Validate Metadata
+
+```bash
+apptainer exec \
+  --bind "$PWD:/work" \
+  beacon2-cbi-tools.sif \
+  bff-tools validate -i /work/metadata.xlsx -o /work/bff
+```
+
+Apptainer runs with the invoking user's identity, so output files retain normal cluster ownership.
+
+## 4. Prepare Annotation Data
+
+Raw VCF and SNP-array input requires the external annotation bundle. Download and verify it once, then follow the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
+
+Use a stable bind destination such as `/beacon2-cbi-tools-data`, and make all paths in `config.yaml` refer to the paths visible inside the container.
+
+## 5. Annotate and Convert a Raw VCF
+
+```bash
+apptainer exec \
+  --bind "$PWD:/work" \
+  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  beacon2-cbi-tools.sif \
+  bff-tools vcf -i /work/cohort.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  -c /work/config.yaml \
+  -o /work/cohort-bff
+```
+
+Annotation is enabled by default. Use `--no-annotate` only for VCF input that already has a compatible SnpEff `ANN` header and record annotations.
+
+## 6. Bind Writable Scratch Space
+
+Java annotation and compressed intermediates can be large. If `/tmp` is restricted, configure `tmpdir` and bind a scheduler-local or project scratch directory:
+
+```bash
+mkdir -p /path/to/project/bff-tmp
+
+apptainer exec \
+  --bind "$PWD:/work" \
+  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  --bind "/path/to/project/bff-tmp:/bff-tmp" \
+  beacon2-cbi-tools.sif \
+  bff-tools vcf -i /work/cohort.vcf.gz \
+  --genome hg38 -c /work/config.yaml -o /work/cohort-bff
+```
+
+Set `tmpdir: /bff-tmp` in the configuration used by that command.
+
+## 7. Open an Interactive Shell
 
 ```bash
 apptainer shell \
-  --bind /absolute/path/to/beacon2-cbi-tools-data:/beacon2-cbi-tools-data \
-  beacon2-cbi-tools_latest.sif
+  --bind "$PWD:/work" \
+  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  beacon2-cbi-tools.sif
 ```
 
-Direct command execution from the host:
+Direct `apptainer exec` commands are preferred in scheduler scripts because they preserve the full invocation in the job record.
+
+## 8. Slurm Example
 
 ```bash
-alias bff-tools='apptainer exec --bind /absolute/path/to/beacon2-cbi-tools-data:/beacon2-cbi-tools-data beacon2-cbi-tools_latest.sif /usr/share/beacon2-cbi-tools/bin/bff-tools'
-bff-tools
+#!/usr/bin/env bash
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=24:00:00
+#SBATCH --tmp=200G
+
+set -euo pipefail
+module load apptainer
+
+apptainer exec \
+  --bind "$SLURM_SUBMIT_DIR:/work" \
+  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  /shared/images/beacon2-cbi-tools.sif \
+  bff-tools vcf -i /work/cohort.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  -c /work/config.yaml \
+  -t "$SLURM_CPUS_PER_TASK" \
+  -o /work/cohort-bff
 ```
 
-Example:
+Adjust wall time, memory, and scratch space to the cohort. `mem` in `config.yaml` controls only the Java heap and must remain below the scheduler memory request.
+
+## Verification
 
 ```bash
-bff-tools vcf -i /beacon2-cbi-tools-data/chr22.Test.1000G.phase3.joint.vcf.gz \
-  -p /beacon2-cbi-tools-data/param.yaml \
-  --projectdir-override /beacon2-cbi-tools-data/my_test_dir
+apptainer exec beacon2-cbi-tools.sif bff-tools validate --help
+apptainer exec beacon2-cbi-tools.sif bff-tools vcf --help
 ```
 
-You can also set the project directory in the parameter file:
+After binding the complete annotation bundle, run the repository's [full annotation integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-deployment-integration) before a production cohort.
 
-```yaml
-projectdir: /beacon2-cbi-tools-data/my_test_dir
-```
+## Common HPC Problems
 
-## 4. Writable temporary directories
+- **Quota exceeded:** move `APPTAINER_CACHEDIR` and `APPTAINER_TMPDIR` to project storage.
+- **Configured file not found:** bind every input, output, configuration, reference, and temporary path used inside the container.
+- **SnpEff attempts a download:** set `data.dir` to the mounted local database path.
+- **Permission denied:** ensure output and scratch bind sources are writable by the submitting user.
+- **Killed by scheduler:** keep the Java heap below the requested memory and account for bcftools, compression, and filesystem cache.
+- **Slow shared storage:** use node-local scratch for intermediates when site policy permits, then copy final output and provenance back to project storage.
 
-If `/tmp` is restricted, bind a writable scratch directory:
+Keep the image tag or checksum, annotation-bundle version, configuration, and scheduler script together in run provenance. Do not run full annotation jobs on login nodes.
 
-```bash
-apptainer shell \
-  --bind /absolute/path/to/beacon2-cbi-tools-data:/beacon2-cbi-tools-data \
-  --bind /absolute/path/to/tmp:/tmp \
-  beacon2-cbi-tools_latest.sif
-```
+## MongoDB
 
-## 5. Test the deployment
-
-```bash
-cd deploy
-bash 02_test_deployment.sh
-```
-
-## MongoDB note
-
-Apptainer does not provide a `docker compose` equivalent. If you need `load` or `full`, run MongoDB outside the container and make sure `bin/config.yaml` points to the correct `mongodburi` and `mongosh`.
-
-## Runtime note
-
-The image includes the core Python and Perl dependencies needed by `bff-tools` and `validate`. Optional utilities under `utils/` and the MkDocs toolchain are not included by default.
-
-## System requirements
-
-- `linux/amd64` or `linux/arm64`
-- Apptainer or Singularity
-- at least 4 GB RAM, ideally more
-- at least 200 GB of disk space for the full data setup
-
-## Cleanup
-
-Remove the image:
-
-```bash
-rm beacon2-cbi-tools_latest.sif
-```
-
-Remove downloaded data:
-
-```bash
-rm -rf /absolute/path/to/beacon2-cbi-tools-data
-```
+Apptainer provides no database service. Install MongoDB clients separately when needed and follow the [MongoDB import guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/reference/mongodb/).

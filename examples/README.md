@@ -1,61 +1,98 @@
-# hs37 (1000 Genomes Project version of GRCh37)
+# Worked Examples
 
-See the [test directory](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/test).
+The runnable inputs, parameter file, and HPC example are kept in the repository's [`examples/` directory](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/examples).
 
-# hg38 (GRCh38)
+## GRCh38 / hg38
 
-## Data Download 
+The repository includes `test_1000G_hg38.vcf.gz`, a compact, multisample 1000 Genomes-derived input. It uses GRCh38 coordinates with UCSC-style `chr22` contigs.
 
-We download the data using `wget` since we could not use `tabix` directly:
+### Run the Included Input
 
-```bash
-wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz
-```
-
-Now, we index the VCF with `tabix`:
+Prepare the external annotation data and update `../bin/config.yaml`, then run from `examples/`:
 
 ```bash
-tabix -p vcf ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz
+../bin/bff-tools vcf \
+  -i test_1000G_hg38.vcf.gz \
+  -p param_hg38.yaml \
+  -c ../bin/config.yaml \
+  -o example-hg38
 ```
 
-**Note**: If your version of `tabix` accepts using `ftp` protocol:
+`param_hg38.yaml` selects `hg38` and enables annotation. The pipeline normalizes the VCF and applies SnpEff, dbNSFP, ClinVar, and COSMIC before conversion.
+
+The primary result is:
+
+```text
+example-hg38/vcf/genomicVariationsVcf.json.gz
+```
+
+Validate it and optionally generate the standalone report:
 
 ```bash
-#tabix -h ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz 22:10516173-11016173  | sed 's/^22    /chr22  /' | bgzip > test_1000G_hg38.vcf.gz
+../bin/bff-tools validate \
+  -i example-hg38/vcf/genomicVariationsVcf.json.gz --gv-vcf
+
+../bin/bff-tools vcf \
+  -i test_1000G_hg38.vcf.gz \
+  -p param_hg38.yaml \
+  -c ../bin/config.yaml \
+  --browser \
+  -o example-hg38-browser
 ```
 
-## Data subset
+Run directories are not overwritten. Use a new `-o` value for each attempt.
 
-Next, we need to convert the GRCh38 file to hg38. This involves adding the prefix 'chr' to '22' to obtain `chr22`. 
+### Recreate the Input Subset
+
+The source is the 2,504-sample chromosome 22 GRCh38 callset from the 1000 Genomes Project. One maintained mirror is the [UCSC 1000 Genomes directory](https://hgdownload.soe.ucsc.edu/gbdb/hg38/1000Genomes/).
+
+Download and index the chromosome file:
 
 ```bash
-tabix -h ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz 22:10516173-11016173 | sed -e 's/##contig=<ID=22>/##contig=<ID=chr22>/' -e 's/^22\t/chr22\t/' | bgzip > test_1000G_hg38.vcf.gz
+wget https://hgdownload.soe.ucsc.edu/gbdb/hg38/1000Genomes/ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz
+
+bcftools index -t \
+  ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz
 ```
 
-## Run `bff-tools`
-
-The simplest task is to convert a `VCF` file to the `BFF` format. The resulting files will be located in the `beacon_*/vcf/` directory.
+The source records use contig `22`, while the configured hg38 resources use `chr22`. Subset the original coordinates and rename the contig with bcftools:
 
 ```bash
-../bin/bff-tools vcf -i test_1000G_hg38.vcf.gz -p param_hg38.yaml
-# Here we're using 'hg38' as the reference genome.
+printf '22\tchr22\n' > rename-chrs.txt
+
+bcftools view \
+  -r 22:10516173-11016173 \
+  -Ou \
+  ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
+  | bcftools annotate --rename-chrs rename-chrs.txt \
+      -Oz -o test_1000G_hg38.vcf.gz
+
+bcftools index -t test_1000G_hg38.vcf.gz
 ```
 
-### Alternative `bff-tools` modes
+This is a contig-name normalization within the same GRCh38 coordinate system. It is not a liftover. Preserve the source URL, checksum, region, rename map, and commands with any regenerated fixture.
 
-If your `mongo` container is set up and running, you can convert the `VCF` and load the data into MongoDB in a single step using the `full` mode:
+### Use Existing Compatible Annotations
+
+To skip re-annotation, the VCF must already contain a compatible SnpEff `ANN` header and annotations:
 
 ```bash
-../bin/bff-tools full -i test_1000G_hg38.vcf.gz -p param_hg38.yaml
-# This runs both 'vcf' and 'load' steps together.
+../bin/bff-tools vcf \
+  -i cohort.hg38.annotated.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  --no-annotate \
+  -o cohort-hg38-bff
 ```
 
-The result of the MongoDB import will be located in the `beacon_*/mongodb/` directory.
+dbNSFP and ClinVar fields remain strongly recommended for complete BFF output.
 
-### Loading other Beacon v2 Model entities
+## GRCh37 / hs37
 
-To import other Beacon v2 Model entities into MongoDB (without converting VCFs), use the `load` mode with a YAML file:
+Compact GRCh37 fixtures and Perl-generated reference outputs are under [`testdata/vcf`](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/testdata/vcf). Use `hs37` for hs37d5-style contigs such as `22`; use `hg19` only with matching hg19 coordinates, contigs, FASTA, and annotation resources.
 
-```bash
-../bin/bff-tools load -p load.yaml
-```
+## Metadata
+
+The populated [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) is the real-world metadata example. It accompanies the packaged workbook template and serves as the 10,018-record validator parity fixture.
+
+Full VCF release acceptance uses an external, fully annotated CINECA chromosome 22 file with 2,504 samples. That full file is not committed to Git or included in the PyPI package.

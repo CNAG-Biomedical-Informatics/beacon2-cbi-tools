@@ -2,8 +2,6 @@
 title: Citation
 ---
 
-# Citation
-
 :::note[Citation]
 Rueda, M, Ariosa R. "Beacon v2 Reference Implementation: a toolkit to enable federated sharing of genomic and phenotypic data". _Bioinformatics_, btac568, [DOI](https://doi.org/10.1093/bioinformatics/btac568).
 :::

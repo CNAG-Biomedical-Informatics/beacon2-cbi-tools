@@ -1,0 +1,77 @@
+{
+  "baselineRecords": 5000,
+  "currentPerlExpectedBffRecords": 4998,
+  "description": "Compact records extracted from the fully annotated CINECA chr22 VCF",
+  "fixtureRecords": 5002,
+  "notes": "The current Perl converter does not emit the selected symbolic copy-number alleles.",
+  "samples": 2504,
+  "source": "chr22.Test.1000G.phase3.joint.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz",
+  "symbolicRecords": 4,
+  "targetedRecords": [
+    {
+      "criterion": "ann_modifier",
+      "recordNumber": 1,
+      "variant": "22:16050075:A:G"
+    },
+    {
+      "criterion": "missing_genotype",
+      "recordNumber": 2,
+      "variant": "22:16050115:G:A"
+    },
+    {
+      "criterion": "homozygous_alternate",
+      "recordNumber": 3,
+      "variant": "22:16050213:C:T"
+    },
+    {
+      "criterion": "indel",
+      "recordNumber": 10,
+      "variant": "22:16050654:A:<CN0>"
+    },
+    {
+      "criterion": "symbolic",
+      "recordNumber": 11,
+      "variant": "22:16050654:A:<CN2>"
+    },
+    {
+      "criterion": "multiple_transcripts",
+      "recordNumber": 1293,
+      "variant": "22:16157536:G:T"
+    },
+    {
+      "criterion": "ann_high",
+      "recordNumber": 1527,
+      "variant": "22:16186954:C:CA"
+    },
+    {
+      "criterion": "cosmic",
+      "recordNumber": 2603,
+      "variant": "22:16257190:G:A"
+    },
+    {
+      "criterion": "ann_moderate",
+      "recordNumber": 2606,
+      "variant": "22:16258211:A:G"
+    },
+    {
+      "criterion": "ann_low",
+      "recordNumber": 2686,
+      "variant": "22:16266920:C:CAG"
+    },
+    {
+      "criterion": "clinvar",
+      "recordNumber": 2765,
+      "variant": "22:16275272:C:T"
+    },
+    {
+      "criterion": "dense_dbnsfp",
+      "recordNumber": 18699,
+      "variant": "22:17071787:T:A"
+    },
+    {
+      "criterion": "clinvar_pathogenic",
+      "recordNumber": 31951,
+      "variant": "22:17566000:C:T"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
 ---
 genome: b37
+annotate: true
 bff2html: false

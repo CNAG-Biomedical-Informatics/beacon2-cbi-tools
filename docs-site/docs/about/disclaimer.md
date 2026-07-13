@@ -2,8 +2,6 @@
 title: Disclaimer
 ---
 
-# Disclaimer
-
 :::warning[Genetic Data Interpretation Disclaimer]
 This tool provides research-based annotations of genetic data from SNP microarray formats, such as 23andMe, and VCF files. It is intended for research use only and is not a medical device. It does not provide medical or clinical advice.
 :::

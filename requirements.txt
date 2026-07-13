@@ -1,3 +1,6 @@
 # Core Python dependencies for bff-tools
-PyYAML
-xlsx2csv
+jsonschema>=4.18
+openpyxl>=3.1
+orjson>=3.10
+PyYAML>=6
+isal>=1.7

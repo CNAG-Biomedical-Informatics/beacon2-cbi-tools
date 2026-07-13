@@ -1,64 +1,52 @@
 ---
-title: Supported Inputs and Outputs
+title: Supported Data
 ---
 
-# Supported Inputs and Outputs
-
-Use this page to check whether your data fits one of the supported `bff-tools` workflows.
-
-## Main Data Paths
-
-| Starting data | Command | Main output | Notes |
+| Input | Command | Output | External resources |
 |---|---|---|---|
-| Beacon metadata workbook (`.xlsx`) | `bff-tools validate` | BFF JSON collections | Use the Beacon v2 workbook template for `individuals`, `biosamples`, `runs`, `datasets`, and related entities. |
-| Existing BFF JSON metadata | `bff-tools validate` | validated BFF JSON collections | Useful when metadata was produced outside the workbook template. |
-| VCF or VCF.gz | `bff-tools vcf` | BFF `genomicVariations` | The `genome` setting must match the input reference build and configured annotation resources. |
-| SNP-array TSV or TXT | `bff-tools tsv` | VCF-like intermediates and BFF `genomicVariations` | Intended for SNP-array style data such as direct-to-consumer genotype exports. |
-| BFF JSON collections | `bff-tools load` | MongoDB collections | Requires MongoDB and valid paths for `mongoimport` and `mongosh`. |
-| Metadata plus VCF or TSV input | `bff-tools full` | BFF output plus MongoDB load | Convenience mode when configuration already points to the metadata collections. |
+| Beacon metadata workbook (`.xlsx`) | `bff-tools validate` | One BFF JSON file per worksheet | None |
+| BFF collection files (`.json`) | `bff-tools validate` | Validation report | None |
+| Streamed genomic variations (`.json` or `.json.gz`) | `bff-tools validate --gv-vcf` | Validation report | None |
+| Raw VCF (`.vcf`, `.vcf.gz`) | `bff-tools vcf` | Annotated intermediates and BFF genomic variations | Full annotation profile |
+| VCF with compatible SnpEff ANN data | `bff-tools vcf --no-annotate` | `genomicVariationsVcf.json.gz` | None |
+| SNP-array TSV/TXT | `bff-tools tsv` | VCF intermediate, annotated intermediates, and BFF genomic variations | Full annotation profile |
 
-## Metadata Entities
+## Metadata Collections
 
-Metadata validation can produce the standard Beacon v2 entity collections used by the toolkit:
+The packaged workbook and schemas cover:
 
-```text
-analyses.json
-biosamples.json
-cohorts.json
-datasets.json
-individuals.json
-runs.json
-```
+- `analyses`
+- `biosamples`
+- `cohorts`
+- `datasets`
+- `individuals`
+- `runs`
+- `genomicVariations` when `--gv` is explicitly selected
 
-The exact files depend on the sheets or JSON collections present in the input.
+JSON filenames must match their collection names. Gzipped, one-record-per-line genomic output may retain the generated name `genomicVariationsVcf.json.gz` when `--gv-vcf` is used.
 
-## Genomic Variation Output
+## Assemblies
 
-VCF and TSV workflows generate genomic variation data in BFF form. The most common final output is:
+The conversion CLI accepts `hg19`, `hg38`, `hs37`, and `b37`. `b37` is treated as the `hs37` profile. Assembly labels do not automatically rename contigs or lift coordinates; the VCF and configured FASTA must already agree.
 
-```text
-genomicVariationsVcf.json.gz
-```
+## Variant Content
 
-The output is normally written inside a run-specific project directory, for example:
+The production converter handles SNVs, small insertions/deletions, multisample genotypes, and annotation fields used by the existing SnpEff/SnpSift workflow. Fully annotated regression fixtures cover ANN, dbNSFP, ClinVar, COSMIC, missing genotypes, homozygous alternate calls, indels, and 2,504-sample records.
 
-```text
-beacon_*/vcf/genomicVariationsVcf.json.gz
-```
+VCF records must have a compatible SnpEff ANN header. Raw VCF and all TSV input therefore use annotation by default. Records within an otherwise annotated VCF that lack `INFO/ANN` are skipped with a warning.
 
-## Optional Inspection Paths
+The converter does not filter SNVs or nucleotide indels because `FILTER` is non-PASS or `QUAL` is low. It preserves `FILTER`, `QUAL`, per-sample depth, and assembly metadata for downstream review.
 
-| Need | Tool or option | Output |
-|---|---|---|
-| Browse static BFF files without MongoDB | `bff2html: true` or `bff-browser` | local browser-oriented files |
-| Query BFF collections loaded in MongoDB | `bff-portal` | lightweight API and web interface |
-| Queue many local ingestion jobs | `bff-queue` | local job queue and status tracking |
+Symbolic and structural alleles remain limited and are currently skipped. The regression fixture records current behavior for symbolic copy-number alleles so future converter changes are deliberate and testable.
 
-## Current Limits
+gVCF reference blocks are not accepted as ordinary variants. Genotype or convert a gVCF to a standard variant VCF before running annotation.
 
-- The genomic workflow is aimed at DNA sequencing VCFs and SNP-array style TSV input.
-- Structural variants and copy-number variation support are limited.
-- Biological interpretation remains the user's responsibility; schema-valid output is not the same as clinically validated output.
-- Reference genome labels such as `hg19`, `hg38`, `hs37`, and `b37` must be aligned with the input file and local reference data.
+## Samples and Coordinates
 
-For copy-paste commands, continue to [Command Recipes](../workflows/recipes.md).
+Single-sample and multi-sample VCFs are supported. Sample names become `biosampleId` values in `caseLevelData`; they should match identifiers in the metadata collections.
+
+Generated BFF intervals use 0-start, half-open coordinates. VCF `POS` is 1-based, so a single-base record at `POS` becomes `start = POS - 1` and `end = POS`.
+
+## Standalone Report
+
+`--browser` generates a single HTML file from genomic variation output. The table supports local search, sorting, column visibility, gene-panel filters, and pagination. No database or web service is required.

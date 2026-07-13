@@ -1,1 +1,2 @@
-utils/bff_browser/static/** linguist-vendored
+docs-site/** linguist-documentation
+src/bff_tools/browser_assets/vendor/** linguist-vendored

@@ -482,7 +482,10 @@
           if (field === "refseqId" && /^N[CGMRTWZ]_/.test(value)) return "https://www.ncbi.nlm.nih.gov/nuccore/" + encodeURIComponent(value);
           if (field === "alternateBases" && row.refseqId && row.position !== "") {
             var variant = row.refseqId + "-" + (Number(row.position) + 1) + "-" + row.referenceBases + "-" + row.alternateBases;
-            return "https://gnomad.broadinstitute.org/variant/" + encodeURIComponent(variant);
+            var assembly = String(row.assemblyId || "").toLowerCase();
+            var grch37 = new Set(["b37", "hs37", "hg19", "grch37"]);
+            var dataset = grch37.has(assembly) ? "gnomad_r2_1" : "gnomad_r4";
+            return "https://gnomad.broadinstitute.org/variant/" + encodeURIComponent(variant) + "?dataset=" + dataset;
           }
           return "";
         }

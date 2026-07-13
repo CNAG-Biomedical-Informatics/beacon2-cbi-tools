@@ -1,5 +1,13 @@
 Revision history for beacon2-cbi-tools:
 
+2.0.13-dev  2026-07-12
+
+    - Replaced the Perl validator and VCF converter with parity-tested Python implementations
+    - Reduced full CINECA chr22 conversion from 15m13s to 1m47s while preserving parity
+    - Retired the portal, queue, MongoDB loading, and legacy browser code
+    - Modernized the standalone BFF GenomicVariations Browser
+    - Added Python packaging, tests, CI, and streamlined documentation
+
 2.0.12  2026-03-25
 
     - Refactored the Perl 5 wrapper to Python 3 while keeping the existing Perl internals in place

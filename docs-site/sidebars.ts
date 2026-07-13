@@ -5,77 +5,64 @@ const sidebars: SidebarsConfig = {
     'overview',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Get Started',
       items: [
         'getting-started/installation',
-        'getting-started/what-should-i-run',
+        {
+          type: 'category',
+          label: 'Installation Paths',
+          items: [
+            'getting-started/docker',
+            'getting-started/apptainer',
+            'getting-started/from-source',
+          ],
+        },
+        'getting-started/annotation-data',
         'getting-started/quick-start',
-        'getting-started/docker',
-        'getting-started/apptainer',
-        'getting-started/non-containerized',
       ],
     },
     {
       type: 'category',
-      label: 'Tutorials and Recipes',
+      label: 'Beaconize Data',
       items: [
         {
           type: 'doc',
           id: 'workflows/data-beaconization',
-          label: 'Data Beaconization Tutorial',
+          label: 'End-to-End Tutorial',
         },
         {
           type: 'doc',
-          id: 'workflows/recipes',
-          label: 'Command Recipes',
+          id: 'examples/hg38',
+          label: 'GRCh38 / hg38 Example',
         },
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Implementation',
-      items: [
-        'implementation/overview',
-        'implementation/core-toolchain',
-        'implementation/utilities',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Examples',
-      items: [
-        'examples/hg38',
         {
           type: 'link',
-          label: 'GRCh37 / hg19',
+          label: 'GRCh37 / hs37 Fixtures',
           href: 'https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/testdata',
         },
         {
           type: 'link',
-          label: 'CINECA cohort',
+          label: 'CINECA Synthetic Cohort',
           href: 'https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1',
         },
+        'reference/supported-data',
       ],
     },
     {
       type: 'category',
       label: 'Reference',
       items: [
-        'reference/supported-data',
         'reference/cli',
         'reference/configuration',
         'reference/outputs',
+        'reference/mongodb',
         'reference/validation-and-reproducibility',
-        'reference/utilities',
       ],
     },
     {
       type: 'category',
-      label: 'Troubleshooting',
-      items: [
-        'troubleshooting/index',
-        'troubleshooting/faq',
-      ],
+      label: 'Help',
+      items: ['troubleshooting/faq'],
     },
     {
       type: 'category',

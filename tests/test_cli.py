@@ -40,19 +40,20 @@ class CliTests(unittest.TestCase):
         stderr = io.StringIO()
         with mock.patch("bff_tools.cli.read_config_file", side_effect=cli.ConfigError("bad config")):
             with contextlib.redirect_stderr(stderr):
-                result = cli.main(["load"])
+                result = cli.main(["tsv", "-i", "input.tsv"])
         self.assertEqual(result, 1)
         self.assertEqual(stderr.getvalue().strip(), "Error: bad config")
 
+    def test_retired_modes_are_not_available(self) -> None:
+        parser = cli.build_parser()
+        for mode in ("load", "full"):
+            with contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as ctx:
+                    parser.parse_args([mode])
+            self.assertEqual(ctx.exception.code, 2)
+
     def test_goodbye_list_is_not_empty(self) -> None:
         self.assertTrue(cli.GOODBYES)
-
-    def test_handle_validate_delegates_to_validator(self) -> None:
-        with mock.patch("bff_tools.cli.subprocess.run") as run_mock:
-            run_mock.return_value = subprocess.CompletedProcess(args=["validator"], returncode=7)
-            result = cli.handle_validate(["-i", "input.xlsx"])
-        self.assertEqual(result, 7)
-        run_mock.assert_called_once()
 
     def test_bin_bff_tools_help_runs(self) -> None:
         result = subprocess.run(

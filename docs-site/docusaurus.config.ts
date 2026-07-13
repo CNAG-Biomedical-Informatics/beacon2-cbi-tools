@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Beacon v2 CBI Tools Docs',
-  tagline: 'Documentation for preparing Beacon v2 deployments with Beacon Friendly Format data',
+  tagline: 'Validate and convert data to Beacon v2 Beacon Friendly Format',
   favicon: 'img/logo.png',
   url: 'https://cnag-biomedical-informatics.github.io',
   baseUrl: '/beacon2-cbi-tools/',
@@ -67,16 +67,6 @@ const config: Config = {
         {
           to: '/docs/workflows/data-beaconization',
           label: 'Tutorial',
-          position: 'left',
-        },
-        {
-          to: '/docs/getting-started/installation',
-          label: 'Install',
-          position: 'left',
-        },
-        {
-          to: '/docs/troubleshooting/faq',
-          label: 'FAQ',
           position: 'left',
         },
         {

@@ -1,127 +1,110 @@
-import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import Layout from '@theme/Layout';
 import styles from './index.module.css';
 
-const features = [
+const guideLinks = [
   {
-    title: 'Run Commands',
-    description:
-      'Use copy-paste recipes for metadata validation, VCF conversion, SNP-array input, MongoDB loading, and inspection.',
-    link: '/docs/workflows/recipes',
-    cta: 'Open Recipes',
+    label: 'Get started',
+    title: 'Install and run',
+    text: 'Choose Docker, Apptainer, or a source installation and produce your first BFF collections.',
+    to: '/docs/getting-started/quick-start',
   },
   {
-    title: 'Check Supported Data',
-    description:
-      'Confirm which inputs, outputs, commands, and current limits apply before processing a real cohort.',
-    link: '/docs/reference/supported-data',
-    cta: 'View Matrix',
+    label: 'Workflow',
+    title: 'Beaconize a dataset',
+    text: 'Take metadata and variants through validation, annotation, conversion, and review.',
+    to: '/docs/workflows/data-beaconization',
   },
   {
-    title: 'Review Reproducibility',
-    description:
-      'Understand what schema validation checks, what it cannot prove, and what to keep for reproducibility.',
-    link: '/docs/reference/validation-and-reproducibility',
-    cta: 'Read Guidance',
+    label: 'Annotation',
+    title: 'Prepare reference data',
+    text: 'Configure the FASTA, SnpEff, dbNSFP, ClinVar, and COSMIC resources used for raw input.',
+    to: '/docs/getting-started/annotation-data',
   },
   {
-    title: 'Install the Toolkit',
-    description:
-      'Pick Docker, Apptainer, or a non-containerized install depending on your workstation, server, or HPC environment.',
-    link: '/docs/getting-started/installation',
-    cta: 'Choose Install Path',
-  },
-  {
-    title: 'Prepare Real Data',
-    description:
-      'Follow the end-to-end workflow for metadata validation, genomic conversion, and MongoDB loading.',
-    link: '/docs/workflows/data-beaconization',
-    cta: 'Start Tutorial',
-  },
-  {
-    title: 'Troubleshoot a Run',
-    description:
-      'Use the FAQ when reference genomes, annotation resources, validation warnings, or MongoDB loading fail.',
-    link: '/docs/troubleshooting/faq',
-    cta: 'Open FAQ',
+    label: 'Quality control',
+    title: 'Establish trust',
+    text: 'Review schema guarantees, biological limits, provenance, and release acceptance checks.',
+    to: '/docs/reference/validation-and-reproducibility',
   },
 ];
 
-function HomepageHeader() {
-  return (
-    <header className={styles.hero}>
-      <div className={styles.heroGrid}>
-        <div className={styles.copy}>
-          <p className={styles.kicker}>Beacon v2 CBI Tools</p>
-          <h1>Build Beacon v2-ready datasets from metadata and genomic files.</h1>
-          <p className={styles.lede}>
-            Validate Beacon metadata, convert VCF or SNP-array input into
-            Beacon Friendly Format, and load the resulting collections into
-            MongoDB for Beacon deployments.
-          </p>
-          <div className={styles.actions}>
-            <Link className="button button--primary button--lg" to="/docs/workflows/data-beaconization">
-              Start Tutorial
-            </Link>
-            <Link className="button button--primary button--lg" to="/docs/workflows/recipes">
-              Command Recipes
-            </Link>
-            <Link className="button button--secondary button--lg" to="/docs/getting-started/what-should-i-run">
-              What should I run?
-            </Link>
-          </div>
-        </div>
-
-        <div className={styles.flow} aria-label="Beacon v2 CBI Tools workflow">
-          <div>
-            <span>Input</span>
-            <strong>XLSX metadata</strong>
-            <strong>BFF JSON</strong>
-            <strong>VCF / SNP-array TSV</strong>
-          </div>
-          <div>
-            <span>Run</span>
-            <strong>validate</strong>
-            <strong>vcf / tsv</strong>
-            <strong>load / full</strong>
-          </div>
-          <div>
-            <span>Output</span>
-            <strong>BFF collections</strong>
-            <strong>genomicVariations</strong>
-            <strong>MongoDB / browser files</strong>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function FeatureCards() {
-  return (
-    <section className={styles.features}>
-      <div className={styles.cardGrid}>
-        {features.map((feature) => (
-          <Link className={styles.card} to={feature.link} key={feature.title}>
-            <span>{feature.cta}</span>
-            <h2>{feature.title}</h2>
-            <p>{feature.description}</p>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function Home() {
+  const browserVisual = useBaseUrl('/img/bff-genomic-variations-browser.png');
+
   return (
     <Layout
       title="Beacon v2 CBI Tools"
-      description="Documentation for Beacon v2 CBI Tools"
-    >
+      description="Validate and convert metadata and genomic files to Beacon v2 Beacon Friendly Format">
       <main className={styles.page}>
-        <HomepageHeader />
-        <FeatureCards />
+        <section className={styles.hero}>
+          <div className={styles.heroInner}>
+            <div className={styles.copy}>
+              <p className={styles.kicker}>CNAG Biomedical Informatics</p>
+              <h1>Beacon v2 CBI Tools</h1>
+              <p className={styles.value}>Turn metadata and genomic files into Beacon Friendly Format.</p>
+              <p className={styles.lede}>
+                Validate Beacon metadata, annotate and convert VCF or SNP-array
+                input, and inspect portable BFF collections before connecting
+                them to a Beacon implementation.
+              </p>
+              <div className={styles.actions}>
+                <Link className="button button--primary button--lg" to="/docs/getting-started/quick-start">
+                  Quick start
+                </Link>
+                <Link className="button button--secondary button--lg" to="/docs/workflows/data-beaconization">
+                  Tutorial
+                </Link>
+              </div>
+            </div>
+
+            <div className={styles.runPreview} aria-label="Example optional beaconization parameter file">
+              <div className={styles.previewTitle}>Optional run profile</div>
+              <pre><code><span>genome:</span> hg38{`\n`}<span>datasetid:</span> cohort-1{`\n`}<span>projectdir:</span> cohort-bff{`\n`}<span>annotate:</span> true{`\n`}<span>bff2html:</span> true</code></pre>
+              <div className={styles.statuses}>
+                <div><span>Metadata</span><strong>validated</strong></div>
+                <div><span>Variants</span><strong>annotated</strong></div>
+                <div><span>Output</span><strong>BFF ready</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.output} aria-label="BFF output review">
+          <div className={styles.outputInner}>
+            <div className={styles.outputHeading}>
+              <div>
+                <span>Standalone review</span>
+                <h2>Inspect the generated genomic variations</h2>
+              </div>
+              <Link to="/docs/examples/hg38">Run the GRCh38 example</Link>
+            </div>
+            <img
+              className={styles.outputImage}
+              src={browserVisual}
+              alt="BFF GenomicVariations Browser showing annotated CINECA chromosome 22 variants"
+            />
+            <div className={styles.mobileFlow}>
+              <div><span>Input</span><strong>XLSX, JSON, VCF, or SNP-array data</strong></div>
+              <div><span>Process</span><strong>Validate, annotate, and convert</strong></div>
+              <div><span>Output</span><strong>Portable BFF collections and report</strong></div>
+            </div>
+            <p>Generated from the annotated CINECA chr22 parity data included with the repository.</p>
+          </div>
+        </section>
+
+        <section className={styles.sections} aria-label="Documentation sections">
+          <div className={styles.grid}>
+            {guideLinks.map((guide) => (
+              <Link className={styles.card} to={guide.to} key={guide.title}>
+                <span>{guide.label}</span>
+                <h2>{guide.title}</h2>
+                <p>{guide.text}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
     </Layout>
   );

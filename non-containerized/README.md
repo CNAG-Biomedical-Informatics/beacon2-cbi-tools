@@ -1,114 +1,127 @@
-# Non-containerized Installation
+# Direct Installation from PyPI or Source
 
-Use this path if you want to run `beacon2-cbi-tools` directly on the host without Docker or Apptainer.
+Use a direct installation when the host or HPC environment already manages Python, Java, bcftools, and reference data through packages or environment modules.
 
-## 1. Prepare external data
+Perl, `xlsx2csv`, MongoDB, `mongosh`, and MongoDB Database Tools are not application dependencies.
 
-Work in a directory with at least 150 GB of free space:
+## Requirements
 
-```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/deploy/01_download_external_data.py
-python3 01_download_external_data.py
-md5sum -c data.tar.gz.md5
-cat data.tar.gz.part-?? > data.tar.gz
-tar -xzvf data.tar.gz
-mkdir tmp
-```
+- Linux on `amd64` or `arm64`;
+- Python 3.10 or newer;
+- Java, bcftools, SnpEff, and SnpSift for raw VCF or TSV annotation;
+- the external FASTA, dbNSFP, ClinVar, and COSMIC resources;
+- sufficient temporary and output storage for retained annotation intermediates.
 
-If Google Drive blocks the download, use the URL printed by the script and fetch the file manually.
+Metadata validation and conversion of a compatibly annotated VCF need only Python and the installed package.
 
-Then edit:
+## 1. Install the Released Package
 
-```text
-/path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/snpEff.config
-```
-
-Set:
-
-```text
-data.dir = /path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/data
-```
-
-## 2. Install system packages
+Create an isolated environment:
 
 ```bash
-sudo apt install git wget gcc make libperl-dev libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev liblzma-dev libcurl4-openssl-dev libssl-dev cpanminus perl python3 python3-pip default-jre
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install beacon2-cbi-tools
 ```
 
-If you plan to use MongoDB loading, install `mongosh` as well.
+Verify it:
 
-## 3. Clone the repository
+```bash
+bff-tools --version
+bff-tools validate --help
+bff-tools vcf --help
+```
+
+## 2. Install from a Source Checkout
+
+Use this route for development or for an unreleased version:
 
 ```bash
 git clone https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools.git
 cd beacon2-cbi-tools
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install .
 ```
 
-To update an existing checkout later:
+The `bin/bff-tools` checkout shim invokes the same package code without requiring a global installation.
+
+## 3. Validate Metadata
 
 ```bash
-git pull
+bff-tools validate --template-out metadata.xlsx
+bff-tools validate -i metadata.xlsx -o bff
 ```
 
-## 4. Install Python and Perl dependencies
+No annotation bundle is needed for this step.
 
-Core Python dependencies:
+## 4. Install the Annotation Runtime
+
+For raw VCF and TSV input, install or load:
+
+- Java compatible with the selected SnpEff/SnpSift release;
+- bcftools;
+- SnpEff and SnpSift jars;
+- a matching FASTA plus dbNSFP, ClinVar, and COSMIC data.
+
+On Debian or Ubuntu, the system executables can be installed with:
 
 ```bash
-pip install -r requirements.txt
+sudo apt-get update
+sudo apt-get install --no-install-recommends \
+  bcftools default-jre-headless libsnpsift-java snpeff
 ```
 
-Core Perl dependencies:
+HPC users should prefer site modules when available. Prepare the shared databases using the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/) and update `config.yaml` with host-visible absolute paths.
+
+## 5. Annotate and Convert
 
 ```bash
-cpanm --notest --installdeps .
+bff-tools vcf -i cohort.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  -c config.yaml \
+  -o cohort-bff
 ```
 
-Optional utility dependencies:
+Annotation is enabled by default. For a VCF that already has a compatible SnpEff `ANN` header and annotations:
 
 ```bash
-cpanm --notest Mojolicious MongoDB Minion Minion::Backend::SQLite
+bff-tools vcf -i cohort.annotated.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  --no-annotate \
+  -o cohort-bff
 ```
 
-The standalone BFF GenomicVariations Browser has no additional runtime
-dependencies; its table assets are bundled into each generated report.
+TSV input cannot disable annotation because the generated VCF does not contain ANN data.
 
-Documentation site dependencies are managed separately under `docs-site/` with Node.js and npm.
+## 6. Test the Installation
 
-## 5. Configure the toolkit
-
-Update `bin/config.yaml` so that:
-
-- `base` points to the directory where you unpacked the external data
-- `mongosh` points to the correct executable on your system
-
-## 6. Test the deployment
+Install test dependencies in a source checkout and run the normal suite:
 
 ```bash
-cd deploy
-bash 02_test_deployment.sh
+python3 -m pip install ".[test]"
+pytest -q
 ```
 
-Installing `jq` may help when running the test scripts.
+After installing the complete external bundle, run the full annotation integration:
 
-## System requirements
+```bash
+BFF_ANNOTATION_DATA=/absolute/path/to/data \
+  deploy/02_test_deployment.sh
+```
 
-- `linux/amd64` or `linux/arm64`
-- Python 3.8+
-- Perl 5
-- at least 4 GB RAM, ideally more
-- at least 200 GB of disk space for the full data setup
+That test covers normalization, SnpEff, dbNSFP, ClinVar, COSMIC, VCF-to-BFF conversion, schema validation, and semantic comparison with the committed expected output.
 
 ## Troubleshooting
 
-If Python modules are missing, rerun:
+- **Python import failure:** reactivate the intended virtual environment and reinstall the package.
+- **Executable not available:** use an absolute executable path in `config.yaml` or load the required module before running.
+- **Configured file missing:** verify `{base}` expansion, assembly selection, and filesystem permissions.
+- **SnpEff attempts a download:** set `data.dir` in `snpEff.config` to the local database directory.
+- **Output directory exists:** choose a new `-o` path; runs do not overwrite previous results.
 
-```bash
-pip install -r requirements.txt
-```
-
-If Perl modules are missing, rerun:
-
-```bash
-cpanm --notest --installdeps .
-```
+MongoDB clients are optional downstream tools and must be installed separately.

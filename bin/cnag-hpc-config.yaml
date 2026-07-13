@@ -32,11 +32,12 @@ mem: 8G
 # Optional: Temporary directory (default: /tmp)
 tmpdir: "{base}/tmp"
 
-# MongoDB 
-mongoimport: "{base}/soft/mongodb-database-tools-ubuntu2404-{arch}-100.11.0/bin/mongoimport"
-mongostat: "{base}/soft/mongodb-database-tools-ubuntu2404-{arch}-100.11.0/bin/mongostat"
-mongodburi: "mongodb://root:example@mongo:27017/beacon?authSource=admin"
-mongosh: "/software/biomed/beacon2-cbi-tools-data/bin/mongosh-2.4.0-linux-x64/bin/mongosh"
+# Deprecated since 2.0.13: MongoDB loading is no longer part of bff-tools.
+# These paths are kept as migration references until the external bundle is repackaged.
+#mongoimport: "{base}/soft/mongodb-database-tools-ubuntu2404-{arch}-100.11.0/bin/mongoimport"
+#mongostat: "{base}/soft/mongodb-database-tools-ubuntu2404-{arch}-100.11.0/bin/mongostat"
+#mongodburi: "mongodb://root:example@mongo:27017/beacon?authSource=admin"
+#mongosh: "/software/biomed/beacon2-cbi-tools-data/bin/mongosh-2.4.0-linux-x64/bin/mongosh"
 
 # Optional: Set of fields from dbNSFP. Values: all | cnag (default: all)
 dbnsfpset: all

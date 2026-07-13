@@ -1,19 +1,20 @@
 #!/usr/bin/env make
 
-SHELL := /bin/bash
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+ROOT := $(abspath $(MAKEFILE_DIR)/..)
+DOCKERFILE := $(MAKEFILE_DIR)/Dockerfile
+IMAGE ?= beacon2-cbi-tools
 
-install:
-	docker build -t cnag/beacon2-ri-tools:latest .
+.PHONY: core annotation shell clean
 
-run:
-	docker run -tid --name beacon2-ri-tools -p 8080:8000 cnag/beacon2-ri-tools:latest
+core:
+	docker build --target core -t $(IMAGE):core -f $(DOCKERFILE) $(ROOT)
 
-enter:
-	docker exec -ti beacon2-ri-tools bash
+annotation:
+	docker build --target runtime -t $(IMAGE):annotation -f $(DOCKERFILE) $(ROOT)
 
-stop:	
-	docker stop beacon2-ri-tools
+shell:
+	docker run --rm -it --entrypoint bash -v $(PWD):/work $(IMAGE):core
 
-clean: 
-	docker rm -f beacon2-ri-tools
-	docker rmi cnag/beacon2-ri-tools:latest
+clean:
+	docker rmi $(IMAGE):core $(IMAGE):annotation

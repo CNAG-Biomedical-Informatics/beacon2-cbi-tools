@@ -2,103 +2,62 @@
 title: Outputs
 ---
 
-# Outputs
+## Metadata Validation
 
-This page explains the files and directories you should expect after running `bff-tools`.
-
-## Run Directory
-
-Conversion and loading modes create a run-specific project directory. By default, this directory usually has a generated name such as:
+An XLSX validation run writes one JSON array per selected worksheet:
 
 ```text
-beacon_XXXXXXXXXXXXXXX/
+bff/
+├── analyses.json
+├── biosamples.json
+├── cohorts.json
+├── datasets.json
+├── individuals.json
+└── runs.json
 ```
 
-You can override the project directory with:
+Keys are sorted and formatting is deterministic. The collections reproduce the former Perl validator output byte-for-byte.
 
-```bash
-bin/bff-tools vcf -i input.vcf.gz -p param.yaml --projectdir-override my_project
-```
+## VCF Conversion
 
-## Common Files
-
-| Output | Created by | Purpose |
-|---|---|---|
-| `log.json` | `vcf`, `tsv`, `load`, `full` | Captures resolved arguments, configuration, and parameters for reproducibility |
-| `genomicVariationsVcf.json.gz` | `vcf`, `tsv`, `full` | BFF genomic variation collection generated from VCF-style input |
-| `*.log` files | pipeline stages | Stage-specific execution logs for debugging |
-| `run_*.sh` scripts | pipeline stages | Rendered shell scripts used to execute the run |
-
-## Metadata Validation Output
-
-`bff-tools validate` writes BFF JSON collections to the requested output directory.
-
-Typical files include:
+A conversion run creates a new project directory:
 
 ```text
-analyses.json
-biosamples.json
-cohorts.json
-datasets.json
-individuals.json
-runs.json
+cohort-bff/
+├── log.json
+├── vcf/
+│   ├── genomicVariationsVcf.json.gz
+│   ├── run_vcf2bff.sh
+│   └── run_vcf2bff.log
+└── browser/
+    ├── <run-id>.html
+    └── run_bff2html.log
 ```
 
-If `genomicVariations` validation is enabled, genomic variation output may also be written.
+The `browser/` directory exists only when browser generation is enabled. Annotation-enabled runs also retain normalization and annotation intermediates in `vcf/`.
 
-## VCF Conversion Output
+## `genomicVariationsVcf.json.gz`
 
-`bff-tools vcf` usually writes under:
+This is a compressed JSON array formatted with one BFF record per line. The layout allows `bff-tools validate --gv-vcf` and the standalone report generator to process large collections incrementally.
 
-```text
-beacon_*/vcf/
-```
+Records may contain:
 
-Typical contents include:
+- variant identifiers and VRS-style variation data;
+- coordinates and assembly metadata;
+- per-sample `caseLevelData`;
+- quality values and filters;
+- molecular attributes from ANN/dbNSFP;
+- clinical interpretations from ClinVar when present;
+- converter provenance under `_info`.
 
-- normalized and annotated VCF intermediates
-- `genomicVariationsVcf.json.gz`
-- `run_vcf2bff.sh`
-- `run_vcf2bff.log`
+Extra fields such as `assemblyId`, `DP`, `QUAL`, and `FILTER` are retained because the Beacon schemas permit additional properties and they are useful for downstream inspection.
 
-## TSV Conversion Output
+## Reproducibility Files
 
-`bff-tools tsv` usually writes under:
+`log.json` records resolved arguments, parameters, and non-secret configuration. Generated shell scripts capture the exact stage commands. Paths and host details can vary between runs; the biological BFF content should remain semantically stable.
 
-```text
-beacon_*/tsv/
-beacon_*/vcf/
-```
+Do not publish logs before checking them for local paths or operational metadata that your project considers sensitive.
 
-The `tsv` step first creates a VCF-like intermediate, then continues through the same BFF genomic conversion path.
+## Serving the Data
 
-## Browser Output
-
-If `bff2html: true` is enabled in the parameter file, static browser output is written under:
-
-```text
-beacon_*/browser/
-```
-
-This output is useful for local inspection without MongoDB.
-
-The browser directory contains a standalone `<job-id>.html` report and
-`run_bff2html.log`. Open the HTML file directly; it embeds the selected data,
-styles, filters, and table logic and does not require a local server.
-
-## MongoDB Loading Output
-
-`bff-tools load` and `bff-tools full` usually write MongoDB import logs under:
-
-```text
-beacon_*/mongodb/
-```
-
-The actual data is inserted into MongoDB using the configured `mongodburi`.
-
-## Debugging Tips
-
-- Start with `log.json` to confirm the resolved configuration and input files.
-- Check the relevant `*.log` file when a stage fails.
-- Confirm that the reference genome in `param.yaml` matches your input.
-- For MongoDB issues, inspect the `mongodb/` logs and verify `mongodburi`, `mongoimport`, and `mongosh`.
+`bff-tools` stops at portable BFF files. See [MongoDB Import](./mongodb.md) for repeatable loading commands, the legacy wildcard indexes, and links to complete Beacon server implementations.

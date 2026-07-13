@@ -19,9 +19,7 @@ export LANG=C
 export LC_ALL=C
 
 # Mandatory set up for modules
-module load Perl/5.36.0-GCCcore-12.2.0
 module load BCFtools/1.17-GCC-12.2.0
-eval "$(perl -Mlocal::lib=/software/biomed/cbi_perl5)"
 export PYTHONPATH="/software/biomed/cbi_py3/lib/python3.10/site-packages:${PYTHONPATH}"
 
 # Variable definition

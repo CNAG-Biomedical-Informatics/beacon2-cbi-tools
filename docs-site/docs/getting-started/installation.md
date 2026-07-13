@@ -1,36 +1,46 @@
 ---
-title: Installation
+title: Install
 ---
 
-# Installation
+The three supported installation paths expose the same `bff-tools` CLI and use the same external annotation bundle.
 
-Choose the runtime model that matches your environment.
-
-## Recommendation
-
-Use **Docker** for a first local or server deployment. Use **Apptainer** on HPC systems where Docker is not available. Use the **non-containerized** path only when you explicitly need to manage Python, Perl, and system dependencies yourself.
-
-| Path | Best for | Notes |
+| Environment | Recommended path | Why |
 |---|---|---|
-| [Docker](docker) | Workstations, servers, reproducible local deployments | Easiest path when Docker is available |
-| [Apptainer](apptainer) | HPC systems and environments without Docker daemon access | Uses the same container image through Apptainer or Singularity |
-| [Non-containerized](non-containerized) | Hosts where you want direct control over Python, Perl, and system dependencies | Most flexible, but requires more local dependency management |
+| HPC cluster | [Apptainer / Singularity](apptainer) | No daemon or root runtime; immutable image works with schedulers and bind-mounted reference data |
+| Workstation or server | [Docker](docker) | Reproducible dependencies and the shortest setup when Docker is available |
+| Managed host or module stack | [From source](from-source) | Direct control over Python, Java, bcftools, and scheduler modules |
 
-All installation modes use the same core idea: prepare the large external reference data once, then point `bff-tools` to that data.
+Containerized execution is the primary route for HPC and shared infrastructure. It keeps the application reproducible while the large, frequently reused biological databases remain on high-throughput shared storage.
 
-## Preflight Checklist
-
-- Confirm that you have at least 200 GB of disk space for the full external data setup.
-- Decide which reference genome your input uses before running genomic conversion.
-- If you plan to use `load` or `full`, make sure MongoDB and `mongosh` are available.
-- If you only want to validate metadata or inspect command behavior, start with the bundled test data first.
-
-## After Installation
-
-Check that the command is visible from your chosen runtime:
+For a Python environment that only needs validation or conversion of pre-annotated VCFs:
 
 ```bash
-bin/bff-tools --help
+python3 -m pip install beacon2-cbi-tools
 ```
 
-After installation, continue with the [Quick Start](quick-start.md).
+## Two Installation Layers
+
+1. Install the application through Docker, Apptainer, or source.
+2. Prepare the [annotation data](annotation-data) used by most real-world VCF workflows.
+
+Metadata validation can run after layer 1. Raw VCF and TSV conversion requires both layers. A VCF with a compatible SnpEff `ANN` header can skip re-annotation with `--no-annotate` and still use the same converter.
+
+## Supported Platforms
+
+- Linux on x86-64 or ARM64;
+- Python 3.10 or newer for source installations;
+- at least 4 GB RAM for basic use;
+- memory sized for Java/SnpEff and cohort scale for annotation;
+- at least 200 GB free for the maintained annotation bundle and more for intermediates.
+
+## Verify the Application
+
+Every installation should provide:
+
+```bash
+bff-tools --version
+bff-tools validate --help
+bff-tools vcf --help
+```
+
+After preparing annotation data, run the [full deployment integration](annotation-data#full-deployment-integration) before processing a cohort.

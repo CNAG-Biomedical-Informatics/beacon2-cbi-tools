@@ -1,121 +1,156 @@
 # Containerized Installation with Docker
 
-This setup keeps the large reference data outside the container. Prepare that data once, then mount it into the image when you run `bff-tools`.
+Docker is the recommended runtime for workstations and servers. The published image contains `bff-tools`, Python, Java, bcftools, SnpEff, and SnpSift. Large reference and annotation databases remain outside the image and are mounted at runtime.
 
-## 1. Prepare external data
+The image does **not** install MongoDB, `mongosh`, or MongoDB Database Tools. `bff-tools` produces BFF files; database loading is an optional downstream step.
 
-Work in a directory with at least 150 GB of free space:
+## Requirements
 
-```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/deploy/01_download_external_data.py
-python3 01_download_external_data.py
-md5sum -c data.tar.gz.md5
-cat data.tar.gz.part-?? > data.tar.gz
-tar -xzvf data.tar.gz
-mkdir tmp
-```
+- Linux on `amd64` or `arm64`;
+- a working Docker Engine with permission to run containers;
+- at least 4 GB RAM for validation and more for Java annotation;
+- at least 200 GB for the annotation bundle, plus working space for intermediate VCFs and BFF output.
 
-If Google Drive blocks the download, use the URL printed by the script and fetch the file manually.
+## 1. Pull the Published Image
 
-Then edit:
-
-```text
-/path/to/downloaded/data/soft/NGSutils/snpEff_v5.0/snpEff.config
-```
-
-Set:
-
-```text
-data.dir = /beacon2-cbi-tools-data/soft/NGSutils/snpEff_v5.0/data
-```
-
-## 2. Pull the image
+Use a numbered tag for reproducible work. `latest` follows the newest published release:
 
 ```bash
 docker pull manuelrueda/beacon2-cbi-tools:latest
-docker image tag manuelrueda/beacon2-cbi-tools:latest cnag/beacon2-cbi-tools:latest
+docker run --rm manuelrueda/beacon2-cbi-tools:latest --version
 ```
 
-## 3. Run the container
+## 2. Validate Metadata
+
+Mount the working directory at `/work`. Supplying the host user and group avoids root-owned output files:
 
 ```bash
-docker run -tid \
-  --volume /absolute/path/to/beacon2-cbi-tools-data:/beacon2-cbi-tools-data \
-  --name beacon2-cbi-tools \
-  cnag/beacon2-cbi-tools:latest
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD:/work" \
+  manuelrueda/beacon2-cbi-tools:latest \
+  validate -i /work/metadata.xlsx -o /work/bff
 ```
 
-Open a shell:
+Export a fresh workbook template in the same way:
 
 ```bash
-docker exec -ti beacon2-cbi-tools bash
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD:/work" \
+  manuelrueda/beacon2-cbi-tools:latest \
+  validate --template-out /work/metadata.xlsx
 ```
 
-Or call the main tool directly:
+## 3. Prepare Annotation Data
+
+Raw VCF and SNP-array input requires the external annotation bundle. Download it once on the host, verify its checksum, and configure SnpEff as described in the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
+
+Keep the mount point stable. The examples use:
+
+```text
+/beacon2-cbi-tools-data
+```
+
+The host directory and container path do not have to match, but every path in `config.yaml` must be valid **inside** the container.
+
+## 4. Annotate and Convert a Raw VCF
+
+Place `cohort.vcf.gz` and a copy of `config.yaml` in the working directory:
 
 ```bash
-alias bff-tools='docker exec -ti beacon2-cbi-tools /usr/share/beacon2-cbi-tools/bin/bff-tools'
-bff-tools
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD:/work" \
+  -v "/absolute/path/to/data:/beacon2-cbi-tools-data" \
+  manuelrueda/beacon2-cbi-tools:latest \
+  vcf -i /work/cohort.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  -c /work/config.yaml \
+  -o /work/cohort-bff
 ```
 
-Example:
+Annotation is enabled by default. The command normalizes the VCF, applies SnpEff, dbNSFP, ClinVar, and COSMIC, then writes BFF genomic variations.
+
+If `tmpdir` is inside the annotation-data mount, that mount must be writable. A stricter deployment can mount reference directories read-only and bind a separate writable temporary directory.
+
+## 5. Convert an Already Annotated VCF
+
+Use `--no-annotate` only when the input has a compatible SnpEff `ANN` header and record annotations:
 
 ```bash
-bff-tools vcf -i /beacon2-cbi-tools-data/chr22.Test.1000G.phase3.joint.vcf.gz \
-  -p /beacon2-cbi-tools-data/param.yaml \
-  --projectdir-override /beacon2-cbi-tools-data/my_test_dir
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD:/work" \
+  manuelrueda/beacon2-cbi-tools:latest \
+  vcf -i /work/cohort.annotated.vcf.gz \
+  --genome hg38 \
+  --dataset-id cohort-1 \
+  --no-annotate \
+  -o /work/cohort-bff
 ```
 
-You can also set the project directory in the parameter file:
+dbNSFP and ClinVar fields are not mandatory for parsing, but they are strongly recommended for complete BFF identifiers, frequencies, predictions, and clinical interpretations.
 
-```yaml
-projectdir: /beacon2-cbi-tools-data/my_test_dir
-```
+## 6. Open an Interactive Shell
 
-## 4. Optional: build locally
-
-If you want to build the image yourself:
+The normal image entry point is `bff-tools`. Override it only when a shell is useful for inspecting mounts or logs:
 
 ```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docker/Dockerfile
-docker buildx build -t cnag/beacon2-cbi-tools:latest .
+docker run --rm -it \
+  --user "$(id -u):$(id -g)" \
+  --entrypoint bash \
+  -v "$PWD:/work" \
+  -v "/absolute/path/to/data:/beacon2-cbi-tools-data" \
+  manuelrueda/beacon2-cbi-tools:latest
 ```
 
-If `buildx` is not available, use `docker build`.
+One-shot `docker run --rm` commands are preferred for production because inputs, mounts, and image tags remain visible in job provenance.
 
-## 5. Optional: run the full stack with Compose
+## 7. Build Locally
 
-To start `beacon2-cbi-tools`, MongoDB, and Mongo Express together:
+The Dockerfile provides two targets:
 
 ```bash
-wget https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docker/docker-compose.all.yml
-docker compose -f docker-compose.all.yml up -d
+docker build --target core \
+  -t beacon2-cbi-tools:core -f docker/Dockerfile .
+
+docker build --target runtime \
+  -t beacon2-cbi-tools:annotation -f docker/Dockerfile .
 ```
 
-Make sure the compose file points to your external data directory, for example through `BEACON2_DATA_DIR`.
+The `core` target supports metadata validation and `--no-annotate` VCF conversion. The default `runtime` target adds the annotation executables but still requires the external databases.
 
-## 6. Test the deployment
+## Verification
+
+Smoke-test the installed command:
 
 ```bash
-cd deploy
-bash 02_test_deployment.sh
+docker run --rm manuelrueda/beacon2-cbi-tools:latest validate --help
+docker run --rm manuelrueda/beacon2-cbi-tools:latest vcf --help
 ```
 
-## MongoDB note
-
-If you are not using `docker-compose.all.yml`, start MongoDB separately and make sure the paths in `bin/config.yaml` match your environment. If the container must reach an external MongoDB service, place both on the same Docker network.
-
-## Runtime note
-
-The container already includes the core Python and Perl dependencies needed by `bff-tools` and `validate`. The MkDocs documentation toolchain is not included.
-
-## System requirements
-
-- `linux/amd64` or `linux/arm64`
-- Docker and Docker Compose
-- at least 4 GB RAM, ideally more
-- at least 200 GB of disk space for the full data setup
+After mounting the complete bundle, run the repository's [full annotation integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-deployment-integration) before processing a production cohort.
 
 ## Troubleshooting
 
-If image builds fail with DNS or package resolution errors, fix Docker host networking first and retry the build.
+### A configured file does not exist
+
+The path is checked inside the container. Confirm the host bind source exists, the destination matches `{base}` in `config.yaml`, and architecture-specific paths resolve to `x86_64` or `arm64`.
+
+### SnpEff tries to use the network
+
+Set `data.dir` in the `snpEff.config` beside the configured jar to the mounted database path visible inside the container.
+
+### The output directory already exists
+
+Runs do not overwrite project directories. Select a new `-o` path or archive and move the previous result.
+
+### Docker cannot resolve package or image hosts
+
+This is a Docker daemon or host-networking problem rather than a `bff-tools` error. Correct proxy, DNS, certificate, or registry access and retry.
+
+## MongoDB
+
+There is no Compose stack in this repository. For an optional MongoDB deployment, install the clients separately and follow the [MongoDB import guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/reference/mongodb/).

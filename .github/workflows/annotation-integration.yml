@@ -1,0 +1,36 @@
+name: Full annotation integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      download_bundle:
+        description: Download and extract the maintained annotation bundle
+        required: true
+        type: boolean
+        default: false
+      data_directory:
+        description: Existing bundle path on the self-hosted runner
+        required: false
+        default: /beacon2-cbi-tools-data
+
+permissions:
+  contents: read
+
+jobs:
+  annotation:
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install project dependencies
+        run: python3 -m pip install .
+
+      - name: Run with downloaded bundle
+        if: inputs.download_bundle
+        run: deploy/02_test_deployment.sh --download "$RUNNER_TEMP/beacon2-cbi-tools-data"
+
+      - name: Run with existing bundle
+        if: ${{ !inputs.download_bundle }}
+        env:
+          BFF_ANNOTATION_DATA: ${{ inputs.data_directory }}
+        run: deploy/02_test_deployment.sh

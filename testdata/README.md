@@ -1,82 +1,88 @@
+# Test Data and Reproducible Examples
 
-# Test README
+This directory contains compact inputs and expected outputs for VCF-to-BFF, TSV-to-VCF-to-BFF, validator, and browser regression tests. These files are small enough for normal development and CI; the full CINECA chromosome 22 acceptance input remains outside Git.
 
-This directory contains data to verify that the transformation of `VCF` and `TSV` to `BFF` function as expected.
+## Before Running the Raw Inputs
 
-## VCF to BFF
+Both `testdata/vcf/test_1000G.vcf.gz` and `testdata/tsv/input.txt.gz` require annotation. Prepare the external annotation bundle and ensure `bin/config.yaml` points to its FASTA, SnpEff, SnpSift, dbNSFP, ClinVar, and COSMIC resources.
 
-Note: You can perform this same test by performing:
+Run commands from a fresh checkout or choose output paths that do not already exist.
 
-```bash
-cd ../scripts
-bash 02_test_deployment.sh
-```
+## GRCh37 / hs37 VCF
 
-### Data Download (hs37)
+`vcf/test_1000G.vcf.gz` is a compact 1000 Genomes Phase 3 chromosome 1 subset using hs37-style contigs.
 
-All data is inside [vcf](./vcf) directory):
-
-**(There is no need to download it again unless you want to test with a different region.)**
-
-The test file included (`test_1000G.vcf.gz`) originates from the 1000 Genomes Project. It was obtained using the following command:
+From `testdata/vcf/`:
 
 ```bash
-# tabix -h ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz 1:10000-200000 | bgzip > test_1000G.vcf.gz
+../../bin/bff-tools vcf \
+  -i test_1000G.vcf.gz \
+  -p param.yaml \
+  -c ../../bin/config.yaml \
+  --no-browser \
+  -o local-hs37-test
 ```
 
-**Note**: If you encounter an error from `tabix` regarding the `ftp` protocol, try downloading the file locally first:
+Validate the generated collection:
 
 ```bash
-# wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-# tabix -p vcf ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-# tabix -h ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz | 1:10000-200000 | bgzip > test_1000G.vcf.gz
+../../bin/bff-tools validate \
+  -i local-hs37-test/vcf/genomicVariationsVcf.json.gz \
+  --gv-vcf
 ```
 
-### Run `bff-tools`
-
-To test your installation, please execute the command below:
-(It should take less than 1 minute to complete.)
+Compare it semantically with the Perl-generated reference while ignoring only run-specific provenance and the two legacy hash-order arrays:
 
 ```bash
-cd vcf
-../../bin/bff-tools vcf -i test_1000G.vcf.gz -p param.yaml  # Note that here we used hs37 as the reference genome
+python3 ../../tools/compare_bff_outputs.py \
+  ref_beacon_166403275914916/vcf/genomicVariationsVcf.json.gz \
+  local-hs37-test/vcf/genomicVariationsVcf.json.gz
 ```
 
-### Test
-
-Once completed, verify that your file `genomicVariationsVcf.json.gz` matches the provided one:
-
-(Where XXXX is the ID of your job)
+The historical source region can be recreated from the 1000 Genomes GRCh37 release:
 
 ```bash
-diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat ref_beacon_166403275914916/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) 
+wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
+
+bcftools view -r 1:10000-200000 \
+  -Oz -o test_1000G.vcf.gz \
+  ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
 ```
 
-In Ubuntu, you can install the tool `jq` with the following command:
+Record a checksum whenever the fixture is regenerated.
+
+## SNP-Array TSV
+
+`tsv/input.txt.gz` exercises the supported SNP-array/23andMe-style path. It is first converted with bcftools, filtered for missing ALT alleles, annotated, and then mapped to BFF.
+
+From `testdata/tsv/`:
 
 ```bash
-sudo apt-get install jq
+../../bin/bff-tools tsv \
+  -i input.txt.gz \
+  -p param.yaml \
+  -c ../../bin/config.yaml \
+  -o local-tsv-test
+
+python3 ../../tools/compare_bff_outputs.py \
+  ref_beacon_174721318508733/vcf/genomicVariationsVcf.json.gz \
+  local-tsv-test/vcf/genomicVariationsVcf.json.gz
 ```
 
-## TSV to BFF
+TSV conversion cannot use `--no-annotate` because its VCF intermediate does not contain SnpEff ANN data.
 
-SNP microarrays text file to BFF.
+## Fully Annotated Parity Fixtures
 
-All data is inside [tsv](./tsv) directory):
+- `vcf/ref_beacon_166403275914916/` contains the compact fully annotated 1000 Genomes input and Perl-generated BFF expected output.
+- `vcf/cineca_annotated/` contains 5,002 fully annotated source records with all 2,504 CINECA samples and a 4,998-record Perl-generated BFF expected output.
 
-### Run `bff-tools`
+These fixtures test ANN, dbNSFP, ClinVar, COSMIC, SNVs, indels, missing genotypes, homozygous alternate calls, and large multi-sample lines without committing the full chromosome.
+
+## Automated Tests
 
 ```bash
-cd tsv
-../../bin/bff-tools tsv -i input.txt.gz -p param.yaml  # Note that here we used hs37 as the reference genome
+pytest -q tests/test_vcf_conversion.py tests/test_vcf_parity.py
 ```
 
-### Test
-
-```bash
-diff <(zcat beacon_XXXX/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S) <(zcat ref_beacon_174721318508733/vcf/genomicVariationsVcf.json.gz | jq 'del(.[]._info)' -S)
-```
-
-Cheers!
-
-Manu
+The full release gate additionally compares every emitted record from the external CINECA chromosome 22 input. See the documentation's Validation and Trust page for the acceptance criteria.
