@@ -1,4 +1,4 @@
-name: Tests
+name: Build and test
 
 on:
   workflow_dispatch:
@@ -28,20 +28,12 @@ jobs:
       - name: Run tests
         run: python -m unittest discover -s tests -v
 
-      - name: Run tests with coverage (for Coveralls)
+      - name: Run tests with coverage
         if: matrix.python-version == '3.12'
-        run: python -m pytest --cov=bff_tools --cov-report=xml --cov-report=term-missing --cov-fail-under=95
-
-      - name: Upload coverage to Coveralls
-        if: matrix.python-version == '3.12'
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          format: cobertura
-          file: coverage.xml
+        run: python -m pytest --cov=bff_tools --cov-report=term-missing --cov-fail-under=95
 
       - name: Compile Python sources
-        run: python -m compileall -q src tests tools
+        run: python -m compileall -q src tests tools utils
 
       - name: Build wheel and source distribution
         if: matrix.python-version == '3.12'
@@ -59,7 +51,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Check shell syntax
-        run: bash -n src/bff_tools/pipeline/partial/*.sh
+        run: bash -n src/bff_tools/pipeline/partial/*.sh utils/_models2xlsx/*.sh
 
       - name: Check patch whitespace
         run: git diff --check HEAD

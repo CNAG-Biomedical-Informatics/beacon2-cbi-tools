@@ -110,17 +110,34 @@ One-shot `docker run --rm` commands are preferred for production because inputs,
 
 ## 7. Build Locally
 
-The Dockerfile provides two targets:
+Build from a repository checkout so the image contains the exact source you
+selected. For a released version, check out its tag before building. The
+version and Git revision can be recorded in the image metadata:
 
 ```bash
 docker build --target core \
+  --build-arg BFF_TOOLS_VERSION="$(cat VERSION)" \
+  --build-arg VCS_REF="$(git rev-parse HEAD)" \
   -t beacon2-cbi-tools:core -f docker/Dockerfile .
 
 docker build --target runtime \
+  --build-arg BFF_TOOLS_VERSION="$(cat VERSION)" \
+  --build-arg VCS_REF="$(git rev-parse HEAD)" \
   -t beacon2-cbi-tools:annotation -f docker/Dockerfile .
 ```
 
 The `core` target supports metadata validation and `--no-annotate` VCF conversion. The default `runtime` target adds the annotation executables but still requires the external databases.
+
+Inspect the source revision recorded in an image with:
+
+```bash
+docker inspect beacon2-cbi-tools:annotation \
+  --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}'
+```
+
+GitHub Actions uses the same model: it checks out one commit, passes that
+checkout as the Docker build context, and records the commit in the OCI image
+labels. No source is cloned while the image is being built.
 
 ## Verification
 

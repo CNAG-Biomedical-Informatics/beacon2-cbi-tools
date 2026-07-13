@@ -3,7 +3,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'BFF Tools Documentation',
+  title: 'Beacon v2 CBI Tools Documentation',
   tagline: 'Validate and convert data to Beacon v2 Beacon Friendly Format',
   favicon: 'img/logo.png',
   url: 'https://cnag-biomedical-informatics.github.io',
@@ -47,9 +47,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'BFF Tools',
+      title: 'Beacon v2 CBI Tools',
       logo: {
-        alt: 'BFF Tools',
+        alt: 'Beacon v2 CBI Tools',
         src: 'img/logo.png',
       },
       items: [

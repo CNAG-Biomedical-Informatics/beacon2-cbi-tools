@@ -1,12 +1,12 @@
 <div align="center">
   <a href="https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools">
-    <img src="https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docs-site/static/img/logo.png" width="180" alt="BFF Tools">
+    <img src="https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docs-site/static/img/logo.png" width="180" alt="Beacon v2 CBI Tools">
   </a>
-  <h1>BFF Tools</h1>
+  <h1>Beacon v2 CBI Tools</h1>
 </div>
 
-[![Tests](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/tests.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/tests.yml)
-[![Coverage Status](https://coveralls.io/repos/github/CNAG-Biomedical-Informatics/beacon2-cbi-tools/badge.svg?branch=main)](https://coveralls.io/github/CNAG-Biomedical-Informatics/beacon2-cbi-tools?branch=main)
+[![Build and test](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/build-and-test.yml)
+[![Coverage: 98%](https://img.shields.io/badge/coverage-98%25-brightgreen.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/build-and-test.yml)
 [![Docker build](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/docker-build-multi-arch.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/docker-build-multi-arch.yml)
 [![Documentation](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/documentation.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/documentation.yml)
 ![Maintenance status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
@@ -16,9 +16,9 @@
 [![Historical EGA Docker pulls](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=EGA-RI-historical-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
 ![Version](https://img.shields.io/badge/version-2.0.13--dev-blue)
 
-**BFF Tools** prepares portable [Beacon Friendly Format (BFF)](https://docs.genomebeacons.org/models/) data for Beacon v2. It validates phenotypic and clinical metadata, converts VCF or SNP-array TSV input into BFF `genomicVariations`, and can generate a standalone browser report.
+**Beacon v2 CBI Tools** prepares portable [Beacon Friendly Format (BFF)](https://docs.genomebeacons.org/models/) data for Beacon v2. Its command-line interface is called **`bff-tools`**. It validates phenotypic and clinical metadata, converts VCF or SNP-array TSV input into BFF `genomicVariations`, and can generate a standalone browser report.
 
-**BFF Tools** (`beacon2-cbi-tools`) is the actively developed continuation of the original `beacon2-ri-tools`, first developed at [EGA](https://ega-archive.org) and now maintained by its original developer at [CNAG Biomedical Informatics](https://www.cnag.eu). It is used by Beacon deployers and is independent of EGA's separate [`beacon2-ri-tools-v2`](https://github.com/EGA-archive/beacon2-ri-tools-v2) project.
+**Beacon v2 CBI Tools** (`beacon2-cbi-tools`) is the actively developed continuation of the original `beacon2-ri-tools`, first developed at [EGA](https://ega-archive.org) and now maintained by its original developer at [CNAG Biomedical Informatics](https://www.cnag.eu). It is used by Beacon deployers and is independent of EGA's separate [`beacon2-ri-tools-v2`](https://github.com/EGA-archive/beacon2-ri-tools-v2) project.
 
 The two historical image badges preserve the download record of earlier distributions; those images are deprecated for new installations.
 
@@ -47,7 +47,7 @@ The output remains independent of a particular Beacon server or database. For se
 
 ## How data flows
 
-![Flow from source metadata and variants through BFF Tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
+![Flow from source metadata and variants through Beacon v2 CBI Tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
 
 ## Install
 

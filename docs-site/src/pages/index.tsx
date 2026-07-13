@@ -35,19 +35,19 @@ export default function Home() {
 
   return (
     <Layout
-      title="BFF Tools"
+      title="Beacon v2 CBI Tools"
       description="Validate and convert metadata and genomic files to Beacon v2 Beacon Friendly Format">
       <main className={styles.page}>
         <section className={styles.hero}>
           <div className={styles.heroInner}>
             <div className={styles.copy}>
               <p className={styles.kicker}>CNAG Biomedical Informatics</p>
-              <h1>BFF Tools</h1>
+              <h1>Beacon v2 CBI Tools</h1>
               <p className={styles.value}>Turn metadata and genomic files into Beacon Friendly Format.</p>
               <p className={styles.lede}>
-                Validate Beacon metadata, annotate and convert VCF or SNP-array
-                input, and inspect portable BFF collections before connecting
-                them to a Beacon implementation.
+                Use the <code>bff-tools</code> CLI to validate Beacon metadata,
+                annotate and convert VCF or SNP-array input, and inspect portable
+                BFF collections before connecting them to a Beacon implementation.
               </p>
               <div className={styles.actions}>
                 <Link className="button button--primary button--lg" to="/docs/getting-started/quick-start">

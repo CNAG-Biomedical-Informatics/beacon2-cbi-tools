@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 660" role="img" aria-labelledby="title description">
-  <title id="title">Beacon v2 data flow with BFF Tools</title>
+  <title id="title">Beacon v2 data flow with Beacon v2 CBI Tools</title>
   <desc id="description">Metadata, VCF, and SNP-array inputs are validated or converted into portable Beacon Friendly Format collections. An optional standalone report can be generated. Database storage and the Beacon API remain downstream responsibilities.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -42,7 +42,7 @@
   <rect class="downstream" x="848" y="101" width="364" height="528" rx="8"/>
   <line class="boundary" x1="836" y1="122" x2="836" y2="608"/>
 
-  <text class="zone-title" x="58" y="136">BFF Tools</text>
+  <text class="zone-title" x="58" y="136">Beacon v2 CBI Tools</text>
   <text class="zone-note" x="58" y="158">Beaconization and review</text>
   <text class="zone-title" x="878" y="136">Downstream deployment</text>
   <text class="zone-note" x="878" y="158">Storage, API, and access</text>
