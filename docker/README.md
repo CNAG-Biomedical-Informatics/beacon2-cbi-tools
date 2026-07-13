@@ -110,17 +110,47 @@ One-shot `docker run --rm` commands are preferred for production because inputs,
 
 ## 7. Build Locally
 
-The Dockerfile provides two targets:
+The Dockerfile builds the source in the current repository checkout. For a
+release build, check out the release tag and confirm that the worktree is clean
+before building:
+
+```bash
+git checkout 2.0.13
+git status --short
+```
+
+The status command should produce no output.
+
+The Dockerfile provides two targets. Pass the version and revision as image
+metadata; these arguments identify the source but do not select or download it:
 
 ```bash
 docker build --target core \
+  --build-arg BFF_TOOLS_VERSION="$(cat VERSION)" \
+  --build-arg VCS_REF="$(git rev-parse HEAD)" \
   -t beacon2-cbi-tools:core -f docker/Dockerfile .
 
 docker build --target runtime \
+  --build-arg BFF_TOOLS_VERSION="$(cat VERSION)" \
+  --build-arg VCS_REF="$(git rev-parse HEAD)" \
   -t beacon2-cbi-tools:annotation -f docker/Dockerfile .
 ```
 
 The `core` target supports metadata validation and `--no-annotate` VCF conversion. The default `runtime` target adds the annotation executables but still requires the external databases.
+
+Inspect the recorded source revision with:
+
+```bash
+docker inspect beacon2-cbi-tools:annotation \
+  --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}'
+```
+
+The manual Docker GitHub Action follows the same source model: it builds the
+ref selected when launching the workflow, records that exact commit, and
+publishes both `manuelrueda/beacon2-cbi-tools:<VERSION>` and `:latest`. For a
+release, create and push the release tag first, then launch the action against
+that tag. Pull an immutable image digest when byte-for-byte identity with a
+published image is required.
 
 ## Verification
 

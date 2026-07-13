@@ -7,6 +7,7 @@ Revision history for beacon2-cbi-tools:
     - Retired the portal, queue, MongoDB loading, and legacy browser code
     - Modernized the standalone BFF GenomicVariations Browser
     - Added Python packaging, tests, CI, and streamlined documentation
+    - Added source revision metadata to container images
 
 2.0.12  2026-03-25
 
