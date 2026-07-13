@@ -5,6 +5,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import sys
 
@@ -13,11 +14,13 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+import bff_tools.browser as browser  # noqa: E402
 from bff_tools.browser import (  # noqa: E402
     BrowserError,
     build_report_payload,
     generate_browser_report,
     load_bff_variants,
+    load_gene_panels,
     variant_to_row,
 )
 
@@ -137,6 +140,118 @@ class BrowserTests(unittest.TestCase):
             path.write_text('{"data": []}\n', encoding="utf-8")
             with self.assertRaises(BrowserError):
                 load_bff_variants(path)
+
+    def test_browser_inputs_report_io_json_and_panel_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            with self.assertRaisesRegex(BrowserError, "Cannot read BFF input"):
+                load_bff_variants(tmp / "missing.json")
+
+            malformed = tmp / "malformed.json"
+            malformed.write_text("[broken", encoding="utf-8")
+            with self.assertRaisesRegex(BrowserError, "Cannot parse BFF input"):
+                load_bff_variants(malformed)
+
+            valid = tmp / "valid.json"
+            valid.write_text('[{"id":"one"}]', encoding="utf-8")
+            self.assertEqual(load_bff_variants(valid), [{"id": "one"}])
+
+            with self.assertRaisesRegex(BrowserError, "does not exist"):
+                load_gene_panels(tmp / "missing-panels")
+            empty_panels = tmp / "empty-panels"
+            empty_panels.mkdir()
+            with self.assertRaisesRegex(BrowserError, "No .lst gene panels"):
+                load_gene_panels(empty_panels)
+
+    def test_gene_panels_and_sparse_variant_fields_are_normalized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            panel_dir = Path(tmpdir)
+            (panel_dir / "clinical.lst").write_text(
+                "# comment\nBRCA1\n\nTP53\nBRCA1\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                load_gene_panels(panel_dir), {"clinical": {"BRCA1", "TP53"}}
+            )
+
+        row = variant_to_row(
+            {
+                "identifiers": {
+                    "variantAlternativeIds": [
+                        None,
+                        {"id": "dbSNP:rs1, rs2"},
+                        {"id": "ClinVar:CV1"},
+                    ]
+                },
+                "molecularAttributes": {
+                    "geneIds": [None, "BRCA1/TP53-ALT/", "BRCA1"],
+                    "molecularEffects": [None, {"id": "SO:1"}],
+                    "annotationImpact": ["MODERATE"],
+                },
+                "variantLevelData": {
+                    "clinicalInterpretations": [
+                        None,
+                        {"effect": {"label": "Disease", "id": "MONDO:1"}},
+                        {"effect": {"id": "MONDO:2"}, "clinicalRelevance": "benign"},
+                    ]
+                },
+                "caseLevelData": [
+                    None,
+                    {"biosampleId": "sample-only"},
+                    {"zygosity": {"label": "0/1"}, "DP": 0},
+                ],
+            }
+        )
+        self.assertEqual(row["dbSNP"], "rs1, rs2")
+        self.assertEqual(row["conditionId"], "Disease (MONDO:1), MONDO:2")
+        self.assertEqual(row["biosampleId"], "sample-only, 0/1:0")
+        self.assertEqual(row["_genes"], ["ALT", "BRCA1", "TP53", "TP53-ALT"])
+        self.assertEqual(variant_to_row({})["clinicalRelevance"], "")
+
+    def test_render_and_browser_cli_report_asset_and_generation_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            with mock.patch.object(browser, "TEMPLATE_FILE", tmp / "missing.html"):
+                with self.assertRaisesRegex(BrowserError, "template assets"):
+                    browser.render_report({})
+
+            with mock.patch.object(
+                browser, "generate_browser_report", side_effect=BrowserError("bad report")
+            ):
+                with self.assertRaisesRegex(SystemExit, "bad report"):
+                    browser.main(
+                        [
+                            "-i",
+                            str(tmp / "input.json"),
+                            "--panel-dir",
+                            str(tmp),
+                            "--project-id",
+                            "project",
+                            "--job-id",
+                            "job",
+                            "-o",
+                            str(tmp / "report.html"),
+                        ]
+                    )
+
+            with mock.patch.object(browser, "generate_browser_report") as generate:
+                self.assertEqual(
+                    browser.main(
+                        [
+                            "-i",
+                            str(tmp / "input.json"),
+                            "--panel-dir",
+                            str(tmp),
+                            "--project-id",
+                            "project",
+                            "--job-id",
+                            "job",
+                            "-o",
+                            str(tmp / "report.html"),
+                        ]
+                    ),
+                    0,
+                )
+            generate.assert_called_once()
 
 
 if __name__ == "__main__":

@@ -7,3 +7,4 @@ bff2html: true
 #center: cnag
 #datasetid: my_dataset_id
 #projectdir: cnag_beacon
+#progress_every: 10000

@@ -9,12 +9,12 @@ from typing import Any, BinaryIO, Iterator
 
 try:
     import orjson as _orjson
-except ImportError:  # Optional fallback for direct source execution.
+except ImportError:  # pragma: no cover - exercised through the explicit fallback test
     _orjson = None
 
 try:
     from isal import igzip as _igzip
-except ImportError:  # Optional fallback for direct source execution.
+except ImportError:  # pragma: no cover - exercised through the explicit fallback test
     _igzip = None
 
 

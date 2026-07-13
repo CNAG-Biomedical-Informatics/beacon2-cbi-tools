@@ -13,7 +13,7 @@ from bff_tools.parity import compare_bff_files
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PYTHON_CONVERTER = ROOT / "src" / "bff_tools" / "vcf_converter.py"
+DEFAULT_PYTHON_CONVERTER = ROOT / "src" / "bff_tools" / "vcf2bff.py"
 DEFAULT_FIXTURE = ROOT / "testdata" / "vcf" / "cineca_annotated" / "fully_annotated.vcf.gz"
 
 

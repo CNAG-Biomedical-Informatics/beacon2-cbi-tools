@@ -121,11 +121,11 @@ def read_config_file(
     partial_dir = pipeline_dir / "partial"
     config["bash4bff"] = str(partial_dir / "run_vcf2bff.sh")
     config["bash4tsv"] = str(partial_dir / "run_tsv2vcf.sh")
-    config["vcf_converter"] = str(PACKAGE_DIR / "vcf_converter.py")
+    config["vcf2bff"] = str(PACKAGE_DIR / "vcf2bff.py")
     config.setdefault("paneldir", str(PACKAGE_DIR / "panels"))
 
     _require_file(config, "bash4bff", "VCF conversion")
-    _require_file(config, "vcf_converter", "VCF conversion")
+    _require_file(config, "vcf2bff", "VCF conversion")
     _require_executable(config, "pythonbin", "VCF conversion")
 
     if mode == "tsv":
@@ -166,6 +166,7 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         "genome": "hg19",
         "organism": "Homo sapiens",
         "projectdir": "beacon",
+        "progress_every": 10_000,
         "bff2html": False,
         "pipeline": {
             "vcf2bff": 0,
@@ -186,6 +187,7 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         "datasetid": arg.get("datasetid"),
         "genome": arg.get("genome"),
         "sampleid": arg.get("sampleid"),
+        "progress_every": arg.get("progress_every"),
     }
     for key, value in cli_overrides.items():
         if value is not None:

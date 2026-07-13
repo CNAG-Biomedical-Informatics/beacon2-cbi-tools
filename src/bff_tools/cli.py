@@ -129,6 +129,13 @@ def _add_common_options(parser: argparse.ArgumentParser, *, require_input: bool)
     )
     parser.add_argument("--debug", dest="debug", type=int, default=0)
     parser.add_argument("--verbose", dest="verbose", action="store_true")
+    parser.add_argument(
+        "--progress-every",
+        dest="progress_every",
+        type=int,
+        metavar="N",
+        help="report VCF progress every N records (default: 10000)",
+    )
     parser.add_argument("-nc", "--no-color", dest="nocolor", action="store_true")
     parser.add_argument("-ne", "--no-emoji", dest="noemoji", action="store_true")
     parser.add_argument(
@@ -151,6 +158,8 @@ def _validate_args(arg: dict[str, object]) -> None:
         raise ConfigError("Option --p requires a param file")
     if arg.get("threads") is not None and int(arg["threads"]) <= 0:
         raise ConfigError("Option --t requires a positive integer")
+    if arg.get("progress_every") is not None and int(arg["progress_every"]) <= 0:
+        raise ConfigError("Option --progress-every requires a positive integer")
 
     if inputfile:
         value = str(inputfile).lower()

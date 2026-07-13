@@ -13,7 +13,7 @@ if str(SRC) not in sys.path:
 
 from bff_tools import VERSION, __version__  # noqa: E402
 from bff_tools.cli import VERSION as CLI_VERSION  # noqa: E402
-from bff_tools.vcf_converter import VERSION as CONVERTER_VERSION  # noqa: E402
+from bff_tools.vcf2bff import VERSION as CONVERTER_VERSION  # noqa: E402
 
 
 class VersionTests(unittest.TestCase):
@@ -26,7 +26,7 @@ class VersionTests(unittest.TestCase):
 
     def test_converter_remains_directly_executable(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(SRC / "bff_tools" / "vcf_converter.py"), "--version"],
+            [sys.executable, str(SRC / "bff_tools" / "vcf2bff.py"), "--version"],
             capture_output=True,
             text=True,
             check=True,

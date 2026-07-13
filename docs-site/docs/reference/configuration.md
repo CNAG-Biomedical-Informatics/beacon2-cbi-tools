@@ -24,6 +24,7 @@ datasetid: cohort-1
 projectdir: cohort-bff
 annotate: true
 bff2html: true
+progress_every: 10000
 ```
 
 | Key | Default | Purpose |
@@ -34,6 +35,7 @@ bff2html: true
 | `sampleid` | `23andme_1` | Sample name used for TSV conversion |
 | `annotate` | `true` | Annotate raw input; set false only for a compatibly annotated VCF |
 | `bff2html` | `false` | Generate the standalone HTML report |
+| `progress_every` | `10000` | With verbose output, report VCF progress every N records |
 | `center` | `CNAG` | Provenance metadata |
 | `organism` | `Homo sapiens` | Organism metadata |
 | `technology` | `Illumina HiSeq 2000` | Sequencing-technology metadata |

@@ -6,6 +6,7 @@
 </div>
 
 [![Tests](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/tests.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/tests.yml)
+[![Coverage Status](https://coveralls.io/repos/github/CNAG-Biomedical-Informatics/beacon2-cbi-tools/badge.svg?branch=main)](https://coveralls.io/github/CNAG-Biomedical-Informatics/beacon2-cbi-tools?branch=main)
 [![Docker build](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/docker-build-multi-arch.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/docker-build-multi-arch.yml)
 [![Documentation](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/documentation.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/documentation.yml)
 ![Maintenance status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)

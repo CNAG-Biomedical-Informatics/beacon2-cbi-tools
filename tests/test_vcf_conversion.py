@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,8 +15,8 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from bff_tools.parity import compare_bff_files  # noqa: E402
-import bff_tools.vcf_converter as vcf_converter  # noqa: E402
-from bff_tools.vcf_converter import (  # noqa: E402
+import bff_tools.vcf2bff as vcf2bff  # noqa: E402
+from bff_tools.vcf2bff import (  # noqa: E402
     ConversionError,
     convert_vcf,
     map_case_level_data,
@@ -150,10 +152,10 @@ class VcfConversionTests(unittest.TestCase):
         expected = fixture_dir / "genomicVariationsVcf.json.gz"
         with tempfile.TemporaryDirectory() as tmpdir:
             with (
-                mock.patch.object(vcf_converter, "_igzip", None),
-                mock.patch.object(vcf_converter, "_orjson", None),
+                mock.patch.object(vcf2bff, "_igzip", None),
+                mock.patch.object(vcf2bff, "_orjson", None),
             ):
-                actual, records_written = vcf_converter.convert_vcf(
+                actual, records_written = vcf2bff.convert_vcf(
                     source,
                     Path(tmpdir),
                     genome="hg19",
@@ -164,6 +166,74 @@ class VcfConversionTests(unittest.TestCase):
             result = compare_bff_files(expected, actual)
         self.assertEqual(records_written, 1044)
         self.assertTrue(result.equal)
+
+    def test_converter_cli_supports_configurable_verbose_progress(self) -> None:
+        source = (
+            ROOT
+            / "testdata"
+            / "vcf"
+            / "ref_beacon_166403275914916"
+            / "vcf"
+            / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                result = vcf2bff.main(
+                    [
+                        "-i",
+                        str(source),
+                        "--dataset-id",
+                        "default_beacon_1",
+                        "--project-dir",
+                        "progress-test",
+                        "--genome",
+                        "hg19",
+                        "--out-dir",
+                        tmpdir,
+                        "--threads",
+                        "1",
+                        "--verbose",
+                        "--progress-every",
+                        "500",
+                    ]
+                )
+            self.assertEqual(result, 0)
+            self.assertTrue((Path(tmpdir) / vcf2bff.OUTPUT_NAME).is_file())
+        rendered = output.getvalue()
+        self.assertIn("VCF records scanned = 500", rendered)
+        self.assertIn("VCF records scanned = 1000", rendered)
+        self.assertIn("Wrote 1044 variants", rendered)
+        self.assertIn("vcf2bff finished OK", rendered)
+
+    def test_converter_cli_rejects_invalid_runtime_arguments_and_errors(self) -> None:
+        source = ROOT / "testdata" / "vcf" / "test_1000G.vcf.gz"
+        common = [
+            "-i",
+            str(source),
+            "--dataset-id",
+            "dataset",
+            "--project-dir",
+            "project",
+            "--genome",
+            "hg19",
+        ]
+        for extra in (
+            ["--out-dir", "/definitely/missing"],
+            ["--threads", "0"],
+            ["--progress-every", "0"],
+        ):
+            with self.subTest(extra=extra), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaisesRegex(SystemExit, "2"):
+                    vcf2bff.main(common + extra)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with mock.patch.object(
+                vcf2bff, "convert_vcf", side_effect=ConversionError("bad record")
+            ), contextlib.redirect_stderr(io.StringIO()) as stderr:
+                with self.assertRaisesRegex(SystemExit, "1"):
+                    vcf2bff.main(common + ["--out-dir", tmpdir])
+            self.assertIn("bad record", stderr.getvalue())
 
 
 if __name__ == "__main__":

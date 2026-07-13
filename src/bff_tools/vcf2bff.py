@@ -324,9 +324,10 @@ def map_case_level_data(
         # This is the large-cohort hot path. iter_bff_records keeps the GT-only
         # sample tail as one string (split at most nine times), then this sparse
         # scan locates only alternate calls instead of allocating and visiting
-        # thousands of genotype strings for every variant. Dense calls fall
-        # back to a full split; the converter still streams one record at a
-        # time and uses orjson/ISA-L when available for encoding and gzip I/O.
+        # thousands of genotype strings for every variant. For sparse cohort
+        # data this is faster than splitting every GT/sample field. Dense calls
+        # fall back to a full split; the converter still streams one record at
+        # a time and uses orjson/ISA-L when available for encoding and gzip I/O.
         if not sample_ids or not genotypes:
             return mapped
         if isinstance(genotypes, str):
@@ -635,6 +636,7 @@ def iter_bff_records(
     dataset_id: str,
     provenance: dict[str, Any],
     verbose: bool = False,
+    progress_every: int = 10_000,
 ) -> Iterator[dict[str, Any]]:
     ann_fields: list[str] = []
     ann_positions: tuple[int, int, int, int] | None = None
@@ -654,6 +656,8 @@ def iter_bff_records(
                 continue
 
             source_records += 1
+            if verbose and source_records % progress_every == 0:
+                print(f"Info: VCF records scanned = {source_records}")
             fields = line.rstrip("\n").split("\t", 9)
             if len(fields) < 8:
                 raise ConversionError(f"VCF record {source_records} has fewer than 8 columns")
@@ -698,8 +702,6 @@ def iter_bff_records(
                 provenance=provenance,
                 annotated_with=annotated_with,
             )
-            if verbose and source_records % 10_000 == 0:
-                print(f"Info: Variants processed = {source_records}")
 
 
 def convert_vcf(
@@ -711,6 +713,7 @@ def convert_vcf(
     project_dir: str,
     threads: int,
     verbose: bool = False,
+    progress_every: int = 10_000,
 ) -> tuple[Path, int]:
     output_path = output_dir / OUTPUT_NAME
     user = os.environ.get("LOGNAME") or os.environ.get("USER") or "unknown"
@@ -734,6 +737,7 @@ def convert_vcf(
             dataset_id=dataset_id,
             provenance=provenance,
             verbose=verbose,
+            progress_every=progress_every,
         ):
             if records:
                 output.write(b",\n")
@@ -754,6 +758,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-dir", type=Path, default=Path("."))
     parser.add_argument("--threads", "-t", type=int, default=os.cpu_count() or 1)
     parser.add_argument("--verbose", "-verbose", action="store_true")
+    parser.add_argument(
+        "--progress-every",
+        type=int,
+        default=10_000,
+        metavar="N",
+        help="with --verbose, report progress every N VCF records (default: 10000)",
+    )
     parser.add_argument("--version", "-v", action="version", version=f"%(prog)s Version {VERSION}")
     return parser
 
@@ -767,6 +778,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error(f"Output directory does not exist: {args.out_dir}")
     if args.threads < 1:
         parser.error("--threads must be a positive integer")
+    if args.progress_every < 1:
+        parser.error("--progress-every must be a positive integer")
     try:
         output_path, records = convert_vcf(
             args.input,
@@ -776,6 +789,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             project_dir=args.project_dir,
             threads=args.threads,
             verbose=args.verbose,
+            progress_every=args.progress_every,
         )
     except (OSError, ConversionError, KeyError, ValueError) as exc:
         parser.exit(1, f"vcf2bff: {exc}\n")

@@ -11,7 +11,7 @@ SOURCE=/media/mrueda/2TBS/CNAG/Project_Beacon/CINECA/CINECA_synthetic_cohort_EUR
 PARITY=/media/mrueda/2TBS/CNAG/Project_Beacon/CINECA/beacon2-cbi-tools-parity
 
 mkdir -p "$PARITY/python"
-/usr/bin/time -v python3 src/bff_tools/vcf_converter.py \
+/usr/bin/time -v python3 src/bff_tools/vcf2bff.py \
   --input "$SOURCE" --genome hg19 \
   --dataset-id CINECA_synthetic_cohort_EUROPE_UK1 \
   --project-dir cineca_chr22 --out-dir "$PARITY/python" --threads 1

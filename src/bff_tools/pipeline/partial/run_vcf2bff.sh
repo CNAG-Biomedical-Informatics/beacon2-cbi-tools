@@ -79,6 +79,6 @@ else
 fi
 
 echo "# Running vcf2bff conversion"
-"$PYTHON" "$VCF_CONVERTER" -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" --threads "$THREADS" --verbose
+"$PYTHON" "$VCF2BFF" -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" --threads "$THREADS" --progress-every "$PROGRESS_EVERY" --verbose
 
 echo "# Finished OK"

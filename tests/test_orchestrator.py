@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import json
 import subprocess
 import tempfile
@@ -22,6 +23,7 @@ from bff_tools.orchestrator import (  # noqa: E402
     write_executable,
     write_json_log,
 )
+from bff_tools.browser import BrowserError  # noqa: E402
 
 
 class OrchestratorTests(unittest.TestCase):
@@ -66,6 +68,14 @@ class OrchestratorTests(unittest.TestCase):
         ]
         expected = ",".join(sorted(expected_fields))
         self.assertEqual(create_dbnsfp4_fields("cnag", ""), expected)
+
+    def test_create_dbnsfp4_fields_reads_and_quotes_header(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            header = Path(tmpdir) / "dbnsfp.gz"
+            with gzip.open(header, "wt", encoding="utf-8") as handle:
+                handle.write("#plain field(one) field_two\n")
+            fields = create_dbnsfp4_fields("all", str(header))
+        self.assertEqual(fields, "'field(one)',field_two,plain")
 
     def test_write_executable_creates_file_and_permissions(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -172,7 +182,7 @@ class OrchestratorTests(unittest.TestCase):
                     "snpeff": "/opt/snpEff.jar",
                     "snpsift": "/opt/SnpSift.jar",
                     "pythonbin": "/usr/bin/python3",
-                    "vcf_converter": "/opt/bff_tools/vcf_converter.py",
+                    "vcf2bff": "/opt/bff_tools/vcf2bff.py",
                     "dbnsfpset": "cnag",
                     "hs37fasta": "/ref/hs37.fa.gz",
                     "hs37cosmic": "/ref/cosmic.vcf.gz",
@@ -195,7 +205,8 @@ class OrchestratorTests(unittest.TestCase):
             script_path = runner.projectdir / "vcf" / "run_vcf2bff.sh"
             content = script_path.read_text(encoding="utf-8")
             self.assertIn("PYTHON=/usr/bin/python3", content)
-            self.assertIn("VCF_CONVERTER=/opt/bff_tools/vcf_converter.py", content)
+            self.assertIn("VCF2BFF=/opt/bff_tools/vcf2bff.py", content)
+            self.assertIn("PROGRESS_EVERY=10000", content)
             self.assertIn("THREADS=5", content)
             self.assertIn("JAVA=/usr/bin/java", content)
             self.assertIn("SNPEFF=/opt/snpEff.jar", content)
@@ -219,7 +230,7 @@ class OrchestratorTests(unittest.TestCase):
                     "bash4bff": str(template),
                     "tmpdir": "/tmp",
                     "pythonbin": "/usr/bin/python3",
-                    "vcf_converter": "/opt/bff_tools/vcf_converter.py",
+                    "vcf2bff": "/opt/bff_tools/vcf2bff.py",
                 },
                 param={
                     "projectdir": str(tmp / "job"),
@@ -280,6 +291,48 @@ class OrchestratorTests(unittest.TestCase):
             self.assertIn("No web server is required", readme)
             self.assertIn("External database links require internet access", readme)
             self.assertIn("not a medical device", readme)
+
+    def test_run_bff2html_wraps_browser_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            projectdir = Path(tmpdir) / "job"
+            projectdir.mkdir()
+            runner = PipelineRunner(
+                arg={},
+                config={"paneldir": str(Path(tmpdir) / "panels")},
+                param={
+                    "projectdir": str(projectdir),
+                    "gvvcfjson": str(projectdir / "variants.json.gz"),
+                    "jobid": "42",
+                },
+            )
+            with mock.patch(
+                "bff_tools.orchestrator.generate_browser_report",
+                side_effect=BrowserError("bad BFF"),
+            ), self.assertRaisesRegex(ExecutionError, "Failed to generate"):
+                runner.run_bff2html()
+            self.assertEqual(
+                (projectdir / "browser" / "run_bff2html.log").read_text(
+                    encoding="utf-8"
+                ),
+                "bad BFF\n",
+            )
+
+    def test_run_named_dispatches_and_rejects_unknown_pipeline(self) -> None:
+        runner = PipelineRunner(
+            arg={}, config={}, param={"projectdir": "/tmp/unused"}
+        )
+        for name, method_name in (
+            ("tsv2vcf", "run_tsv2vcf"),
+            ("vcf2bff", "run_vcf2bff"),
+            ("bff2html", "run_bff2html"),
+        ):
+            with self.subTest(name=name), mock.patch.object(
+                runner, method_name
+            ) as method:
+                runner.run_named(name)
+                method.assert_called_once()
+        with self.assertRaisesRegex(ExecutionError, "Unknown pipeline"):
+            runner.run_named("unknown")
 
     def test_run_executes_pipelines_in_order(self) -> None:
         runner = PipelineRunner(

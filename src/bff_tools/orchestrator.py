@@ -161,11 +161,12 @@ class PipelineRunner:
             f"export TMPDIR={shell_value(self.config['tmpdir'])}",
             f"ZIP={shell_value(self.param['zip'])}",
             f"PYTHON={shell_value(self.config['pythonbin'])}",
-            f"VCF_CONVERTER={shell_value(self.config['vcf_converter'])}",
+            f"VCF2BFF={shell_value(self.config['vcf2bff'])}",
             f"THREADS={shell_value(self.param['threads'])}",
             f"GENOME={shell_value(genome)}",
             f"DATASETID={shell_value(self.param['datasetid'])}",
             f"PROJECTDIR={shell_value(self.param['projectdir'])}",
+            f"PROGRESS_EVERY={shell_value(self.param.get('progress_every', 10_000))}",
         ]
         fields = ""
         if self.param.get("annotate"):

@@ -81,12 +81,15 @@ TSV conversion creates a VCF intermediate, annotates it, and then uses the same 
 | `--annotate`, `--no-annotate` | Annotation is enabled by default; disable only for a compatibly annotated VCF |
 | `--browser`, `--no-browser` | Enable or disable standalone HTML generation |
 | `--verbose` | Stream stage output rather than showing the interactive spinner |
+| `--progress-every N` | With `--verbose`, report VCF progress every N records (default: 10,000) |
 
 Values supplied directly on the command line override parameter YAML values. YAML values override built-in defaults.
 
 When `--config` is omitted, `BFF_TOOLS_CONFIG` can point to a shared annotation configuration. An explicit `--config` always takes precedence.
 
 The Python VCF-to-BFF conversion itself is single-process and streaming. Increasing `-t` helps only stages that support threads; it does not partition records across Python workers.
+
+For finer-grained diagnostics on a short file, combine `--verbose` with a smaller interval, for example `--progress-every 100`. The same option is available when running `src/bff_tools/vcf2bff.py` directly. Progress is also retained in `<project>/vcf/run_vcf2bff.log`.
 
 ## Common Options
 

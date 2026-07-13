@@ -21,6 +21,17 @@ class RedactionTests(unittest.TestCase):
         value = redact_uri("https://user:password@example.org/api")
         self.assertEqual(value, "https://<redacted>@example.org/api")
 
+    def test_redact_uri_handles_plain_invalid_and_ipv6_values(self) -> None:
+        self.assertEqual(redact_uri("not-a-uri"), "not-a-uri")
+        self.assertEqual(
+            redact_uri("http://example.org/path"), "http://example.org/path"
+        )
+        self.assertEqual(
+            redact_uri("mongodb://user:pass@[::1]:27017/db"),
+            "mongodb://<redacted>@[::1]:27017/db",
+        )
+        self.assertEqual(redact_uri("http://[invalid"), "<redacted>")
+
     def test_redact_mapping_handles_nested_sensitive_keys(self) -> None:
         redacted = redact_mapping(
             {
@@ -32,6 +43,17 @@ class RedactionTests(unittest.TestCase):
         self.assertNotIn("secret", redacted["service_uri"])
         self.assertEqual(redacted["nested"]["api_token"], "<redacted>")
         self.assertEqual(redacted["nested"]["ordinary"], "value")
+
+    def test_redact_mapping_preserves_tuple_and_list_shapes(self) -> None:
+        redacted = redact_mapping(
+            {
+                "values": ({"api_key": "secret"}, "plain"),
+                "items": [{"password": "hidden"}],
+            }
+        )
+        self.assertIsInstance(redacted["values"], tuple)
+        self.assertEqual(redacted["values"][0]["api_key"], "<redacted>")
+        self.assertEqual(redacted["items"][0]["password"], "<redacted>")
 
     def test_run_summary_does_not_print_uri_credentials(self) -> None:
         output = io.StringIO()

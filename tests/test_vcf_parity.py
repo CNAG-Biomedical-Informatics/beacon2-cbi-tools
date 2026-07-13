@@ -4,7 +4,9 @@ import json
 import os
 import tempfile
 import unittest
+import gzip
 from pathlib import Path
+from unittest import mock
 
 import sys
 
@@ -13,7 +15,14 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from bff_tools.parity import compare_bff_files  # noqa: E402
+import bff_tools.parity as parity  # noqa: E402
+from bff_tools.parity import (  # noqa: E402
+    ParityError,
+    compare_bff_files,
+    first_value_difference,
+    iter_streamed_bff,
+    normalise_bff_record,
+)
 
 
 class VcfParityTests(unittest.TestCase):
@@ -69,6 +78,75 @@ class VcfParityTests(unittest.TestCase):
             actual_path.write_text('[{"value": 1.0}]\n', encoding="utf-8")
             result = compare_bff_files(expected_path, actual_path)
         self.assertTrue(result.equal)
+
+    def test_stream_reader_accepts_compact_gzip_and_fallback_codecs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "records.json.gz"
+            with gzip.open(path, "wt", encoding="utf-8") as handle:
+                handle.write('[{"id":1},{"id":2}]\n')
+            with (
+                mock.patch.object(parity, "_igzip", None),
+                mock.patch.object(parity, "_orjson", None),
+            ):
+                self.assertEqual(list(iter_streamed_bff(path)), [{"id": 1}, {"id": 2}])
+                self.assertIsNone(parity._canonical_json({"id": 1}))
+                self.assertIsInstance(parity._sort_key({"id": 1}), str)
+
+    def test_stream_reader_reports_shape_syntax_truncation_and_io_errors(self) -> None:
+        cases = {
+            "not-array.json": '{}\n',
+            "bad-open.json": '{"id":1}\n',
+            "bad-record.json": '[\n{"id":}\n]\n',
+            "truncated.json": '[\n{"id":1}\n',
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            for name, content in cases.items():
+                path = tmp / name
+                path.write_text(content, encoding="utf-8")
+                with self.subTest(name=name), self.assertRaises(ParityError):
+                    list(iter_streamed_bff(path))
+            with self.assertRaisesRegex(ParityError, "Cannot read BFF file"):
+                list(iter_streamed_bff(tmp / "missing.json"))
+
+    def test_normalization_sorts_unordered_legacy_lists(self) -> None:
+        record = {
+            "_info": {"vcf2bff": {"version": "perl"}, "genome": "hg19"},
+            "identifiers": {"variantAlternativeIds": [{"id": "z"}, {"id": "a"}]},
+            "variantLevelData": {
+                "clinicalInterpretations": [{"effect": {"id": "z"}}, {"effect": {"id": "a"}}]
+            },
+        }
+        normalized = normalise_bff_record(record)
+        self.assertNotIn("vcf2bff", normalized["_info"])
+        self.assertEqual(normalized["identifiers"]["variantAlternativeIds"][0]["id"], "a")
+        self.assertEqual(
+            normalized["variantLevelData"]["clinicalInterpretations"][0]["effect"]["id"],
+            "a",
+        )
+        self.assertEqual(normalise_bff_record("scalar"), "scalar")
+
+    def test_difference_finder_reports_missing_keys_lengths_and_scalars(self) -> None:
+        self.assertEqual(first_value_difference({"a": 1}, {}), ("/a", 1, "<missing>"))
+        self.assertEqual(first_value_difference({}, {"a": 1}), ("/a", "<missing>", 1))
+        self.assertEqual(first_value_difference([1], [1, 2]), ("/length", 1, 2))
+        self.assertEqual(first_value_difference("a", "b"), ("/", "a", "b"))
+        self.assertIsNone(first_value_difference([{"a": 1}], [{"a": 1}]))
+
+    def test_comparison_reports_when_either_file_has_extra_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            short = tmp / "short.json"
+            long = tmp / "long.json"
+            short.write_text('[\n{"id":1}\n]\n', encoding="utf-8")
+            long.write_text('[\n{"id":1},\n{"id":2}\n]\n', encoding="utf-8")
+            first = compare_bff_files(short, long)
+            second = compare_bff_files(long, short)
+        self.assertEqual((first.records, first.first_difference, first.path), (1, 2, "/records"))
+        self.assertIsNone(first.expected)
+        self.assertEqual(first.actual, {"id": 2})
+        self.assertEqual(second.expected, {"id": 2})
+        self.assertIsNone(second.actual)
 
     @unittest.skipUnless(
         os.environ.get("BFF_CINECA_FIXTURE_DIR")
