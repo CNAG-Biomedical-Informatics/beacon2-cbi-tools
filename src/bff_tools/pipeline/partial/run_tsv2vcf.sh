@@ -2,11 +2,11 @@
 #
 #   Script that generates VCF format from TSV
 #
-#   Last Modified: Mar/17/2025
+#   Last Modified: Jul/13/2026
 #
 #   Version taken from $BEACON
 #
-#   Copyright (C) 2023-2025 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
+#   Copyright (C) 2023-2026 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

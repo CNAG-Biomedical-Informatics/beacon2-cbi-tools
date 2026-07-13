@@ -2,12 +2,12 @@
 #
 #   Script that generates BFF format from VCF
 #
-#   Last Modified: Mar/17/2025
+#   Last Modified: Jul/13/2026
 #
 #   Version taken from $BEACON
 #
 #   Copyright (C) 2021-2022 Manuel Rueda - CRG
-#   Copyright (C) 2023-2025 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
+#   Copyright (C) 2023-2026 Manuel Rueda - CNAG (manuel.rueda@cnag.eu)
 #
 #   Credits: Dietmar Fernandez-Orth for creating bcftools/snpEff commands
 #
