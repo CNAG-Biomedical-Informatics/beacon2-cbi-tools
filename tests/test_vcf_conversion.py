@@ -178,7 +178,9 @@ class VcfConversionTests(unittest.TestCase):
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             output = io.StringIO()
-            with contextlib.redirect_stdout(output):
+            with contextlib.redirect_stdout(output), mock.patch(
+                "builtins.print", wraps=print
+            ) as print_mock:
                 result = vcf2bff.main(
                     [
                         "-i",
@@ -205,6 +207,14 @@ class VcfConversionTests(unittest.TestCase):
         self.assertIn("VCF records scanned = 1000", rendered)
         self.assertIn("Wrote 1044 variants", rendered)
         self.assertIn("vcf2bff finished OK", rendered)
+        flushed = {
+            call.args[0]
+            for call in print_mock.call_args_list
+            if call.kwargs.get("flush") is True
+        }
+        self.assertIn("Info: VCF records scanned = 500", flushed)
+        self.assertIn("Info: VCF records scanned = 1000", flushed)
+        self.assertIn("Info: vcf2bff finished OK", flushed)
 
     def test_converter_cli_rejects_invalid_runtime_arguments_and_errors(self) -> None:
         source = ROOT / "testdata" / "vcf" / "test_1000G.vcf.gz"

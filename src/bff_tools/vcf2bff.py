@@ -657,7 +657,7 @@ def iter_bff_records(
 
             source_records += 1
             if verbose and source_records % progress_every == 0:
-                print(f"Info: VCF records scanned = {source_records}")
+                print(f"Info: VCF records scanned = {source_records}", flush=True)
             fields = line.rstrip("\n").split("\t", 9)
             if len(fields) < 8:
                 raise ConversionError(f"VCF record {source_records} has fewer than 8 columns")
@@ -794,8 +794,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (OSError, ConversionError, KeyError, ValueError) as exc:
         parser.exit(1, f"vcf2bff: {exc}\n")
     if args.verbose:
-        print(f"Info: Wrote {records} variants to {output_path}")
-        print("Info: vcf2bff finished OK")
+        print(f"Info: Wrote {records} variants to {output_path}", flush=True)
+        print("Info: vcf2bff finished OK", flush=True)
     return 0
 
 

@@ -65,6 +65,7 @@ class OutputTests(unittest.TestCase):
                     "jobid": "42",
                     "genome": "hg19",
                     "threads": 2,
+                    "sampleid": "23andme_1",
                     "log": "/tmp/output/log.json",
                     "pipeline": {"vcf2bff": 1},
                 },
@@ -79,6 +80,21 @@ class OutputTests(unittest.TestCase):
         self.assertIn("<redacted>@host:27017", rendered)
         self.assertNotIn("secret", rendered)
         self.assertIn("See /tmp/output/log.json", rendered)
+        self.assertNotIn("23andme_1", rendered)
+
+    def test_tsv_run_summary_includes_sample_id(self) -> None:
+        stream = io.StringIO()
+        with contextlib.redirect_stdout(stream):
+            output.print_run_summary(
+                arg={"mode": "tsv", "inputfile": "/tmp/input.tsv"},
+                config={},
+                param={"projectdir": "job", "sampleid": "sample_1", "pipeline": {}},
+                version="2.0.13-dev",
+                executable=Path("/tmp/bff-tools"),
+                no_color=True,
+                no_emoji=True,
+            )
+        self.assertIn("sample_1", stream.getvalue())
 
     def test_banners_status_and_color_controls(self) -> None:
         stream = io.StringIO()

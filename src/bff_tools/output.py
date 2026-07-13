@@ -120,6 +120,8 @@ def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], para
     _print_mapping("Resolved Configuration", redact_mapping(config), BLUE, use_color=use_color)
 
     display_param = redact_mapping(param)
+    if arg.get("mode") != "tsv":
+        display_param.pop("sampleid", None)
     for nested in ("pipeline",):
         if nested in display_param:
             display_param[nested] = f"See {_plain(param.get('log'))}"
