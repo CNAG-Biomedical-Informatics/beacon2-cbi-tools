@@ -1,14 +1,6 @@
 FROM ubuntu:24.04 AS core
 
-ARG BFF_TOOLS_VERSION=development
-ARG VCS_REF=unknown
-
-LABEL org.opencontainers.image.authors="Manuel Rueda <manuel.rueda@cnag.eu>" \
-      org.opencontainers.image.source="https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools" \
-      org.opencontainers.image.title="Beacon v2 CBI Tools" \
-      org.opencontainers.image.version="${BFF_TOOLS_VERSION}" \
-      org.opencontainers.image.revision="${VCS_REF}" \
-      org.opencontainers.image.licenses="GPL-3.0-or-later"
+LABEL maintainer="Manuel Rueda <manuel.rueda@cnag.eu>"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \

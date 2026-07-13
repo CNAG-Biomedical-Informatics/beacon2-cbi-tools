@@ -7,14 +7,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Read build metadata
-        id: build_metadata
-        run: |
-          echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
-          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Get version
+        id: get_version
+        run: echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -36,10 +33,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          build-args: |
-            BFF_TOOLS_VERSION=${{ steps.build_metadata.outputs.version }}
-            VCS_REF=${{ steps.build_metadata.outputs.revision }}
           tags: |
-            manuelrueda/beacon2-cbi-tools:${{ steps.build_metadata.outputs.version }}
+            manuelrueda/beacon2-cbi-tools:${{ steps.get_version.outputs.version }}
             manuelrueda/beacon2-cbi-tools:latest
           platforms: linux/amd64,linux/arm64
