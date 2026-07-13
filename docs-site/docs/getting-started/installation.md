@@ -2,25 +2,42 @@
 title: Install
 ---
 
-The three supported installation paths expose the same `bff-tools` CLI and use the same external annotation bundle.
+The four supported installation paths expose the same `bff-tools` CLI. Choose based on where the application and its external annotation toolchain should run.
 
 | Environment | Recommended path | Why |
 |---|---|---|
+| Python environment | [PyPI](https://pypi.org/project/beacon2-cbi-tools/) | Smallest installation for validation, pre-annotated VCF conversion, and standalone report generation |
 | HPC cluster | [Apptainer / Singularity](apptainer) | No daemon or root runtime; immutable image works with schedulers and bind-mounted reference data |
 | Workstation or server | [Docker](docker) | Reproducible dependencies and the shortest setup when Docker is available |
 | Managed host or module stack | [From source](from-source) | Direct control over Python, Java, bcftools, and scheduler modules |
 
 Containerized execution is the primary route for HPC and shared infrastructure. It keeps the application reproducible while the large, frequently reused biological databases remain on high-throughput shared storage.
 
-For a Python environment that only needs validation or conversion of pre-annotated VCFs:
+## Install from PyPI
+
+Create an isolated Python environment and install the published package:
 
 ```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install --upgrade pip
 python3 -m pip install beacon2-cbi-tools
+bff-tools --version
+```
+
+The package installs the command as `bff-tools`. The `bin/bff-tools` path is only a compatibility shim for running directly from a Git checkout.
+
+The PyPI package provides the Python application and its bundled schemas, templates, panels, and browser assets. It does not install Java, bcftools, SnpEff/SnpSift, reference FASTA files, or the external annotation databases. Metadata validation and conversion of a compatible pre-annotated VCF can run immediately; raw VCF and TSV workflows also require the annotation layer described below.
+
+Upgrade an existing environment with:
+
+```bash
+python3 -m pip install --upgrade beacon2-cbi-tools
 ```
 
 ## Two Installation Layers
 
-1. Install the application through Docker, Apptainer, or source.
+1. Install the application from PyPI, Docker, Apptainer, or source.
 2. Prepare the [annotation data](annotation-data) used by most real-world VCF workflows.
 
 Metadata validation can run after layer 1. Raw VCF and TSV conversion requires both layers. A VCF with a compatible SnpEff `ANN` header can skip re-annotation with `--no-annotate` and still use the same converter.
@@ -28,7 +45,7 @@ Metadata validation can run after layer 1. Raw VCF and TSV conversion requires b
 ## Supported Platforms
 
 - Linux on x86-64 or ARM64;
-- Python 3.10 or newer for source installations;
+- Python 3.10 or newer for PyPI and source installations;
 - at least 4 GB RAM for basic use;
 - memory sized for Java/SnpEff and cohort scale for annotation;
 - at least 200 GB free for the maintained annotation bundle and more for intermediates.

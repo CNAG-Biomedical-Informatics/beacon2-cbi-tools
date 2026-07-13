@@ -334,6 +334,10 @@
         font-size: 13px;
       }
       .page-count { flex: 0 0 auto; }
+      .table-navigation { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
+      .column-scroll-controls { display: flex; align-items: center; gap: 4px; padding-right: 10px; border-right: 1px solid var(--line); }
+      .column-scroll-label { margin-right: 3px; color: var(--ink-soft); font-weight: 700; }
+      .column-scroll-controls button { width: 32px; min-height: 32px; padding: 0; }
       .table-paginator { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; }
       .table-paginator label { margin-right: 2px; color: var(--ink-soft); font-weight: 700; }
       .table-paginator .tabulator-page-size {
@@ -358,6 +362,26 @@
       .table-paginator .tabulator-page:hover:not(:disabled) { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-dark); }
       .table-paginator .tabulator-page.active { border-color: var(--brand); background: var(--brand); color: #fff; }
       .table-paginator .tabulator-page:disabled { opacity: 0.45; }
+      .table-horizontal-scroll {
+        height: 17px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        border-bottom: 1px solid var(--line);
+        background: #edf2f1;
+        scrollbar-color: #718b87 #e2e9e7;
+        scrollbar-width: auto;
+      }
+      .table-horizontal-scroll[hidden] { display: none; }
+      .table-horizontal-scroll::-webkit-scrollbar { height: 14px; }
+      .table-horizontal-scroll::-webkit-scrollbar-track { background: #e2e9e7; }
+      .table-horizontal-scroll::-webkit-scrollbar-thumb {
+        min-width: 48px;
+        border: 3px solid #e2e9e7;
+        border-radius: 7px;
+        background: #718b87;
+      }
+      .table-horizontal-scroll::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+      .table-horizontal-scroll-content { height: 1px; }
 
       .gene-cell, .variant-cell, .condition-cell { min-width: 0; }
       .condition-cell { width: 100%; overflow: hidden; }
@@ -438,7 +462,6 @@
       .detail-close { border-color: rgba(255, 255, 255, 0.28); background: transparent; color: #fff; }
       .detail-close:hover:not(:disabled) { border-color: #fff; background: rgba(255, 255, 255, 0.1); color: #fff; }
       .detail-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 15px; }
-      .detail-badges .badge { background: rgba(255, 255, 255, 0.13); color: #fff; }
       .detail-body { padding: 4px 22px 30px; }
       .detail-section { padding: 21px 0; border-bottom: 1px solid var(--line); }
       .detail-section:last-child { border-bottom: 0; }
@@ -459,7 +482,7 @@
       .empty-inline { color: var(--muted); font-size: 14px; }
 
       @media print {
-        .topbar, .workspace-actions, .panel-tabs, .filters, .footer-note, .detail-overlay, .detail-panel { display: none !important; }
+        .topbar, .workspace-actions, .panel-tabs, .filters, .pagination-bar, .table-horizontal-scroll, .footer-note, .detail-overlay, .detail-panel { display: none !important; }
         body, html { background: #fff; }
         main { width: 100%; padding: 0; }
         .summary { margin: 0 0 12px; }
@@ -494,6 +517,8 @@
         .toggles { width: 100%; }
         .toggle { flex: 1; }
         .filter-reset { width: 100%; }
+        .pagination-bar { align-items: flex-start; flex-direction: column; }
+        .table-navigation { min-width: max-content; }
         .column-menu { left: 0; right: auto; width: min(300px, calc(100vw - 42px)); }
         .tabulator { font-size: 15px; }
         .tabulator-row { min-height: 58px; }
@@ -512,6 +537,7 @@
       <symbol id="icon-columns" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"></rect><path d="M9 4v16M15 4v16"></path></symbol>
       <symbol id="icon-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></symbol>
       <symbol id="icon-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></symbol>
+      <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></symbol>
       <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
       <symbol id="icon-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></symbol>
       <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M4 5h16M7 12h10M10 19h4"></path></symbol>
@@ -585,7 +611,17 @@
 
         <div class="pagination-bar" aria-label="Table pagination">
           <div id="page-count" class="page-count"></div>
-          <div id="table-pagination" class="table-paginator"></div>
+          <div class="table-navigation">
+            <div class="column-scroll-controls" role="group" aria-label="Horizontal table navigation">
+              <span class="column-scroll-label">Columns</span>
+              <button id="table-scroll-left" class="icon-button" type="button" title="Scroll columns left" aria-label="Scroll columns left"><svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg></button>
+              <button id="table-scroll-right" class="icon-button" type="button" title="Scroll columns right" aria-label="Scroll columns right"><svg class="icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+            </div>
+            <div id="table-pagination" class="table-paginator"></div>
+          </div>
+        </div>
+        <div id="table-horizontal-scroll" class="table-horizontal-scroll" aria-label="Horizontal table scrollbar">
+          <div id="table-horizontal-scroll-content" class="table-horizontal-scroll-content"></div>
         </div>
         <div class="table-wrap"><div id="variant-table"></div></div>
       </section>
@@ -618,7 +654,8 @@
         var report = JSON.parse(document.getElementById("report-data").textContent);
         var defaultFields = new Set([
           "geneIds", "variantInternalId", "annotationImpact", "clinicalRelevance",
-          "conditionId", "dbSNP", "ClinVar"
+          "conditionId", "dbSNP", "ClinVar", "variantType", "genomicHGVSId",
+          "molecularEffects", "aminoacidChanges"
         ]);
         var preferredOrder = [
           "geneIds", "variantInternalId", "annotationImpact", "clinicalRelevance",
@@ -1011,17 +1048,15 @@
           layout: "fitDataStretch",
           renderVertical: "virtual",
           pagination: true,
-          paginationSize: 50,
-          paginationSizeSelector: [25, 50, 100, 250],
+          paginationSize: 25,
+          paginationSizeSelector: [10, 25, 50, 100, 250],
           paginationButtonCount: 5,
-          paginationCounter: "rows",
           paginationElement: document.getElementById("table-pagination"),
-          paginationCounterElement: document.getElementById("page-count"),
           selectableRows: 1,
           movableColumns: true,
           placeholder: "No variants match the active filters.",
           persistence: {columns: true, sort: true, page: true},
-          persistenceID: "bff-tools-browser-v2-" + report.jobId,
+          persistenceID: "bff-tools-browser-v3-" + report.jobId,
           printAsHtml: true,
           printStyled: true,
           downloadRowRange: "active",
@@ -1036,8 +1071,93 @@
           window.clearTimeout(resizeTimer);
           resizeTimer = window.setTimeout(function () {
             table.setHeight(availableTableHeight());
+            refreshHorizontalNavigation();
           }, 100);
         });
+
+        var tableHolder = null;
+        var tableScrollLeft = document.getElementById("table-scroll-left");
+        var tableScrollRight = document.getElementById("table-scroll-right");
+        var horizontalRail = document.getElementById("table-horizontal-scroll");
+        var horizontalRailContent = document.getElementById("table-horizontal-scroll-content");
+        var syncingHorizontalScroll = false;
+        function resolveTableHolder() {
+          var holder = document.querySelector("#variant-table .tabulator-tableholder");
+          if (holder && holder !== tableHolder) {
+            tableHolder = holder;
+            tableHolder.addEventListener("scroll", handleTableHorizontalScroll, {passive: true});
+          }
+          return tableHolder;
+        }
+        function syncHorizontalRailFromTable() {
+          var holder = resolveTableHolder();
+          if (!holder || syncingHorizontalScroll) return;
+          syncingHorizontalScroll = true;
+          horizontalRail.scrollLeft = holder.scrollLeft;
+          syncingHorizontalScroll = false;
+        }
+        function updateHorizontalRailDimensions() {
+          var holder = resolveTableHolder();
+          if (!holder) return;
+          var hasOverflow = holder.scrollWidth > holder.clientWidth + 1;
+          horizontalRail.hidden = !hasOverflow;
+          horizontalRailContent.style.width = holder.scrollWidth + "px";
+          syncHorizontalRailFromTable();
+        }
+        function updateHorizontalControls() {
+          var holder = resolveTableHolder();
+          if (!holder) return;
+          var maximum = Math.max(0, holder.scrollWidth - holder.clientWidth);
+          tableScrollLeft.disabled = holder.scrollLeft <= 1;
+          tableScrollRight.disabled = holder.scrollLeft >= maximum - 1;
+        }
+        function scrollTableColumns(direction) {
+          var holder = resolveTableHolder();
+          if (!holder) return;
+          var distance = Math.max(240, Math.floor(holder.clientWidth * 0.72));
+          var maximum = Math.max(0, holder.scrollWidth - holder.clientWidth);
+          holder.scrollLeft = Math.max(0, Math.min(maximum, holder.scrollLeft + (direction * distance)));
+          updateHorizontalControls();
+          syncHorizontalRailFromTable();
+        }
+        function handleTableHorizontalScroll() {
+          updateHorizontalControls();
+          syncHorizontalRailFromTable();
+        }
+        function refreshHorizontalNavigation() {
+          updateHorizontalRailDimensions();
+          updateHorizontalControls();
+        }
+        horizontalRail.addEventListener("scroll", function () {
+          var holder = resolveTableHolder();
+          if (!holder || syncingHorizontalScroll) return;
+          syncingHorizontalScroll = true;
+          holder.scrollLeft = horizontalRail.scrollLeft;
+          syncingHorizontalScroll = false;
+          updateHorizontalControls();
+        }, {passive: true});
+        tableScrollLeft.addEventListener("click", function () { scrollTableColumns(-1); });
+        tableScrollRight.addEventListener("click", function () { scrollTableColumns(1); });
+        table.on("tableBuilt", refreshHorizontalNavigation);
+        table.on("columnMoved", refreshHorizontalNavigation);
+        table.on("columnResized", refreshHorizontalNavigation);
+        table.on("columnVisibilityChanged", refreshHorizontalNavigation);
+        window.requestAnimationFrame(function () {
+          refreshHorizontalNavigation();
+        });
+
+        var pageCount = document.getElementById("page-count");
+        function updatePageCount() {
+          var total = table.getDataCount("active");
+          var page = Number(table.getPage()) || 1;
+          var pageSize = Number(table.getPageSize()) || total || 1;
+          var first = total ? ((page - 1) * pageSize) + 1 : 0;
+          var last = Math.min(page * pageSize, total);
+          pageCount.textContent = first.toLocaleString() + "-" + last.toLocaleString()
+            + " of " + total.toLocaleString() + " variant" + (total === 1 ? "" : "s");
+        }
+        table.on("tableBuilt", updatePageCount);
+        table.on("pageLoaded", updatePageCount);
 
         var clearButton = document.getElementById("clear");
         function activeFilterLabels() {
@@ -1057,7 +1177,8 @@
             tab.setAttribute("aria-selected", String(active));
             tab.tabIndex = active ? 0 : -1;
           });
-          clearButton.disabled = activeFilterLabels().length === 0 && table.getSorters().length === 0;
+          var sorters = typeof table.getSorters === "function" ? table.getSorters() : [];
+          clearButton.disabled = activeFilterLabels().length === 0 && sorters.length === 0;
         }
         function applyFilters() {
           updateControls();
@@ -1065,6 +1186,7 @@
         }
         table.on("dataFiltered", function (filters, rows) {
           document.getElementById("table-count").textContent = rows.length.toLocaleString() + " of " + report.rows.length.toLocaleString() + " variant" + (report.rows.length === 1 ? "" : "s");
+          updatePageCount();
         });
         table.on("dataSorted", updateControls);
         table.on("rowClick", function (event, row) {
@@ -1207,11 +1329,16 @@
           document.getElementById("detail-subtitle").textContent = text(row.genomicHGVSId, text(row.variantInternalId));
           var badges = document.getElementById("detail-badges");
           badges.replaceChildren();
-          values(row.annotationImpact).concat(values(row.clinicalRelevance)).forEach(function (value) {
-            var badge = document.createElement("span");
-            badge.className = "badge";
-            badge.textContent = value;
-            badges.appendChild(badge);
+          [
+            {field: "annotationImpact", entries: values(row.annotationImpact)},
+            {field: "clinicalRelevance", entries: values(row.clinicalRelevance)}
+          ].forEach(function (group) {
+            group.entries.forEach(function (value) {
+              var badge = document.createElement("span");
+              badge.className = "badge " + badgeKind(group.field, value);
+              badge.textContent = value;
+              badges.appendChild(badge);
+            });
           });
           addDetailFields(document.getElementById("detail-clinical"), [
             {label: "Clinical relevance", value: row.clinicalRelevance},
@@ -1258,7 +1385,7 @@
           if (event.key === "Escape" && detailPanel.classList.contains("open")) closeDetail();
         });
 
-        applyFilters();
+        table.on("tableBuilt", applyFilters);
       }());
     </script>
   </body>

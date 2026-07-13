@@ -154,9 +154,30 @@ class BrowserTests(unittest.TestCase):
             self.assertIn("<\\/script><script>alert(1)<\\/script>", text)
             self.assertIn("new Tabulator", text)
             self.assertIn("pagination: true", text)
-            self.assertIn("paginationSizeSelector: [25, 50, 100, 250]", text)
+            self.assertIn("paginationSize: 25", text)
+            self.assertIn("paginationSizeSelector: [10, 25, 50, 100, 250]", text)
             self.assertIn('paginationElement: document.getElementById("table-pagination")', text)
+            self.assertIn('id="table-scroll-left"', text)
+            self.assertIn('id="table-scroll-right"', text)
+            self.assertIn('id="table-horizontal-scroll"', text)
+            self.assertIn('id="table-horizontal-scroll-content"', text)
+            self.assertIn('class="column-scroll-label">Columns</span>', text)
+            self.assertIn(
+                '"molecularEffects", "aminoacidChanges"', text
+            )
+            self.assertIn("scrollTableColumns", text)
+            self.assertIn("holder.scrollLeft = Math.max", text)
+            self.assertIn("horizontalRail.scrollLeft = holder.scrollLeft", text)
+            self.assertIn("holder.scrollLeft = horizontalRail.scrollLeft", text)
+            self.assertIn(
+                'addEventListener("scroll", handleTableHorizontalScroll', text
+            )
+            self.assertIn('table.on("pageLoaded", updatePageCount)', text)
             self.assertIn("height: availableTableHeight()", text)
+            self.assertIn(
+                'badge.className = "badge " + badgeKind(group.field, value)', text
+            )
+            self.assertNotIn(".detail-badges .badge { background:", text)
             self.assertNotIn(("DP", "DP"), browser.COLUMNS)
             self.assertIn("https://www.ncbi.nlm.nih.gov/snp/", text)
             self.assertIn("https://gnomad.broadinstitute.org/variant/", text)
