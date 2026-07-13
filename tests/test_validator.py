@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import tempfile
 import unittest
@@ -16,6 +18,7 @@ if str(SRC) not in sys.path:
 from bff_tools.validator import (  # noqa: E402
     ValidatorError,
     export_template,
+    print_report,
     row_to_document,
     validate_inputs,
 )
@@ -85,6 +88,30 @@ class ValidatorTests(unittest.TestCase):
             report = validate_inputs([path])
         self.assertTrue(report.ok)
         self.assertEqual(report.checked, 1)
+
+    def test_report_restores_collection_status_and_respects_output_flags(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "individuals.json"
+            path.write_text(
+                '[{"id":"person-1","sex":{"id":"NCIT:C20197","label":"male"}}]\n',
+                encoding="utf-8",
+            )
+            report = validate_inputs([path])
+
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            print_report(report, no_color=True)
+        rendered = output.getvalue()
+        self.assertIn("🧬 BFF Tools Validator", rendered)
+        self.assertIn("== 🧍 individuals ==", rendered)
+        self.assertIn("✓ individuals: validation passed (1 record)", rendered)
+        self.assertNotIn("\033[", rendered)
+
+        plain_output = io.StringIO()
+        with contextlib.redirect_stdout(plain_output):
+            print_report(report, no_color=True, no_emoji=True)
+        self.assertNotIn("🧬", plain_output.getvalue())
+        self.assertNotIn("✓", plain_output.getvalue())
 
     def test_mixed_xlsx_and_json_inputs_are_rejected(self) -> None:
         workbook = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1" / "Beacon-v2-Models_CINECA_UK1.xlsx"

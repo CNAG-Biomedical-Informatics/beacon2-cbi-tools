@@ -324,7 +324,7 @@ Conversion time scales with records, annotations, sample count, compression, and
 <details>
 <summary>Where is the standalone HTML report?</summary>
 
-Pass `--browser` or set `bff2html: true`. The generated HTML is under `<project>/browser/` and opens directly without a local server. The **BFF GenomicVariations Browser** provides search, sorting, column controls, gene panels, database links, and pagination. The `biosamples` column is hidden by default.
+Pass `--browser` or set `bff2html: true`. The generated HTML is under `<project>/browser/` and opens directly without a local server. The **BFF Tools Browser** provides search, sorting, column controls, gene panels, database links, and pagination. The `biosamples` column is hidden by default.
 
 Browser memory still scales with the variants embedded in the report. Use gene-panel and impact filters when a cohort contains many thousands of variants.
 

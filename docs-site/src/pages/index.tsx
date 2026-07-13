@@ -35,14 +35,14 @@ export default function Home() {
 
   return (
     <Layout
-      title="Beacon v2 CBI Tools"
+      title="BFF Tools"
       description="Validate and convert metadata and genomic files to Beacon v2 Beacon Friendly Format">
       <main className={styles.page}>
         <section className={styles.hero}>
           <div className={styles.heroInner}>
             <div className={styles.copy}>
               <p className={styles.kicker}>CNAG Biomedical Informatics</p>
-              <h1>Beacon v2 CBI Tools</h1>
+              <h1>BFF Tools</h1>
               <p className={styles.value}>Turn metadata and genomic files into Beacon Friendly Format.</p>
               <p className={styles.lede}>
                 Validate Beacon metadata, annotate and convert VCF or SNP-array
@@ -83,7 +83,7 @@ export default function Home() {
             <img
               className={styles.outputImage}
               src={browserVisual}
-              alt="BFF GenomicVariations Browser showing annotated CINECA chromosome 22 variants"
+              alt="BFF Tools Browser showing annotated CINECA chromosome 22 variants"
             />
             <div className={styles.mobileFlow}>
               <div><span>Input</span><strong>XLSX, JSON, VCF, or SNP-array data</strong></div>

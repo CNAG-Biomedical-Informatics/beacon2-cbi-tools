@@ -2,31 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Genomic variation review - __PROJECT_ID__</title>
+    <title>BFF Tools Browser - __PROJECT_ID__</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>__TABULATOR_CSS__</style>
     <style>
       :root {
         color-scheme: light;
-        --canvas: #f5f7f8;
+        --canvas: #f2f5f4;
         --surface: #ffffff;
-        --surface-subtle: #f8fafb;
-        --ink: #18212b;
-        --muted: #66717e;
-        --line: #dce2e7;
-        --line-strong: #bdc7d0;
-        --brand: #16697a;
-        --brand-dark: #105361;
-        --brand-soft: #e6f3f5;
-        --green: #287a55;
-        --green-soft: #e8f5ee;
-        --amber: #8c5b08;
-        --amber-soft: #fff3d9;
-        --red: #a63e3e;
-        --red-soft: #fbe9e7;
-        --blue: #24669b;
+        --surface-soft: #f7f9f8;
+        --surface-tint: #edf4f2;
+        --ink: #182423;
+        --ink-soft: #3d4b49;
+        --muted: #687673;
+        --line: #dbe3e0;
+        --line-strong: #bac8c4;
+        --brand: #146f73;
+        --brand-dark: #0d5155;
+        --brand-deep: #173c3f;
+        --brand-soft: #e3f2f1;
+        --blue: #326d9a;
         --blue-soft: #eaf2f8;
-        --shadow: 0 8px 24px rgba(25, 39, 52, 0.07);
+        --green: #2c7757;
+        --green-soft: #e8f4ed;
+        --amber: #9a650c;
+        --amber-soft: #fff1d2;
+        --orange: #b95735;
+        --orange-soft: #fae9e1;
+        --red: #ae3f50;
+        --red-soft: #fae8eb;
+        --violet: #6c5f9c;
+        --violet-soft: #efecf8;
+        --shadow-low: 0 8px 24px rgba(22, 43, 40, 0.06);
+        --shadow-high: 0 22px 60px rgba(17, 38, 35, 0.18);
       }
 
       * { box-sizing: border-box; }
@@ -34,16 +42,21 @@
 
       body {
         margin: 0;
+        overflow-x: hidden;
         background: var(--canvas);
         color: var(--ink);
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
           "Segoe UI", sans-serif;
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.45;
       }
 
-      button, input, select { font: inherit; }
-      button, select, input { letter-spacing: 0; }
+      body.detail-open { overflow: hidden; }
+      button, input, select { font: inherit; letter-spacing: 0; }
+      button, a, input, select { outline-offset: 3px; }
+      button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+        outline: 2px solid var(--brand);
+      }
 
       .icon {
         width: 17px;
@@ -59,310 +72,387 @@
       .topbar {
         position: sticky;
         top: 0;
-        z-index: 10;
+        z-index: 20;
         border-top: 4px solid var(--brand);
         border-bottom: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.97);
       }
 
       .topbar-inner, main {
-        width: min(1680px, calc(100% - 40px));
+        width: min(1720px, calc(100% - 48px));
         margin: 0 auto;
       }
 
       .topbar-inner {
-        min-height: 64px;
+        min-height: 74px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 20px;
+        gap: 24px;
       }
 
-      .brand { display: flex; align-items: center; gap: 11px; }
+      .brand { display: flex; align-items: center; gap: 12px; }
       .brand-mark {
         display: grid;
-        width: 38px;
-        height: 38px;
+        width: 46px;
+        height: 46px;
         place-items: center;
-        border-radius: 6px;
-        background: var(--brand);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 800;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #fff;
+        color: var(--brand);
       }
-      .brand-name { font-size: 16px; font-weight: 760; }
-      .brand-context { color: var(--muted); font-size: 12px; }
-      .topbar-meta { color: var(--muted); font-size: 12px; }
+      .brand-mark .icon { width: 27px; height: 27px; }
+      .brand-name { font-size: 20px; font-weight: 780; }
+      .brand-context { color: var(--muted); font-size: 13px; }
+      .report-status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+      .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
 
-      main { padding: 22px 0 28px; }
+      main { padding: 22px 0 30px; }
 
-      .report-head {
-        display: grid;
-        grid-template-columns: minmax(360px, 1fr) auto;
-        gap: 28px;
-        align-items: end;
-        margin-bottom: 18px;
-      }
-
-      .kicker {
-        margin: 0 0 3px;
+      .kicker, .section-kicker {
+        margin: 0 0 5px;
         color: var(--brand-dark);
-        font-size: 11px;
-        font-weight: 800;
+        font-size: 12px;
+        font-weight: 820;
         text-transform: uppercase;
       }
 
       h1 {
-        margin: 0;
-        font-size: 24px;
-        font-weight: 760;
-        line-height: 1.2;
+        margin: 1px 0 9px;
+        font-size: 26px;
+        font-weight: 790;
+        line-height: 1.15;
       }
 
+      .summary {
+        display: grid;
+        grid-template-columns: minmax(460px, 1.35fr) repeat(4, minmax(140px, 0.42fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .run-panel, .metric {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+      .run-panel { padding: 13px 15px; box-shadow: var(--shadow-low); }
       .run-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px 18px;
-        margin: 9px 0 0;
+        gap: 7px;
+        margin: 0;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
       }
-      .run-meta div { display: flex; min-width: 0; gap: 6px; }
-      .run-meta dt { font-weight: 760; }
-      .run-meta dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-      .metrics {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(108px, 1fr));
-        border: 1px solid var(--line);
-        border-radius: 7px;
-        background: var(--surface);
-        box-shadow: var(--shadow);
+      .run-meta div { display: flex; min-width: 0; align-items: baseline; gap: 7px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-soft); }
+      .run-meta dt { color: var(--muted); font-size: 11px; font-weight: 780; text-transform: uppercase; }
+      .run-meta dd { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .metric {
+        min-height: 92px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 11px 13px 11px 17px;
       }
-      .metric { min-width: 108px; padding: 10px 14px; border-left: 1px solid var(--line); }
-      .metric:first-child { border-left: 0; }
-      .metric-label { display: block; color: var(--muted); font-size: 11px; font-weight: 720; }
-      .metric-value { display: block; margin-top: 2px; font-size: 22px; font-weight: 790; line-height: 1; }
+      .metric::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--blue); }
+      .metric.panels { background: var(--violet-soft); }
+      .metric.panels::before { background: var(--violet); }
+      .metric.pathogenic { background: #fff8f8; }
+      .metric.pathogenic::before { background: var(--red); }
+      .metric.hom-alt { background: #fffaf0; }
+      .metric.hom-alt::before { background: var(--amber); }
+      .metric-heading { display: flex; align-items: center; gap: 6px; }
+      .metric-heading .icon { width: 16px; height: 16px; color: var(--muted); }
+      .metric-label { display: block; color: var(--muted); font-size: 13px; font-weight: 720; }
+      .metric-value { display: block; margin-top: 3px; font-size: 28px; font-weight: 810; line-height: 1; font-variant-numeric: tabular-nums; }
       .metric.pathogenic .metric-value { color: var(--red); }
       .metric.hom-alt .metric-value { color: var(--amber); }
 
       .workspace {
-        overflow: hidden;
+        min-width: 0;
+        overflow: visible;
         border: 1px solid var(--line);
-        border-radius: 7px;
+        border-radius: 8px;
         background: var(--surface);
-        box-shadow: var(--shadow);
+        box-shadow: var(--shadow-low);
       }
-
-      .toolbar {
-        position: relative;
-        z-index: 6;
-        display: grid;
-        grid-template-columns: minmax(240px, 1fr) minmax(190px, 0.32fr) auto auto;
-        gap: 10px;
-        align-items: end;
-        padding: 13px 14px;
-        border-bottom: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.98);
-      }
-
-      .toolbar > label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 11px; font-weight: 720; }
-      .input-wrap { position: relative; }
-      .input-wrap .icon { position: absolute; top: 9px; left: 10px; color: #7b8793; pointer-events: none; }
-
-      input[type="search"], .toolbar select {
-        width: 100%;
-        height: 36px;
-        border: 1px solid var(--line-strong);
-        border-radius: 5px;
-        outline: none;
-        background: #fff;
-        color: var(--ink);
-      }
-      input[type="search"] { padding: 7px 10px 7px 34px; }
-      .toolbar select { padding: 7px 30px 7px 9px; }
-      input[type="search"]:focus, .toolbar select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
-
-      .toggles { display: flex; flex-wrap: wrap; gap: 6px; }
-      .toggle {
-        min-height: 36px;
-        display: inline-flex;
-        flex-direction: row;
+      .workspace-head {
+        min-height: 72px;
+        display: flex;
         align-items: center;
-        gap: 7px;
-        padding: 0 9px;
-        border: 1px solid var(--line);
-        border-radius: 5px;
-        background: var(--surface-subtle);
-        color: #394551;
-        font-size: 12px;
-        white-space: nowrap;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
       }
-      .toggle input { width: 15px; height: 15px; accent-color: var(--brand); }
+      .workspace-title { display: flex; align-items: center; gap: 11px; min-width: 0; }
+      .workspace-title-icon { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border-radius: 7px; background: var(--brand-soft); color: var(--brand-dark); }
+      .workspace-title h2 { margin: 0; font-size: 17px; font-weight: 790; }
+      .workspace-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+      .workspace-actions { display: flex; align-items: center; justify-content: flex-end; gap: 7px; }
 
-      .actions { display: flex; justify-content: flex-end; gap: 7px; }
-      .column-control { position: relative; }
-      .column-menu {
-        position: absolute;
-        top: calc(100% + 6px);
-        right: 0;
-        z-index: 12;
-        width: 280px;
-        padding: 10px;
-        border: 1px solid var(--line-strong);
-        border-radius: 6px;
-        background: #fff;
-        box-shadow: 0 14px 36px rgba(25, 39, 52, 0.16);
-      }
-      .column-menu[hidden] { display: none; }
-      .column-menu-title { margin: 0 0 8px; font-size: 12px; font-weight: 780; }
-      .column-options { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; max-height: 310px; overflow: auto; }
-      .column-option { display: flex; flex-direction: row; align-items: center; gap: 6px; min-height: 28px; color: #34414d; font-size: 11px; }
-      .column-option input { accent-color: var(--brand); }
-      .column-menu-actions { display: flex; gap: 6px; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); }
-      .column-menu-actions button { flex: 1; min-height: 31px; }
       button {
         min-height: 36px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 7px;
-        padding: 7px 10px;
+        padding: 7px 11px;
         border: 1px solid var(--line-strong);
         border-radius: 5px;
         background: #fff;
-        color: #33404c;
-        font-size: 12px;
+        color: #33423f;
+        font-size: 13px;
         font-weight: 740;
         cursor: pointer;
       }
       button:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-dark); background: var(--brand-soft); }
       button.primary { border-color: var(--brand); background: var(--brand); color: #fff; }
       button.primary:hover:not(:disabled) { background: var(--brand-dark); color: #fff; }
-      button:disabled { cursor: not-allowed; opacity: 0.4; }
+      button:disabled { cursor: not-allowed; opacity: 0.42; }
+      .icon-button { width: 36px; padding: 0; }
 
-      .table-bar {
+      .panel-tabs {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        min-height: 47px;
-        padding: 9px 14px;
+        overflow-x: auto;
+        gap: 2px;
+        padding: 0 10px;
         border-bottom: 1px solid var(--line);
-        background: var(--surface-subtle);
+        background: #fff;
+        scrollbar-width: thin;
       }
-      .table-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 770; }
-      .table-count { color: var(--muted); font-size: 12px; }
+      .panel-tab {
+        min-height: 58px;
+        flex: 0 0 auto;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1px;
+        padding: 9px 13px 7px;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        border-radius: 0;
+        background: transparent;
+        color: var(--ink-soft);
+        text-align: left;
+      }
+      .panel-tab:hover:not(:disabled) { border-color: var(--line-strong); background: var(--surface-soft); }
+      .panel-tab.active { border-bottom-color: var(--brand); background: var(--brand-soft); color: var(--brand-dark); }
+      .panel-tab-name { font-size: 13px; font-weight: 780; }
+      .panel-tab-meta { color: var(--muted); font-size: 11px; font-weight: 650; }
+      .panel-tab.active .panel-tab-meta { color: var(--brand-dark); }
 
-      .table-wrap { background: #fff; }
-      table { width: 100%; min-width: 1280px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
-      th, td { padding: 9px 10px; border-right: 1px solid #edf0f2; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
-      th:last-child, td:last-child { border-right: 0; }
-      th {
-        position: sticky;
-        top: 0;
-        z-index: 3;
-        background: #eef2f4;
-        color: #394652;
-        font-size: 11px;
-        font-weight: 780;
-        white-space: nowrap;
+      .filters {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) auto auto;
+        gap: 10px;
+        align-items: end;
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-soft);
       }
-      th button {
-        all: unset;
+      .filters > label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 12px; font-weight: 720; }
+      .filters .panel-select { display: none; }
+      .input-wrap { position: relative; }
+      .input-wrap .icon { position: absolute; top: 10px; left: 11px; color: #71807d; pointer-events: none; }
+      input[type="search"], .filters select {
+        width: 100%;
+        height: 38px;
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        outline: none;
+        background: #fff;
+        color: var(--ink);
+      }
+      input[type="search"] { padding: 8px 11px 8px 36px; }
+      .filters select { padding: 8px 31px 8px 10px; }
+      input[type="search"]:focus, .filters select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+      .toggles { display: flex; flex-wrap: wrap; gap: 6px; }
+      .toggle {
+        min-height: 38px;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        cursor: pointer;
+        gap: 7px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #fff;
+        color: var(--ink-soft);
+        font-size: 13px;
+        white-space: nowrap;
       }
-      th button:hover { color: var(--brand-dark); }
-      .sort-mark { min-width: 8px; color: var(--brand); font-size: 9px; }
-      tbody tr:nth-child(even) td { background: #fbfcfc; }
-      tbody tr:hover td { background: var(--brand-soft); }
-      tbody tr.selected td { background: #dceef1; }
-      td { max-width: 260px; overflow-wrap: anywhere; }
-      td.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; }
-      td.numeric { font-variant-numeric: tabular-nums; text-align: right; }
-      td a { color: var(--blue); font-weight: 680; text-decoration: none; }
-      td a:hover { text-decoration: underline; }
-      .hidden-column { display: none; }
+      .toggle.active { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-dark); }
+      .toggle input { width: 15px; height: 15px; accent-color: var(--brand); }
+      .filter-reset { align-self: end; }
 
-      .tabulator { border: 0; background: #fff; font-size: 13px; }
-      .tabulator .tabulator-header { border-bottom: 1px solid var(--line-strong); background: #eef2f4; color: #394652; }
-      .tabulator .tabulator-header .tabulator-col { border-right: 1px solid var(--line); background: #eef2f4; }
-      .tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 9px 10px; }
-      .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title { font-size: 12px; font-weight: 780; }
-      .tabulator-row { min-height: 36px; border-bottom: 1px solid var(--line); background: #fff; }
-      .tabulator-row.tabulator-row-even { background: #fbfcfc; }
-      .tabulator-row:hover { background: var(--brand-soft); }
-      .tabulator-row.tabulator-selected { background: #dceef1; }
-      .tabulator-row .tabulator-cell { display: inline-flex; align-items: center; padding: 9px 10px; border-right: 1px solid #edf0f2; white-space: normal; }
-      .tabulator .tabulator-footer { padding: 8px 12px; border-top: 1px solid var(--line); background: var(--surface-subtle); color: var(--muted); font-size: 11px; }
-      .tabulator .tabulator-footer .tabulator-page { min-width: 32px; min-height: 30px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; color: #34414d; }
+      .column-control { position: relative; }
+      .column-menu {
+        position: absolute;
+        top: calc(100% + 7px);
+        right: 0;
+        z-index: 24;
+        width: 300px;
+        padding: 11px;
+        border: 1px solid var(--line-strong);
+        border-radius: 7px;
+        background: #fff;
+        box-shadow: var(--shadow-high);
+      }
+      .column-menu[hidden] { display: none; }
+      .column-menu-title { margin: 0 0 8px; font-size: 13px; font-weight: 790; }
+      .column-options { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 9px; max-height: 320px; overflow: auto; }
+      .column-option { min-height: 31px; display: flex; align-items: center; gap: 6px; color: #34413f; font-size: 12px; }
+      .column-option input { accent-color: var(--brand); }
+      .column-menu-actions { display: flex; gap: 6px; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); }
+      .column-menu-actions button { flex: 1; min-height: 31px; }
+
+      .table-wrap { overflow: hidden; border-radius: 0 0 8px 8px; background: #fff; }
+      .tabulator { border: 0; background: #fff; font-size: 15px; }
+      .tabulator .tabulator-header { border: 0; border-bottom: 1px solid var(--line-strong); background: #f0f4f2; color: #40504d; }
+      .tabulator .tabulator-header .tabulator-col { border: 0; background: #f0f4f2; }
+      .tabulator .tabulator-header .tabulator-col:hover { background: #e8eeeb; }
+      .tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 12px 14px; }
+      .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title { font-size: 14px; font-weight: 800; }
+      .tabulator .tabulator-header .tabulator-col.tabulator-frozen { border-right: 1px solid var(--line); }
+      .tabulator-row { min-height: 58px; border: 0; border-bottom: 1px solid #e7ecea; background: #fff; }
+      .tabulator-row.tabulator-row-even { background: #fff; }
+      .tabulator-row:hover { background: #f3f8f6; }
+      .tabulator-row.tabulator-selected { background: #e3f2ef; }
+      .tabulator-row.row-pathogenic { box-shadow: inset 3px 0 0 var(--red); }
+      .tabulator-row.row-high { box-shadow: inset 3px 0 0 var(--orange); }
+      .tabulator-row .tabulator-cell { display: inline-flex; align-items: center; padding: 11px 14px; border: 0; white-space: normal; }
+      .tabulator-row .tabulator-cell.tabulator-frozen { border-right: 1px solid #e7ecea; background: inherit; }
+      .tabulator .tabulator-footer { min-height: 48px; padding: 8px 13px; border: 0; border-top: 1px solid var(--line); background: var(--surface-soft); color: var(--muted); font-size: 12px; }
+      .tabulator .tabulator-footer .tabulator-page { min-width: 32px; min-height: 30px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; color: #34413f; }
+      .tabulator .tabulator-footer .tabulator-page:hover:not(.disabled) { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-dark); }
       .tabulator .tabulator-footer .tabulator-page.active { border-color: var(--brand); background: var(--brand); color: #fff; }
+      .tabulator .tabulator-placeholder { border: 0; }
 
+      .gene-cell, .variant-cell { min-width: 0; }
+      .cell-primary { display: block; overflow: hidden; color: var(--ink); font-weight: 760; text-overflow: ellipsis; }
+      .cell-primary a { color: var(--brand-dark); text-decoration: none; }
+      .cell-primary a:hover { text-decoration: underline; }
+      .cell-sub { display: block; overflow: hidden; margin-top: 3px; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+      .variant-id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+      .tabulator-cell a { color: var(--blue); font-weight: 680; text-decoration: none; }
+      .tabulator-cell a:hover { text-decoration: underline; }
+      .badge-list { display: flex; flex-wrap: wrap; gap: 4px; }
       .badge {
+        min-height: 24px;
         display: inline-flex;
         align-items: center;
-        min-height: 21px;
-        padding: 2px 7px;
+        padding: 3px 7px;
         border-radius: 999px;
-        font-size: 10px;
-        font-weight: 780;
-        line-height: 1.2;
+        font-size: 12px;
+        font-weight: 790;
+        line-height: 1.15;
         white-space: nowrap;
       }
-      .badge.high, .badge.pathogenic { background: var(--red-soft); color: var(--red); }
+      .badge.high { background: var(--orange-soft); color: var(--orange); }
       .badge.moderate { background: var(--amber-soft); color: var(--amber); }
+      .badge.pathogenic { background: var(--red-soft); color: var(--red); }
       .badge.pass { background: var(--green-soft); color: var(--green); }
       .badge.neutral { background: var(--blue-soft); color: var(--blue); }
+      .review-button { width: 30px; min-height: 30px; padding: 0; border-color: transparent; background: transparent; color: var(--muted); }
+      .review-button:hover { border-color: var(--line); background: #fff; }
+      .tabulator-row .tabulator-cell.review-cell { justify-content: flex-end; padding-right: 14px; }
+      .empty { padding: 58px 20px; color: var(--muted); text-align: center; }
+      .footer-note { margin: 10px 2px 0; color: var(--muted); font-size: 12px; }
 
-      .empty { padding: 54px 20px; color: var(--muted); text-align: center; }
-      .pagination {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 9px 14px;
-        background: var(--surface-subtle);
+      .detail-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(14, 31, 29, 0.38);
       }
-      .page-controls { display: flex; align-items: center; gap: 7px; }
-      .rows-control { display: flex; flex-direction: row; align-items: center; gap: 7px; }
-      .rows-control select { width: 74px; height: 32px; }
-      .footer-note { margin: 10px 2px 0; color: var(--muted); font-size: 11px; }
+      .detail-overlay[hidden] { display: none; }
+      .detail-panel {
+        position: fixed;
+        inset: 0 0 0 auto;
+        z-index: 41;
+        width: min(540px, 100%);
+        overflow: auto;
+        border-left: 1px solid var(--line);
+        background: #fff;
+        box-shadow: var(--shadow-high);
+        transform: translateX(102%);
+        transition: transform 180ms ease-out;
+      }
+      .detail-panel.open { transform: translateX(0); }
+      .detail-header { position: sticky; top: 0; z-index: 2; padding: 22px 22px 18px; background: var(--brand-deep); color: #fff; }
+      .detail-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+      .detail-eyebrow { margin: 0 0 5px; color: #a9cac7; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+      .detail-header h2 { margin: 0; font-size: 23px; line-height: 1.2; overflow-wrap: anywhere; }
+      .detail-subtitle { margin: 7px 0 0; color: #c6d8d6; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; overflow-wrap: anywhere; }
+      .detail-close { border-color: rgba(255, 255, 255, 0.28); background: transparent; color: #fff; }
+      .detail-close:hover:not(:disabled) { border-color: #fff; background: rgba(255, 255, 255, 0.1); color: #fff; }
+      .detail-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 15px; }
+      .detail-badges .badge { background: rgba(255, 255, 255, 0.13); color: #fff; }
+      .detail-body { padding: 4px 22px 30px; }
+      .detail-section { padding: 21px 0; border-bottom: 1px solid var(--line); }
+      .detail-section:last-child { border-bottom: 0; }
+      .detail-section h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 13px; color: var(--ink); font-size: 15px; font-weight: 790; }
+      .detail-section h3 .icon { color: var(--brand); }
+      .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 18px; margin: 0; }
+      .detail-field { min-width: 0; margin: 0; }
+      .detail-field.wide { grid-column: 1 / -1; }
+      .detail-field dt { margin: 0 0 3px; color: var(--muted); font-size: 12px; font-weight: 740; text-transform: uppercase; }
+      .detail-field dd { margin: 0; color: var(--ink-soft); font-size: 14px; overflow-wrap: anywhere; }
+      .detail-field dd.mono { color: var(--ink); }
+      .resource-links { display: flex; flex-wrap: wrap; gap: 7px; }
+      .resource-link { min-height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; color: var(--blue); font-size: 13px; font-weight: 720; text-decoration: none; }
+      .resource-link:hover { border-color: var(--blue); background: var(--blue-soft); }
+      .resource-link .icon { width: 14px; height: 14px; }
+      .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tag { display: inline-flex; padding: 4px 7px; border-radius: 4px; background: var(--surface-tint); color: var(--ink-soft); font-size: 13px; }
+      .empty-inline { color: var(--muted); font-size: 14px; }
 
       @media print {
-        .topbar, .toolbar, .pagination, .footer-note { display: none !important; }
+        .topbar, .workspace-actions, .panel-tabs, .filters, .footer-note, .detail-overlay, .detail-panel { display: none !important; }
         body, html { background: #fff; }
         main { width: 100%; padding: 0; }
-        .report-head { margin-bottom: 12px; }
-        .workspace { border: 0; box-shadow: none; }
-        .table-wrap { max-height: none; overflow: visible; }
-        table { min-width: 0; font-size: 8px; }
-        th, td { padding: 4px; }
+        .summary { margin: 0 0 12px; }
+        .metric, .workspace { box-shadow: none; }
+        .table-wrap { overflow: visible; }
       }
 
-      @media (max-width: 1120px) {
-        .report-head { grid-template-columns: 1fr; gap: 14px; }
-        .metrics { width: 100%; }
-        .toolbar { position: static; grid-template-columns: 1fr 1fr; }
-        .actions { justify-content: flex-start; }
+      @media (max-width: 1180px) {
+        .summary { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+        .run-panel { grid-column: 1 / -1; }
+        .filters { grid-template-columns: 1fr auto auto; }
+        .filter-reset { justify-self: start; }
       }
 
-      @media (max-width: 680px) {
-        .topbar-inner, main { width: min(100% - 20px, 1680px); }
-        .topbar-meta { display: none; }
-        main { padding-top: 16px; }
-        h1 { font-size: 21px; }
-        .metrics { grid-template-columns: 1fr 1fr; }
-        .metric:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
-        .metric:nth-child(4) { border-top: 1px solid var(--line); }
-        .toolbar { grid-template-columns: 1fr; }
-        .toggles, .actions { width: 100%; }
-        .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .actions button, .column-control { width: 100%; }
-        .table-wrap { max-height: 62vh; }
-        .pagination { align-items: flex-start; flex-direction: column; }
+      @media (max-width: 760px) {
+        .topbar-inner, main { width: min(calc(100% - 20px), 1720px); }
+        .report-status { display: none; }
+        main { padding-top: 18px; }
+        h1 { font-size: 25px; }
+        .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+        .run-meta { display: grid; grid-template-columns: minmax(0, 1fr); }
+        .run-meta div { width: 100%; max-width: 100%; }
+        .metric { min-height: 78px; padding: 10px 11px 10px 15px; }
+        .metric-value { font-size: 24px; }
+        .workspace-head { align-items: flex-start; flex-direction: column; }
+        .workspace-actions { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .workspace-actions > button, .workspace-actions .column-control, .workspace-actions .column-control > button { width: 100%; }
+        .workspace-actions #export { grid-column: 1 / -1; }
+        .panel-tabs { display: none; }
+        .filters { grid-template-columns: 1fr; }
+        .filters .panel-select { display: flex; }
+        .toggles { width: 100%; }
+        .toggle { flex: 1; }
+        .filter-reset { width: 100%; }
+        .column-menu { left: 0; right: auto; width: min(300px, calc(100vw - 42px)); }
+        .tabulator { font-size: 15px; }
+        .tabulator-row { min-height: 58px; }
+        .detail-panel { width: 100%; border-left: 0; }
+        .detail-grid { grid-template-columns: 1fr; }
+        .detail-field.wide { grid-column: auto; }
       }
     </style>
   </head>
@@ -372,71 +462,103 @@
       <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></symbol>
       <symbol id="icon-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></symbol>
       <symbol id="icon-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"></rect><path d="M3 9h18M9 4v16"></path></symbol>
-      <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></symbol>
+      <symbol id="icon-columns" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"></rect><path d="M9 4v16M15 4v16"></path></symbol>
+      <symbol id="icon-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></symbol>
       <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+      <symbol id="icon-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></symbol>
+      <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M4 5h16M7 12h10M10 19h4"></path></symbol>
+      <symbol id="icon-activity" viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"></path></symbol>
+      <symbol id="icon-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5M3 17l9 5 9-5"></path></symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3v8Z"></path><path d="M12 8v4M12 16h.01"></path></symbol>
+      <symbol id="icon-samples" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></symbol>
+      <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></symbol>
+      <symbol id="icon-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v6c0 1.7 4 3 9 3s9-1.3 9-3V5"></path><path d="M3 11v6c0 1.7 4 3 9 3s9-1.3 9-3v-6"></path></symbol>
+      <symbol id="icon-dna" viewBox="0 0 24 24"><path d="M2 15c6-6 14-6 20-12"></path><path d="M2 9c6 6 14 6 20 12"></path><path d="M7 6h10M7 18h10M4.5 12h15"></path></symbol>
     </svg>
 
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <span class="brand-mark">BFF</span>
-          <div><div class="brand-name">BFF GenomicVariations Browser</div><div class="brand-context">Clinical variant review</div></div>
+          <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-dna"></use></svg></span>
+          <div><div class="brand-name">BFF Tools Browser</div><div class="brand-context">Clinical-style variant review</div></div>
         </div>
-        <div class="topbar-meta">Standalone report</div>
+        <div class="report-status"><span class="status-dot"></span>Standalone data snapshot</div>
       </div>
     </header>
 
     <main>
-      <header class="report-head">
-        <div>
-          <p class="kicker">Analysis output</p>
-          <h1>__PROJECT_ID__</h1>
+      <section class="summary" aria-label="Report summary">
+        <div class="run-panel">
+          <p class="kicker">Genomic variation review</p>
+          <h1 id="report-title">__PROJECT_ID__</h1>
           <dl class="run-meta">
             <div><dt>Job</dt><dd title="__JOB_ID__">__JOB_ID__</dd></div>
             <div><dt>Source</dt><dd title="__SOURCE_FILE__">__SOURCE_FILE__</dd></div>
           </dl>
         </div>
-        <section class="metrics" aria-label="Report summary">
-          <div class="metric"><span class="metric-label">Variants</span><strong class="metric-value" id="metric-variants">0</strong></div>
-          <div class="metric"><span class="metric-label">Panels hit</span><strong class="metric-value" id="metric-panels">0</strong></div>
-          <div class="metric pathogenic"><span class="metric-label">Pathogenic</span><strong class="metric-value" id="metric-pathogenic">0</strong></div>
-          <div class="metric hom-alt"><span class="metric-label">Hom. ALT</span><strong class="metric-value" id="metric-hom-alt">0</strong></div>
-        </section>
-      </header>
+        <div class="metric"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-activity"></use></svg><span class="metric-label">Prioritized variants</span></div><strong class="metric-value" id="metric-variants">0</strong></div>
+        <div class="metric panels"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-layers"></use></svg><span class="metric-label">Gene panels hit</span></div><strong class="metric-value" id="metric-panels">0</strong></div>
+        <div class="metric pathogenic"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span class="metric-label">Pathogenic</span></div><strong class="metric-value" id="metric-pathogenic">0</strong></div>
+        <div class="metric hom-alt"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-samples"></use></svg><span class="metric-label">Homozygous ALT</span></div><strong class="metric-value" id="metric-hom-alt">0</strong></div>
+      </section>
 
       <section class="workspace" aria-label="Variant review workspace">
-        <div class="toolbar">
-          <label>Search variants
-            <span class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg><input id="search" type="search" placeholder="Gene, variant, sample, condition..."></span>
-          </label>
-          <label>Gene panel<select id="panel"></select></label>
-          <div class="toggles" aria-label="Table filters">
-            <label class="toggle"><input id="pathogenic" type="checkbox">Pathogenic</label>
-            <label class="toggle"><input id="hom-alt" type="checkbox">Hom. ALT</label>
+        <div class="workspace-head">
+          <div class="workspace-title">
+            <span class="workspace-title-icon"><svg class="icon" aria-hidden="true"><use href="#icon-table"></use></svg></span>
+            <div><p class="section-kicker">Review queue</p><h2>Prioritized variants</h2><p class="workspace-subtitle" id="table-count">0 variants</p></div>
           </div>
-          <div class="actions">
+          <div class="workspace-actions">
             <div class="column-control">
-              <button id="columns-button" type="button" aria-expanded="false">Columns</button>
+              <button id="columns-button" type="button" aria-expanded="false"><svg class="icon" aria-hidden="true"><use href="#icon-columns"></use></svg>Columns</button>
               <div id="column-menu" class="column-menu" hidden>
                 <p class="column-menu-title">Visible columns</p>
                 <div id="column-options" class="column-options"></div>
                 <div class="column-menu-actions"><button id="columns-default" type="button">Defaults</button><button id="columns-all" type="button">Show all</button></div>
               </div>
             </div>
-            <button id="clear" type="button" title="Reset filters"><svg class="icon" aria-hidden="true"><use href="#icon-reset"></use></svg>Reset</button>
-            <button id="print" type="button">Print</button>
+            <button id="print" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-print"></use></svg>Print</button>
             <button id="export" class="primary" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>Export CSV</button>
           </div>
         </div>
 
-        <div class="table-bar">
-          <span class="table-title"><svg class="icon" aria-hidden="true"><use href="#icon-table"></use></svg>Prioritized variants</span>
-          <span class="table-count" id="table-count">0 variants</span>
+        <div id="panel-tabs" class="panel-tabs" role="tablist" aria-label="Gene panel views"></div>
+
+        <div class="filters">
+          <label>Search variants
+            <span class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg><input id="search" type="search" placeholder="Gene, variant, sample, condition..."></span>
+          </label>
+          <label class="panel-select">Gene panel<select id="panel"></select></label>
+          <div class="toggles" aria-label="Table filters">
+            <label class="toggle" id="pathogenic-toggle"><input id="pathogenic" type="checkbox">Pathogenic</label>
+            <label class="toggle" id="hom-alt-toggle"><input id="hom-alt" type="checkbox">Hom. ALT</label>
+          </div>
+          <button id="clear" class="filter-reset" type="button" title="Reset filters and sorting"><svg class="icon" aria-hidden="true"><use href="#icon-reset"></use></svg>Reset</button>
         </div>
+
         <div class="table-wrap"><div id="variant-table"></div></div>
       </section>
-      <p class="footer-note">HIGH and MODERATE impact variants matching a configured gene panel. Select a column heading to sort.</p>
+      <p class="footer-note">HIGH and MODERATE impact variants matching a configured gene panel. Display coordinates are 1-based; BFF start coordinates remain 0-based.</p>
     </main>
+
+    <div id="detail-overlay" class="detail-overlay" hidden></div>
+    <aside id="detail-panel" class="detail-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="detail-title">
+      <header class="detail-header">
+        <div class="detail-header-top">
+          <div><p class="detail-eyebrow">Selected variant</p><h2 id="detail-title">Variant</h2><p class="detail-subtitle" id="detail-subtitle"></p></div>
+          <button id="detail-close" class="icon-button detail-close" type="button" title="Close variant details" aria-label="Close variant details"><svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg></button>
+        </div>
+        <div class="detail-badges" id="detail-badges"></div>
+      </header>
+      <div class="detail-body">
+        <section class="detail-section"><h3><svg class="icon" aria-hidden="true"><use href="#icon-shield"></use></svg>Clinical interpretation</h3><dl class="detail-grid" id="detail-clinical"></dl></section>
+        <section class="detail-section"><h3><svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg>Variant definition</h3><dl class="detail-grid" id="detail-definition"></dl></section>
+        <section class="detail-section"><h3><svg class="icon" aria-hidden="true"><use href="#icon-database"></use></svg>Evidence resources</h3><div class="resource-links" id="detail-resources"></div></section>
+        <section class="detail-section"><h3><svg class="icon" aria-hidden="true"><use href="#icon-layers"></use></svg>Matched panels</h3><div class="tag-list" id="detail-panels"></div></section>
+        <section class="detail-section"><h3><svg class="icon" aria-hidden="true"><use href="#icon-samples"></use></svg>Biosamples</h3><div class="tag-list" id="detail-samples"></div></section>
+      </div>
+    </aside>
 
     <script>__TABULATOR_JS__</script>
     <script id="report-data" type="application/json">__REPORT_DATA__</script>
@@ -444,19 +566,55 @@
       (function () {
         "use strict";
         var report = JSON.parse(document.getElementById("report-data").textContent);
-        var compactFields = new Set([
-          "variantInternalId", "position", "referenceBases", "alternateBases", "geneIds",
-          "annotationImpact", "clinicalRelevance", "dbSNP", "ClinVar"
+        var defaultFields = new Set([
+          "geneIds", "variantInternalId", "annotationImpact", "clinicalRelevance",
+          "conditionId", "dbSNP", "ClinVar"
         ]);
+        var preferredOrder = [
+          "geneIds", "variantInternalId", "annotationImpact", "clinicalRelevance",
+          "conditionId", "dbSNP", "ClinVar", "assemblyId", "refseqId", "position",
+          "referenceBases", "alternateBases", "QUAL", "FILTER", "variantType",
+          "genomicHGVSId", "molecularEffects", "aminoacidChanges", "biosampleId"
+        ];
         var numericFields = new Set(["position", "QUAL"]);
-        var monoFields = new Set(["variantInternalId", "genomicHGVSId", "refseqId"]);
-        var linkedFields = new Set(["dbSNP", "ClinVar", "geneIds", "refseqId", "alternateBases"]);
+        var monoFields = new Set(["genomicHGVSId", "refseqId"]);
+        var linkedFields = new Set(["dbSNP", "ClinVar", "refseqId", "alternateBases"]);
         var controls = {
           search: document.getElementById("search"),
           panel: document.getElementById("panel"),
           pathogenic: document.getElementById("pathogenic"),
           homAlt: document.getElementById("hom-alt")
         };
+
+        function icon(id) {
+          var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          var use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+          svg.setAttribute("class", "icon");
+          svg.setAttribute("aria-hidden", "true");
+          use.setAttribute("href", "#" + id);
+          svg.appendChild(use);
+          return svg;
+        }
+
+        function text(value, fallback) {
+          var rendered = String(value === null || value === undefined ? "" : value).trim();
+          return rendered || fallback || "Not available";
+        }
+
+        function values(value) {
+          return String(value || "").split(",").map(function (part) { return part.trim(); }).filter(Boolean);
+        }
+
+        function oneBasedPosition(row) {
+          if (row.position === "" || row.position === null || row.position === undefined) return "";
+          var position = Number(row.position);
+          return Number.isFinite(position) ? position + 1 : "";
+        }
+
+        function displayCoordinate(row) {
+          var locus = row.refseqId && oneBasedPosition(row) !== "" ? row.refseqId + ":" + Number(oneBasedPosition(row)).toLocaleString() : "";
+          return [row.assemblyId, locus].filter(Boolean).join(" / ");
+        }
 
         document.getElementById("metric-variants").textContent = report.summary.variants.toLocaleString();
         document.getElementById("metric-panels").textContent = report.summary.panels.toLocaleString();
@@ -469,9 +627,34 @@
           option.textContent = label;
           controls.panel.appendChild(option);
         }
+        var panelTabs = document.getElementById("panel-tabs");
+        function appendPanelTab(value, label, variantCount, geneCount) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "panel-tab";
+          button.setAttribute("role", "tab");
+          button.dataset.panel = value;
+          var name = document.createElement("span");
+          name.className = "panel-tab-name";
+          name.textContent = label;
+          var meta = document.createElement("span");
+          meta.className = "panel-tab-meta";
+          meta.textContent = geneCount === null
+            ? variantCount.toLocaleString() + " variants"
+            : Number(geneCount).toLocaleString() + " genes / " + variantCount.toLocaleString() + " variants";
+          button.append(name, meta);
+          button.addEventListener("click", function () {
+            controls.panel.value = value;
+            applyFilters();
+          });
+          panelTabs.appendChild(button);
+        }
         appendOption("", "All panels");
+        appendPanelTab("", "All prioritized", report.rows.length, null);
         Object.keys(report.panels).sort().forEach(function (name) {
-          appendOption(name, name + " (" + report.panels[name] + ")");
+          var geneCount = (report.panelGenes || {})[name];
+          appendOption(name, name + " (" + report.panels[name] + " variants)");
+          appendPanelTab(name, name, report.panels[name], geneCount === undefined ? 0 : geneCount);
         });
 
         function externalLink(field, value, row) {
@@ -493,9 +676,8 @@
         function linkedValueFormatter(cell) {
           var field = cell.getField();
           var row = cell.getRow().getData();
-          var value = String(cell.getValue() || "");
           var fragment = document.createDocumentFragment();
-          value.split(",").map(function (part) { return part.trim(); }).filter(Boolean).forEach(function (part, index) {
+          values(cell.getValue()).forEach(function (part, index) {
             if (index) fragment.appendChild(document.createTextNode(", "));
             var href = externalLink(field, part, row);
             if (!href) {
@@ -510,6 +692,53 @@
             fragment.appendChild(link);
           });
           return fragment;
+        }
+
+        function geneFormatter(cell) {
+          var row = cell.getRow().getData();
+          var wrapper = document.createElement("div");
+          wrapper.className = "gene-cell";
+          var primary = document.createElement("span");
+          primary.className = "cell-primary";
+          var genes = values(cell.getValue());
+          if (!genes.length) primary.textContent = "Unassigned";
+          genes.forEach(function (gene, index) {
+            if (index) primary.appendChild(document.createTextNode(", "));
+            var link = document.createElement("a");
+            link.href = externalLink("geneIds", gene, row);
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = gene;
+            primary.appendChild(link);
+          });
+          wrapper.appendChild(primary);
+          if (row.aminoacidChanges) {
+            var secondary = document.createElement("span");
+            secondary.className = "cell-sub";
+            secondary.textContent = row.aminoacidChanges;
+            secondary.title = row.aminoacidChanges;
+            wrapper.appendChild(secondary);
+          }
+          return wrapper;
+        }
+
+        function variantFormatter(cell) {
+          var row = cell.getRow().getData();
+          var wrapper = document.createElement("div");
+          wrapper.className = "variant-cell";
+          var primary = document.createElement("span");
+          primary.className = "cell-primary variant-id";
+          primary.textContent = text(cell.getValue(), "Unnamed variant");
+          wrapper.appendChild(primary);
+          var coordinate = displayCoordinate(row);
+          if (coordinate) {
+            var secondary = document.createElement("span");
+            secondary.className = "cell-sub";
+            secondary.textContent = coordinate;
+            secondary.title = "Display coordinate (1-based)";
+            wrapper.appendChild(secondary);
+          }
+          return wrapper;
         }
 
         function conditionFormatter(cell) {
@@ -532,33 +761,42 @@
           return fragment;
         }
 
+        function badgeKind(field, value) {
+          var lowered = value.toLowerCase();
+          if (field === "annotationImpact") return lowered.indexOf("high") !== -1 ? "high" : "moderate";
+          if (field === "clinicalRelevance") return lowered.indexOf("pathogenic") !== -1 ? "pathogenic" : "neutral";
+          if (field === "FILTER") return lowered === "pass" ? "pass" : "neutral";
+          return "neutral";
+        }
+
         function badgeFormatter(cell) {
           var field = cell.getField();
-          var value = String(cell.getValue() || "");
-          if (!value) return "";
-          var lowered = value.toLowerCase();
-          var kind = "neutral";
-          if (field === "annotationImpact") kind = lowered.indexOf("high") !== -1 ? "high" : "moderate";
-          if (field === "clinicalRelevance") kind = lowered.indexOf("pathogenic") !== -1 ? "pathogenic" : "neutral";
-          if (field === "FILTER") kind = lowered === "pass" ? "pass" : "neutral";
-          var badge = document.createElement("span");
-          badge.className = "badge " + kind;
-          badge.textContent = value;
-          return badge;
+          var entries = values(cell.getValue());
+          if (!entries.length) return "";
+          var list = document.createElement("div");
+          list.className = "badge-list";
+          entries.forEach(function (value) {
+            var badge = document.createElement("span");
+            badge.className = "badge " + badgeKind(field, value);
+            badge.textContent = value;
+            list.appendChild(badge);
+          });
+          return list;
         }
 
         function biosampleFormatter(cell) {
-          var value = String(cell.getValue() || "");
-          var samples = value.split(",").map(function (part) { return part.trim(); }).filter(Boolean);
-          var preview = samples.slice(0, 2).join(", ");
-          if (samples.length > 2) preview += " (and " + (samples.length - 2) + " more)";
+          var allSamples = values(cell.getValue());
+          var preview = allSamples.slice(0, 2).join(", ");
+          if (allSamples.length > 2) preview += " (and " + (allSamples.length - 2) + " more)";
           var span = document.createElement("span");
           span.textContent = preview;
-          span.title = value;
+          span.title = String(cell.getValue() || "");
           return span;
         }
 
         function columnFormatter(field) {
+          if (field === "geneIds") return geneFormatter;
+          if (field === "variantInternalId") return variantFormatter;
           if (linkedFields.has(field)) return linkedValueFormatter;
           if (field === "conditionId") return conditionFormatter;
           if (field === "biosampleId") return biosampleFormatter;
@@ -567,23 +805,55 @@
         }
 
         var widthByField = {
-          variantInternalId: 185, position: 105, referenceBases: 80, alternateBases: 80,
-          geneIds: 150, annotationImpact: 115, clinicalRelevance: 140, dbSNP: 110,
-          ClinVar: 100, biosampleId: 260, conditionId: 220, molecularEffects: 180
+          geneIds: 170, variantInternalId: 250, annotationImpact: 125,
+          clinicalRelevance: 190, conditionId: 255, dbSNP: 130, ClinVar: 120,
+          assemblyId: 105, refseqId: 145, position: 110, referenceBases: 85,
+          alternateBases: 85, QUAL: 90, FILTER: 95, variantType: 115,
+          genomicHGVSId: 210, molecularEffects: 190, aminoacidChanges: 175,
+          biosampleId: 270
         };
-        var columns = report.columns.map(function (column) {
+        var definitionByKey = new Map(report.columns.map(function (column) { return [column.key, column]; }));
+        var orderedDefinitions = preferredOrder.map(function (key) { return definitionByKey.get(key); }).filter(Boolean);
+        report.columns.forEach(function (column) {
+          if (preferredOrder.indexOf(column.key) === -1) orderedDefinitions.push(column);
+        });
+        var columns = orderedDefinitions.map(function (column) {
           return {
             title: column.label,
             field: column.key,
-            visible: compactFields.has(column.key),
+            visible: defaultFields.has(column.key),
             sorter: numericFields.has(column.key) ? "number" : "string",
             formatter: columnFormatter(column.key),
             cssClass: monoFields.has(column.key) ? "mono" : "",
-            minWidth: widthByField[column.key] || 95,
+            minWidth: widthByField[column.key] || 105,
             width: widthByField[column.key],
             headerSort: true,
-            tooltip: true
+            tooltip: true,
+            frozen: column.key === "geneIds"
           };
+        });
+        columns.push({
+          title: "",
+          field: "_review",
+          width: 46,
+          minWidth: 46,
+          cssClass: "review-cell",
+          headerSort: false,
+          download: false,
+          print: false,
+          formatter: function () {
+            var button = document.createElement("button");
+            button.type = "button";
+            button.className = "review-button";
+            button.title = "Review variant";
+            button.setAttribute("aria-label", "Review variant");
+            button.appendChild(icon("icon-chevron-right"));
+            return button;
+          },
+          cellClick: function (event, cell) {
+            event.stopPropagation();
+            openDetail(cell.getRow(), event.currentTarget);
+          }
         });
 
         function domainFilter(row) {
@@ -601,28 +871,61 @@
           data: report.rows,
           columns: columns,
           index: "variantInternalId",
-          height: "calc(100vh - 292px)",
-          minHeight: 360,
+          height: "calc(100vh - 420px)",
+          minHeight: 420,
           layout: "fitDataStretch",
+          renderVertical: "virtual",
           pagination: true,
           paginationSize: 50,
           paginationSizeSelector: [25, 50, 100, 250],
           paginationButtonCount: 5,
           paginationCounter: "rows",
-          selectableRows: true,
+          selectableRows: 1,
           movableColumns: true,
           placeholder: "No variants match the active filters.",
           persistence: {columns: true, sort: true, page: true},
-          persistenceID: "bff-browser-" + report.jobId,
+          persistenceID: "bff-tools-browser-v2-" + report.jobId,
           printAsHtml: true,
           printStyled: true,
-          downloadRowRange: "active"
+          downloadRowRange: "active",
+          rowFormatter: function (row) {
+            var data = row.getData();
+            if (data._pathogenic) row.getElement().classList.add("row-pathogenic");
+            else if (String(data.annotationImpact).toUpperCase().indexOf("HIGH") !== -1) row.getElement().classList.add("row-high");
+          }
         });
 
-        function applyFilters() { table.setFilter(domainFilter); }
+        var clearButton = document.getElementById("clear");
+        function activeFilterLabels() {
+          var labels = [];
+          if (controls.search.value.trim()) labels.push("search");
+          if (controls.panel.value) labels.push(controls.panel.value);
+          if (controls.pathogenic.checked) labels.push("pathogenic");
+          if (controls.homAlt.checked) labels.push("homozygous ALT");
+          return labels;
+        }
+        function updateControls() {
+          document.getElementById("pathogenic-toggle").classList.toggle("active", controls.pathogenic.checked);
+          document.getElementById("hom-alt-toggle").classList.toggle("active", controls.homAlt.checked);
+          panelTabs.querySelectorAll(".panel-tab").forEach(function (tab) {
+            var active = tab.dataset.panel === controls.panel.value;
+            tab.classList.toggle("active", active);
+            tab.setAttribute("aria-selected", String(active));
+            tab.tabIndex = active ? 0 : -1;
+          });
+          clearButton.disabled = activeFilterLabels().length === 0 && table.getSorters().length === 0;
+        }
+        function applyFilters() {
+          updateControls();
+          table.setFilter(domainFilter);
+        }
         table.on("dataFiltered", function (filters, rows) {
-          document.getElementById("table-count").textContent =
-            rows.length.toLocaleString() + (rows.length === 1 ? " variant" : " variants");
+          document.getElementById("table-count").textContent = rows.length.toLocaleString() + " of " + report.rows.length.toLocaleString() + " variant" + (report.rows.length === 1 ? "" : "s");
+        });
+        table.on("dataSorted", updateControls);
+        table.on("rowClick", function (event, row) {
+          if (event.target.closest("a, button, input, select")) return;
+          openDetail(row, event.currentTarget);
         });
         [controls.panel, controls.pathogenic, controls.homAlt].forEach(function (control) {
           control.addEventListener("change", applyFilters);
@@ -634,7 +937,7 @@
         var columnOptions = document.getElementById("column-options");
         function syncColumnOptions() {
           columnOptions.replaceChildren();
-          report.columns.forEach(function (definition) {
+          orderedDefinitions.forEach(function (definition) {
             var label = document.createElement("label");
             label.className = "column-option";
             var input = document.createElement("input");
@@ -645,7 +948,6 @@
             columnOptions.appendChild(label);
           });
         }
-
         columnButton.addEventListener("click", function () {
           var open = columnMenu.hidden;
           columnMenu.hidden = !open;
@@ -659,23 +961,24 @@
           }
         });
         document.getElementById("columns-default").addEventListener("click", function () {
-          report.columns.forEach(function (column) {
+          orderedDefinitions.forEach(function (column) {
             var component = table.getColumn(column.key);
-            compactFields.has(column.key) ? component.show() : component.hide();
+            defaultFields.has(column.key) ? component.show() : component.hide();
           });
           syncColumnOptions();
         });
         document.getElementById("columns-all").addEventListener("click", function () {
-          table.getColumns().forEach(function (column) { column.show(); });
+          orderedDefinitions.forEach(function (column) { table.getColumn(column.key).show(); });
           syncColumnOptions();
         });
 
-        document.getElementById("clear").addEventListener("click", function () {
+        clearButton.addEventListener("click", function () {
           controls.search.value = "";
           controls.panel.value = "";
           controls.pathogenic.checked = false;
           controls.homAlt.checked = false;
           table.clearSort();
+          table.deselectRow();
           applyFilters();
         });
         document.getElementById("export").addEventListener("click", function () {
@@ -684,6 +987,135 @@
         document.getElementById("print").addEventListener("click", function () {
           table.print(false, true);
         });
+
+        var detailPanel = document.getElementById("detail-panel");
+        var detailOverlay = document.getElementById("detail-overlay");
+        var detailClose = document.getElementById("detail-close");
+        var lastDetailTrigger = null;
+
+        function addDetailFields(container, fields) {
+          container.replaceChildren();
+          fields.forEach(function (field) {
+            var wrapper = document.createElement("div");
+            wrapper.className = "detail-field" + (field.wide ? " wide" : "");
+            var term = document.createElement("dt");
+            term.textContent = field.label;
+            var description = document.createElement("dd");
+            description.textContent = text(field.value);
+            if (field.mono) description.className = "mono";
+            wrapper.append(term, description);
+            container.appendChild(wrapper);
+          });
+        }
+
+        function addTags(container, entries) {
+          container.replaceChildren();
+          if (!entries.length) {
+            var empty = document.createElement("span");
+            empty.className = "empty-inline";
+            empty.textContent = "Not available";
+            container.appendChild(empty);
+            return;
+          }
+          entries.forEach(function (entry) {
+            var tag = document.createElement("span");
+            tag.className = "tag";
+            tag.textContent = entry;
+            container.appendChild(tag);
+          });
+        }
+
+        function addResource(container, label, href) {
+          if (!href) return;
+          var link = document.createElement("a");
+          link.className = "resource-link";
+          link.href = href;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.append(document.createTextNode(label), icon("icon-external"));
+          container.appendChild(link);
+        }
+
+        function populateResources(row) {
+          var container = document.getElementById("detail-resources");
+          container.replaceChildren();
+          values(row.geneIds).forEach(function (gene) { addResource(container, "Gene " + gene, externalLink("geneIds", gene, row)); });
+          values(row.dbSNP).forEach(function (identifier) { addResource(container, "dbSNP " + identifier, externalLink("dbSNP", identifier, row)); });
+          values(row.ClinVar).forEach(function (identifier) { addResource(container, "ClinVar " + identifier, externalLink("ClinVar", identifier, row)); });
+          addResource(container, "gnomAD variant", externalLink("alternateBases", row.alternateBases, row));
+          var conditionPattern = /([A-Za-z][A-Za-z0-9_]+:[A-Za-z0-9_.-]+)/g;
+          var match;
+          while ((match = conditionPattern.exec(String(row.conditionId || ""))) !== null) {
+            addResource(container, match[1], "https://identifiers.org/" + encodeURIComponent(match[1]));
+          }
+          if (!container.children.length) {
+            var empty = document.createElement("span");
+            empty.className = "empty-inline";
+            empty.textContent = "No linked identifiers available";
+            container.appendChild(empty);
+          }
+        }
+
+        function openDetail(rowComponent, trigger) {
+          var row = rowComponent.getData();
+          table.deselectRow();
+          rowComponent.select();
+          lastDetailTrigger = trigger instanceof HTMLElement ? trigger : null;
+          document.getElementById("detail-title").textContent = text(row.geneIds, text(row.variantInternalId, "Variant"));
+          document.getElementById("detail-subtitle").textContent = text(row.genomicHGVSId, text(row.variantInternalId));
+          var badges = document.getElementById("detail-badges");
+          badges.replaceChildren();
+          values(row.annotationImpact).concat(values(row.clinicalRelevance)).forEach(function (value) {
+            var badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = value;
+            badges.appendChild(badge);
+          });
+          addDetailFields(document.getElementById("detail-clinical"), [
+            {label: "Clinical relevance", value: row.clinicalRelevance},
+            {label: "Annotation impact", value: row.annotationImpact},
+            {label: "Condition", value: row.conditionId, wide: true},
+            {label: "Molecular effect", value: row.molecularEffects, wide: true},
+            {label: "Amino acid change", value: row.aminoacidChanges, wide: true, mono: true}
+          ]);
+          addDetailFields(document.getElementById("detail-definition"), [
+            {label: "Variant ID", value: row.variantInternalId, wide: true, mono: true},
+            {label: "Assembly", value: row.assemblyId},
+            {label: "Reference sequence", value: row.refseqId, mono: true},
+            {label: "Display locus (1-based)", value: displayCoordinate(row), wide: true, mono: true},
+            {label: "BFF start (0-based)", value: row.position, mono: true},
+            {label: "Variant type", value: row.variantType},
+            {label: "Reference", value: row.referenceBases, mono: true},
+            {label: "Alternate", value: row.alternateBases, mono: true},
+            {label: "QUAL", value: row.QUAL},
+            {label: "FILTER", value: row.FILTER}
+          ]);
+          populateResources(row);
+          addTags(document.getElementById("detail-panels"), row._panels || []);
+          addTags(document.getElementById("detail-samples"), values(row.biosampleId));
+          detailOverlay.hidden = false;
+          detailPanel.setAttribute("aria-hidden", "false");
+          document.body.classList.add("detail-open");
+          requestAnimationFrame(function () {
+            detailPanel.classList.add("open");
+            detailClose.focus();
+          });
+        }
+
+        function closeDetail() {
+          detailPanel.classList.remove("open");
+          detailPanel.setAttribute("aria-hidden", "true");
+          document.body.classList.remove("detail-open");
+          table.deselectRow();
+          window.setTimeout(function () { detailOverlay.hidden = true; }, 190);
+          if (lastDetailTrigger) lastDetailTrigger.focus();
+        }
+        detailClose.addEventListener("click", closeDetail);
+        detailOverlay.addEventListener("click", closeDetail);
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && detailPanel.classList.contains("open")) closeDetail();
+        });
+
         applyFilters();
       }());
     </script>

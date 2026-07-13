@@ -17,7 +17,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
   </div>
 </div>
 
-`beacon2-cbi-tools` does one job: it prepares data in the Beacon Friendly Format (BFF) for Beacon v2.
+**BFF Tools** does one job: it prepares data in the Beacon Friendly Format (BFF) for Beacon v2.
 
 <div className="beaconFlowDiagramFrame">
   <img

@@ -224,6 +224,75 @@
   text-align: center;
 }
 
+.beaconWorkbookFigure {
+  margin: 1.25rem 0 1.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.beaconWorkbookHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: #153f4b;
+  color: #ffffff;
+}
+
+.beaconWorkbookHeader span,
+.beaconWorkbookHeader small {
+  color: #b9d4da;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.beaconWorkbookHeader strong {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.95rem;
+}
+
+.beaconWorkbookHeader small {
+  margin-left: auto;
+}
+
+.beaconWorkbookSheets {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: rgba(15, 23, 42, 0.1);
+  gap: 1px;
+}
+
+.beaconWorkbookSheets span {
+  min-width: 0;
+  padding: 1.1rem 0.55rem;
+  border-top: 4px solid #2a8190;
+  background: #ffffff;
+  color: #243b53;
+  font-size: 0.75rem;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.beaconWorkbookSheets span:nth-child(2) { border-top-color: #3273a8; }
+.beaconWorkbookSheets span:nth-child(3) { border-top-color: #6a62a3; }
+.beaconWorkbookSheets span:nth-child(4) { border-top-color: #39815d; }
+.beaconWorkbookSheets span:nth-child(5) { border-top-color: #b77a1e; }
+.beaconWorkbookSheets span:nth-child(6) { border-top-color: #b84d59; }
+.beaconWorkbookSheets span:nth-child(7) { border-top-color: #637381; }
+
+.beaconWorkbookFigure figcaption {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  color: #486581;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .faqLead {
   margin: 0 0 1.5rem;
   padding: 0.9rem 1rem;
@@ -383,6 +452,25 @@
   color: #f8fafc;
 }
 
+[data-theme='dark'] .beaconWorkbookFigure {
+  border-color: rgba(226, 232, 240, 0.14);
+  background: #102033;
+}
+
+[data-theme='dark'] .beaconWorkbookSheets {
+  background: rgba(226, 232, 240, 0.12);
+}
+
+[data-theme='dark'] .beaconWorkbookSheets span {
+  background: #102033;
+  color: #e5edf5;
+}
+
+[data-theme='dark'] .beaconWorkbookFigure figcaption {
+  border-top-color: rgba(226, 232, 240, 0.12);
+  color: #cbd5e1;
+}
+
 [data-theme='dark'] .about-kicker {
   color: var(--ifm-color-primary-light);
 }
@@ -491,6 +579,20 @@
 
   .beaconWorkflowBand {
     grid-template-columns: 1fr;
+  }
+
+  .beaconWorkbookSheets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .beaconWorkbookHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .beaconWorkbookHeader small {
+    margin-left: 0;
   }
 
   .beacon-docs-hero-brand {

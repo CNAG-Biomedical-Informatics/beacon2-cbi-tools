@@ -228,6 +228,7 @@ def build_report_payload(
         "columns": [{"key": key, "label": label} for key, label in COLUMNS],
         "rows": selected,
         "panels": {name: len(rows) for name, rows in panel_rows.items()},
+        "panelGenes": {name: len(genes) for name, genes in panels.items()},
         "summary": {
             "variants": len(selected),
             "panels": sum(1 for rows in panel_rows.values() if rows),
@@ -281,7 +282,7 @@ def generate_browser_report(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate a standalone BFF genomic variations browser")
+    parser = argparse.ArgumentParser(description="Generate a standalone BFF Tools Browser report")
     parser.add_argument("-i", "--input", required=True, type=Path)
     parser.add_argument("--panel-dir", required=True, type=Path)
     parser.add_argument("--project-id", required=True)

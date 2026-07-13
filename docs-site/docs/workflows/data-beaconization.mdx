@@ -1,7 +1,3 @@
-import excelTemplate from '@site/static/img/excel-template.png';
-import validatorOutput from '@site/static/img/bff-tools-validate.png';
-import vcfWorkflow from '@site/static/img/bff-tools-vcf.png';
-
 # Tutorial: Beaconize a Dataset
 
 <div className="beaconDocHero">
@@ -55,8 +51,21 @@ bff-tools validate --template-out metadata.xlsx
 
 The [CINECA synthetic workbook](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/CINECA_synthetic_cohort_EUROPE_UK1/Beacon-v2-Models_CINECA_UK1.xlsx) is a populated reference.
 
-<figure className="beaconFigure">
-  <img src={excelTemplate} alt="Beacon v2 metadata workbook template" />
+<figure className="beaconWorkbookFigure">
+  <div className="beaconWorkbookHeader">
+    <span>XLSX workbook</span>
+    <strong>metadata.xlsx</strong>
+    <small>7 Beacon collections</small>
+  </div>
+  <div className="beaconWorkbookSheets" role="list" aria-label="Beacon metadata workbook worksheets">
+    <span role="listitem">analyses</span>
+    <span role="listitem">biosamples</span>
+    <span role="listitem">cohorts</span>
+    <span role="listitem">datasets</span>
+    <span role="listitem">genomicVariations</span>
+    <span role="listitem">individuals</span>
+    <span role="listitem">runs</span>
+  </div>
   <figcaption>Each worksheet represents one Beacon entity collection.</figcaption>
 </figure>
 
@@ -75,10 +84,38 @@ Validate the completed workbook:
 bff-tools validate -i metadata.xlsx -o bff
 ```
 
-<figure className="beaconFigure">
-  <img src={validatorOutput} alt="BFF validation output example" />
-  <figcaption>Valid worksheets become deterministic BFF JSON collections.</figcaption>
-</figure>
+```text title="Successful metadata validation"
+🧬 BFF Tools Validator  v2.0.13-dev
+Validate Beacon XLSX or JSON input and write BFF JSON collections
+
+== 🗂 analyses ==
+✓ analyses: validation passed (2,504 records)
+→ Wrote .../bff/analyses.json
+
+== 🧪 biosamples ==
+✓ biosamples: validation passed (2,504 records)
+→ Wrote .../bff/biosamples.json
+
+== 👥 cohorts ==
+✓ cohorts: validation passed (1 record)
+→ Wrote .../bff/cohorts.json
+
+== 📦 datasets ==
+✓ datasets: validation passed (1 record)
+→ Wrote .../bff/datasets.json
+
+== 🧍 individuals ==
+✓ individuals: validation passed (2,504 records)
+→ Wrote .../bff/individuals.json
+
+== 🧫 runs ==
+✓ runs: validation passed (2,504 records)
+→ Wrote .../bff/runs.json
+
+✓ Validation passed; checked 10,018 records
+```
+
+Valid worksheets become deterministic BFF JSON collections. Use `--no-color` or `--no-emoji` when plain output is required for a log processor.
 
 ### Diagnose a Failed Workbook Row
 
@@ -147,10 +184,21 @@ This normalizes the VCF and applies SnpEff, dbNSFP, ClinVar, and COSMIC resource
 
 The production mapping targets DNA-sequencing SNVs and nucleotide insertions/deletions from single-sample or multi-sample VCFs. Symbolic structural and copy-number alleles are currently skipped; see [Supported Data](../reference/supported-data) before processing an SV-focused callset.
 
-<figure className="beaconFigure">
-  <img src={vcfWorkflow} alt="VCF to BFF genomic variation workflow" />
-  <figcaption>Conversion writes compressed BFF genomic variations plus a reproducibility log.</figcaption>
-</figure>
+The full stdout lists the arguments, resolved configuration, and input parameters. A successful compact run ends with:
+
+```text title="Successful VCF conversion (stdout excerpt)"
+Starting BFF-Tools
+  Pipeline execution begins now
+
+  🧬 VCF2BFF
+  🌐 BFF2HTML
+
+BFF-Tools Finished
+  Status       => OK
+  Runtime      => 1s
+```
+
+Conversion writes compressed BFF genomic variations plus `log.json`, generated stage scripts, and stage logs. Runtime depends on input size, annotations, sample count, CPU, and storage.
 
 The assembly must match the input. `b37` is normalized to `hs37`; `hg19`, `hs37`, and `hg38` remain distinct because contig conventions and coordinates can differ.
 
@@ -259,7 +307,7 @@ bff-tools validate \
 
 ## 4. Inspect and Hand Off
 
-Generate the standalone **BFF GenomicVariations Browser** during conversion:
+Generate the standalone **BFF Tools Browser** during conversion:
 
 ```bash
 bff-tools vcf -i cohort.vcf.gz \
@@ -267,7 +315,7 @@ bff-tools vcf -i cohort.vcf.gz \
   -c config.yaml --browser -o cohort-bff-browser
 ```
 
-Open the generated HTML file directly. It includes searching, sorting, column controls, pagination for large tables, gene panels, and assembly-aware links to external variant databases.
+Open the generated HTML file directly. The adjacent `browser/README.txt` records the exact filename and an optional local HTTP-server command. The report includes searching, sorting, column controls, pagination for large tables, gene panels, a structured variant inspector, and assembly-aware links to external variant databases.
 
 Before handing the BFF files to a Beacon implementation, confirm:
 

@@ -1,8 +1,8 @@
 <div align="center">
   <a href="https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools">
-    <img src="https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docs-site/static/img/logo.png" width="180" alt="beacon2-cbi-tools">
+    <img src="https://raw.githubusercontent.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/main/docs-site/static/img/logo.png" width="180" alt="BFF Tools">
   </a>
-  <h1>beacon2-cbi-tools</h1>
+  <h1>BFF Tools</h1>
 </div>
 
 [![Tests](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/tests.yml/badge.svg)](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/actions/workflows/tests.yml)
@@ -15,9 +15,11 @@
 [![Historical EGA Docker pulls](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=EGA-RI-historical-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
 ![Version](https://img.shields.io/badge/version-2.0.13--dev-blue)
 
-**beacon2-cbi-tools** prepares portable [Beacon Friendly Format (BFF)](https://docs.genomebeacons.org/models/) data for Beacon v2. It validates phenotypic and clinical metadata, converts VCF or SNP-array TSV input into BFF `genomicVariations`, and can generate a standalone browser report.
+**BFF Tools** prepares portable [Beacon Friendly Format (BFF)](https://docs.genomebeacons.org/models/) data for Beacon v2. It validates phenotypic and clinical metadata, converts VCF or SNP-array TSV input into BFF `genomicVariations`, and can generate a standalone browser report.
 
-The project is maintained by [CNAG Biomedical Informatics](https://www.cnag.eu) and was previously named **beacon2-ri-tools**. The two historical image badges preserve the download record of earlier distributions; those images are deprecated for new installations.
+**BFF Tools** (`beacon2-cbi-tools`) is the actively developed continuation of the original `beacon2-ri-tools`, first developed at [EGA](https://ega-archive.org) and now maintained by its original developer at [CNAG Biomedical Informatics](https://www.cnag.eu). It is used by Beacon deployers and is independent of EGA's separate [`beacon2-ri-tools-v2`](https://github.com/EGA-archive/beacon2-ri-tools-v2) project.
+
+The two historical image badges preserve the download record of earlier distributions; those images are deprecated for new installations.
 
 ## Quick links
 
@@ -38,13 +40,13 @@ The project is maintained by [CNAG Biomedical Informatics](https://www.cnag.eu) 
 - Serializes workbook metadata into deterministic BFF collections.
 - Normalizes and annotates raw VCF input with SnpEff, dbNSFP, ClinVar, and COSMIC.
 - Converts VCF or SNP-array TSV data into streamed, compressed BFF `genomicVariations`.
-- Generates a standalone **BFF GenomicVariations Browser** for clinical-style review.
+- Generates a standalone **BFF Tools Browser** for clinical-style review.
 
 The output remains independent of a particular Beacon server or database. For serving, consider the [Beacon v2 Production Implementation](https://github.com/EGA-archive/beacon2-pi-api) or [bycon](https://codeberg.org/Progenetix/bycon/).
 
 ## How data flows
 
-![Flow from source metadata and variants through beacon2-cbi-tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
+![Flow from source metadata and variants through BFF Tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
 
 ## Install
 

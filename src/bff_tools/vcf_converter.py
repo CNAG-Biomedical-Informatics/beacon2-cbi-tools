@@ -321,6 +321,12 @@ def map_case_level_data(
     format_fields = format_value.split(":")
     mapped: list[dict[str, Any]] = []
     if len(format_fields) == 1:
+        # This is the large-cohort hot path. iter_bff_records keeps the GT-only
+        # sample tail as one string (split at most nine times), then this sparse
+        # scan locates only alternate calls instead of allocating and visiting
+        # thousands of genotype strings for every variant. Dense calls fall
+        # back to a full split; the converter still streams one record at a
+        # time and uses orjson/ISA-L when available for encoding and gzip I/O.
         if not sample_ids or not genotypes:
             return mapped
         if isinstance(genotypes, str):

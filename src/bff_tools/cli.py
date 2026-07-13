@@ -178,7 +178,12 @@ def handle_validate(arg: dict[str, object]) -> int:
         ignore_validation=bool(arg.get("ignore_validation")),
         verbose=bool(arg.get("verbose")) or bool(arg.get("debug")),
     )
-    print_report(report, ignore_validation=bool(arg.get("ignore_validation")))
+    print_report(
+        report,
+        ignore_validation=bool(arg.get("ignore_validation")),
+        no_color=bool(arg.get("no_color")),
+        no_emoji=bool(arg.get("no_emoji")),
+    )
     return 0 if report.ok or bool(arg.get("ignore_validation")) else 1
 
 

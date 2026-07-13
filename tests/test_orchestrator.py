@@ -275,6 +275,11 @@ class OrchestratorTests(unittest.TestCase):
             )
             log = (projectdir / "browser" / "run_bff2html.log").read_text(encoding="utf-8")
             self.assertIn("Selected variants: 3", log)
+            readme = (projectdir / "browser" / "README.txt").read_text(encoding="utf-8")
+            self.assertIn("Report: 12345.html", readme)
+            self.assertIn("No web server is required", readme)
+            self.assertIn("External database links require internet access", readme)
+            self.assertIn("not a medical device", readme)
 
     def test_run_executes_pipelines_in_order(self) -> None:
         runner = PipelineRunner(

@@ -3,12 +3,16 @@ from __future__ import annotations
 import gzip
 import json
 import math
+import os
 import re
 import shutil
+import warnings
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Sequence, TextIO
+
+from .version import VERSION
 
 
 COLLECTIONS = (
@@ -25,6 +29,22 @@ METADATA_COLLECTIONS = tuple(
 )
 NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$")
 ARRAY_HEADER_RE = re.compile(r"^[A-Za-z0-9-]+_")
+RESET = "\033[0m"
+BOLD = "\033[1m"
+BLUE = "\033[34m"
+CYAN = "\033[36m"
+GREEN = "\033[32m"
+RED = "\033[31m"
+YELLOW = "\033[33m"
+COLLECTION_EMOJI = {
+    "analyses": "🗂 ",
+    "biosamples": "🧪 ",
+    "cohorts": "👥 ",
+    "datasets": "📦 ",
+    "genomicVariations": "🧬 ",
+    "individuals": "🧍 ",
+    "runs": "🧫 ",
+}
 
 
 class ValidatorError(RuntimeError):
@@ -39,10 +59,18 @@ class ValidationIssue:
 
 
 @dataclass(frozen=True)
+class CollectionReport:
+    name: str
+    checked: int
+    written: Path | None = None
+
+
+@dataclass(frozen=True)
 class ValidationReport:
     checked: int
     written: tuple[Path, ...]
     issues: tuple[ValidationIssue, ...]
+    collections: tuple[CollectionReport, ...] = ()
 
     @property
     def ok(self) -> bool:
@@ -241,7 +269,12 @@ def _validate_workbook(
         ) from exc
 
     try:
-        workbook = load_workbook(workbook_path, read_only=True, data_only=True)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="Unknown extension is not supported and will be removed",
+            )
+            workbook = load_workbook(workbook_path, read_only=True, data_only=True)
     except (OSError, ValueError) as exc:
         raise ValidatorError(f"Cannot read XLSX workbook {workbook_path}: {exc}") from exc
 
@@ -253,6 +286,7 @@ def _validate_workbook(
     checked = 0
     written: list[Path] = []
     issues: list[ValidationIssue] = []
+    collection_reports: list[CollectionReport] = []
     try:
         for collection in collections:
             worksheet = workbook[collection]
@@ -266,6 +300,7 @@ def _validate_workbook(
 
             documents: list[dict[str, Any]] = []
             collection_issues: list[ValidationIssue] = []
+            destination: Path | None = None
             validator = _schema_validator(_load_schema(schema_dir, collection))
             for worksheet_row, values in enumerate(rows, start=2):
                 if not any(_has_value(value) for value in values):
@@ -294,10 +329,18 @@ def _validate_workbook(
                 destination = output_dir / f"{collection}.json"
                 _write_collection(destination, documents)
                 written.append(destination)
+            collection_reports.append(
+                CollectionReport(collection, len(documents), destination)
+            )
     finally:
         workbook.close()
 
-    return ValidationReport(checked, tuple(written), tuple(issues))
+    return ValidationReport(
+        checked,
+        tuple(written),
+        tuple(issues),
+        tuple(collection_reports),
+    )
 
 
 def _open_json(path: Path) -> TextIO:
@@ -382,6 +425,7 @@ def _validate_json_files(
     checked = 0
     issues: list[ValidationIssue] = []
     seen: set[str] = set()
+    collection_reports: list[CollectionReport] = []
     for path in paths:
         collection = _collection_from_path(path, include_genomic, streamed)
         if collection in seen:
@@ -392,12 +436,15 @@ def _validate_json_files(
             documents: Iterable[tuple[int, Any]] = _read_streamed_array(path)
         else:
             documents = enumerate(_read_json_array(path), start=1)
+        collection_checked = 0
         for row, document in documents:
             checked += 1
+            collection_checked += 1
             issues.extend(_validate_document(validator, collection, row, document))
             if verbose and checked % 1000 == 0:
                 print(f"  {checked} JSON documents checked")
-    return ValidationReport(checked, (), tuple(issues))
+        collection_reports.append(CollectionReport(collection, collection_checked))
+    return ValidationReport(checked, (), tuple(issues), tuple(collection_reports))
 
 
 def validate_inputs(
@@ -447,18 +494,118 @@ def validate_inputs(
     )
 
 
-def print_report(report: ValidationReport, *, ignore_validation: bool = False) -> None:
+def _colorize(value: str, *codes: str, use_color: bool) -> str:
+    if not use_color:
+        return value
+    return "".join(codes) + value + RESET
+
+
+def _record_label(count: int) -> str:
+    return "record" if count == 1 else "records"
+
+
+def print_report(
+    report: ValidationReport,
+    *,
+    ignore_validation: bool = False,
+    no_color: bool = False,
+    no_emoji: bool = False,
+) -> None:
+    use_color = not no_color and os.environ.get("ANSI_COLORS_DISABLED") != "1"
+    header_prefix = "" if no_emoji else "🧬 "
+    print(_colorize(f"{header_prefix}BFF Tools Validator  v{VERSION}", BOLD, CYAN, use_color=use_color))
+    print(_colorize("Validate Beacon XLSX or JSON input and write BFF JSON collections", CYAN, use_color=use_color))
+
     grouped: dict[str, list[ValidationIssue]] = {}
     for issue in report.issues:
         grouped.setdefault(issue.collection, []).append(issue)
+
+    for collection_report in report.collections:
+        collection = collection_report.name
+        issues = grouped.pop(collection, [])
+        collection_icon = "" if no_emoji else COLLECTION_EMOJI.get(collection, "")
+        print()
+        print(_colorize(f"== {collection_icon}{collection} ==", BOLD, BLUE, use_color=use_color))
+        if issues:
+            prefix = "" if no_emoji else "✖ "
+            print(
+                _colorize(
+                    f"{prefix}{collection}: {len(issues)} validation issue(s)",
+                    BOLD,
+                    RED,
+                    use_color=use_color,
+                )
+            )
+            for issue in issues:
+                print(_colorize(f"  row {issue.row}: {issue.message}", RED, use_color=use_color))
+            if ignore_validation:
+                prefix = "" if no_emoji else "⚠ "
+                print(
+                    _colorize(
+                        f"{prefix}Validation issues ignored for this collection",
+                        BOLD,
+                        YELLOW,
+                        use_color=use_color,
+                    )
+                )
+        else:
+            prefix = "" if no_emoji else "✓ "
+            print(
+                _colorize(
+                    f"{prefix}{collection}: validation passed "
+                    f"({collection_report.checked:,} {_record_label(collection_report.checked)})",
+                    BOLD,
+                    GREEN,
+                    use_color=use_color,
+                )
+            )
+        if collection_report.written is not None:
+            prefix = "" if no_emoji else "→ "
+            print(
+                _colorize(
+                    f"{prefix}Wrote {collection_report.written}",
+                    GREEN,
+                    use_color=use_color,
+                )
+            )
+
     for collection, issues in grouped.items():
-        print(f"{collection}: {len(issues)} validation issue(s)")
+        print()
+        print(_colorize(f"== {collection} ==", BOLD, BLUE, use_color=use_color))
         for issue in issues:
-            print(f"  row {issue.row}: {issue.message}")
-    if report.written:
-        for path in report.written:
-            print(f"Wrote {path}")
+            print(_colorize(f"  row {issue.row}: {issue.message}", RED, use_color=use_color))
+
+    print()
     if report.issues and ignore_validation:
-        print(f"Validation issues ignored; checked {report.checked} record(s)")
+        prefix = "" if no_emoji else "⚠ "
+        print(
+            _colorize(
+                f"{prefix}Validation issues ignored; checked "
+                f"{report.checked:,} {_record_label(report.checked)}",
+                BOLD,
+                YELLOW,
+                use_color=use_color,
+            )
+        )
+    elif report.issues:
+        prefix = "" if no_emoji else "✖ "
+        print(
+            _colorize(
+                f"{prefix}Validation failed; checked "
+                f"{report.checked:,} {_record_label(report.checked)}",
+                BOLD,
+                RED,
+                use_color=use_color,
+            )
+        )
     elif not report.issues:
-        print(f"Validation passed; checked {report.checked} record(s)")
+        prefix = "" if no_emoji else "✓ "
+        print(
+            _colorize(
+                f"{prefix}Validation passed; checked "
+                f"{report.checked:,} {_record_label(report.checked)}",
+                BOLD,
+                GREEN,
+                use_color=use_color,
+            )
+        )

@@ -88,6 +88,7 @@ class BrowserTests(unittest.TestCase):
         )
         self.assertEqual(payload["summary"]["variants"], 1)
         self.assertEqual(payload["summary"]["panels"], 1)
+        self.assertEqual(payload["panelGenes"], {"cancer": 2})
         self.assertEqual(payload["rows"][0]["_panels"], ["cancer"])
 
     def test_generate_browser_report_is_standalone_and_escapes_script_end(self) -> None:
@@ -113,6 +114,11 @@ class BrowserTests(unittest.TestCase):
 
             text = output_path.read_text(encoding="utf-8")
             self.assertEqual(summary["variants"], 1)
+            self.assertIn("BFF Tools Browser", text)
+            self.assertIn('id="detail-panel"', text)
+            self.assertIn('id="panel-tabs"', text)
+            self.assertIn("Review queue", text)
+            self.assertNotIn("Variant landscape", text)
             self.assertIn("project &lt;one&gt;", text)
             self.assertIn("<\\/script><script>alert(1)<\\/script>", text)
             self.assertIn("new Tabulator", text)

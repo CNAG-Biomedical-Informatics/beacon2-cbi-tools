@@ -44,6 +44,44 @@ def shell_value(value: Any) -> str:
     return shlex.quote(str(value))
 
 
+def write_browser_readme(
+    path: Path,
+    *,
+    report_name: str,
+    variants: int,
+    panels: int,
+) -> None:
+    path.write_text(
+        "BFF TOOLS BROWSER\n"
+        "=================\n\n"
+        f"Report: {report_name}\n"
+        f"Prioritized variants: {variants}\n"
+        f"Gene panels with hits: {panels}\n\n"
+        "HOW TO OPEN\n"
+        "-----------\n"
+        f"Open {report_name} directly in a modern web browser. No web server "
+        "is required and the table library and data are embedded in the HTML.\n\n"
+        "If local-file access is restricted by browser policy, run this command "
+        "from this directory:\n\n"
+        "    python3 -m http.server 8000\n\n"
+        f"Then open http://localhost:8000/{report_name}\n\n"
+        "NOTES\n"
+        "-----\n"
+        "- Search, filters, sorting, pagination, column settings, printing, and "
+        "CSV export run locally in the browser.\n"
+        "- Select a row or its arrow to inspect the complete variant summary.\n"
+        "- External database links require internet access; the report itself "
+        "does not.\n"
+        "- Display loci are 1-based. The BFF start value shown in variant details "
+        "is 0-based.\n"
+        "- The report contains HIGH and MODERATE impact variants matching a "
+        "configured gene panel; it is not an exhaustive copy of the input.\n"
+        "- This research-use report is not a medical device and is not sufficient "
+        "for clinical decisions.\n",
+        encoding="utf-8",
+    )
+
+
 def create_dbnsfp4_fields(selection: str, file_path: str) -> str:
     if selection == "cnag":
         fields = [
@@ -177,14 +215,20 @@ class PipelineRunner:
         except BrowserError as exc:
             log_path.write_text(str(exc) + "\n", encoding="utf-8")
             raise ExecutionError(
-                f"Failed to generate BFF browser report\nPlease check this file:\n{log_path}\n"
+                f"Failed to generate BFF Tools Browser report\nPlease check this file:\n{log_path}\n"
             ) from exc
         log_path.write_text(
-            "Generated standalone BFF browser report\n"
+            "Generated standalone BFF Tools Browser report\n"
             f"Output: {output_path}\n"
             f"Selected variants: {summary['variants']}\n"
             f"Panels with hits: {summary['panels']}\n",
             encoding="utf-8",
+        )
+        write_browser_readme(
+            target_dir / "README.txt",
+            report_name=output_path.name,
+            variants=summary["variants"],
+            panels=summary["panels"],
         )
 
     def run_named(self, pipeline_name: str) -> None:
