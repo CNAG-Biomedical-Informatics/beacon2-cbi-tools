@@ -65,6 +65,19 @@ def _sort_key(value: Any) -> bytes | str:
 def iter_streamed_bff(path: Path) -> Iterator[Any]:
     try:
         with _open_binary(path) as handle:
+            if path.name.endswith((".jsonl", ".jsonl.gz")):
+                for line_number, raw_line in enumerate(handle, start=1):
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    try:
+                        yield _loads(line)
+                    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                        raise ParityError(
+                            f"Invalid JSON Lines record on line {line_number} of {path}: {exc}"
+                        ) from exc
+                return
+
             started = False
             closed = False
             for line_number, raw_line in enumerate(handle, start=1):

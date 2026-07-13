@@ -344,7 +344,7 @@ def _validate_workbook(
 
 
 def _open_json(path: Path) -> TextIO:
-    if path.name.endswith(".json.gz"):
+    if path.suffix == ".gz":
         return gzip.open(path, "rt", encoding="utf-8")
     return path.open("r", encoding="utf-8")
 
@@ -365,6 +365,21 @@ def _read_json_array(path: Path) -> list[Any]:
 def _read_streamed_array(path: Path) -> Iterator[tuple[int, Any]]:
     try:
         with _open_json(path) as handle:
+            if path.name.endswith((".jsonl", ".jsonl.gz")):
+                row = 0
+                for line_number, raw_line in enumerate(handle, start=1):
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    row += 1
+                    try:
+                        yield row, json.loads(line)
+                    except json.JSONDecodeError as exc:
+                        raise ValidatorError(
+                            f"Invalid JSON Lines record on line {line_number} of {path}: {exc}"
+                        ) from exc
+                return
+
             started = False
             row = 0
             for line_number, raw_line in enumerate(handle, start=1):
@@ -396,12 +411,21 @@ def _read_streamed_array(path: Path) -> Iterator[tuple[int, Any]]:
 
 def _collection_from_path(path: Path, include_genomic: bool, streamed: bool) -> str:
     name = path.name
-    if name.endswith(".json.gz"):
+    jsonl = name.endswith((".jsonl", ".jsonl.gz"))
+    if jsonl and not streamed:
+        raise ValidatorError("Use --gv-vcf to validate JSON Lines genomic variations")
+    if name.endswith(".jsonl.gz"):
+        name = name[:-9]
+    elif name.endswith(".jsonl"):
+        name = name[:-6]
+    elif name.endswith(".json.gz"):
         name = name[:-8]
     elif name.endswith(".json"):
         name = name[:-5]
     else:
-        raise ValidatorError(f"Input must end in .json or .json.gz: {path}")
+        raise ValidatorError(
+            f"Input must end in .json, .json.gz, .jsonl, or .jsonl.gz: {path}"
+        )
     if streamed and name == "genomicVariationsVcf":
         name = "genomicVariations"
     allowed = COLLECTIONS if include_genomic else METADATA_COLLECTIONS

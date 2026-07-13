@@ -253,6 +253,13 @@ class ValidatorTests(unittest.TestCase):
                 [(1, {"id": "one"}), (2, {"id": "two"})],
             )
 
+            jsonl = tmp / "valid.jsonl"
+            jsonl.write_text('{"id":"one"}\n{"id":"two"}\n', encoding="utf-8")
+            self.assertEqual(
+                list(validator._read_streamed_array(jsonl)),
+                [(1, {"id": "one"}), (2, {"id": "two"})],
+            )
+
             cases = {
                 "bad-start.json": '{}\n',
                 "bad-record.json": '[\n{"id":}\n]\n',
@@ -273,8 +280,18 @@ class ValidatorTests(unittest.TestCase):
             ),
             "genomicVariations",
         )
+        self.assertEqual(
+            validator._collection_from_path(
+                Path("genomicVariationsVcf.jsonl.gz"), True, True
+            ),
+            "genomicVariations",
+        )
         with self.assertRaisesRegex(ValidatorError, "must end"):
             validator._collection_from_path(Path("individuals.txt"), False, False)
+        with self.assertRaisesRegex(ValidatorError, "Use --gv-vcf"):
+            validator._collection_from_path(
+                Path("genomicVariationsVcf.jsonl"), True, False
+            )
         with self.assertRaisesRegex(ValidatorError, "Use --gv"):
             validator._collection_from_path(Path("genomicVariations.json"), False, False)
         with self.assertRaisesRegex(ValidatorError, "filename must match"):

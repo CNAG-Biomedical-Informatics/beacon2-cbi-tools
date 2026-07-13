@@ -79,7 +79,22 @@ done
 
 ## Import Genomic Variations
 
-`genomicVariationsVcf.json.gz` is one compact JSON record per line inside an array. Strip the array delimiters and trailing commas while decompressing so `mongoimport` can stream collections much larger than the `--jsonArray` limit:
+For new runs, `--jsonl` produces a directly streamable `genomicVariationsVcf.jsonl.gz`:
+
+```bash
+bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 \
+  --jsonl -c config.yaml
+
+gzip -dc cohort-bff/vcf/genomicVariationsVcf.jsonl.gz \
+  | mongoimport \
+      --uri "$MONGODB_URI" \
+      --collection genomicVariations \
+      --mode=upsert \
+      --upsertFields='variantInternalId,_info.datasetId' \
+      --stopOnError
+```
+
+The default `genomicVariationsVcf.json.gz` remains a standard JSON array with one compact record per physical line. Strip its array delimiters and trailing commas while decompressing so `mongoimport` can stream it:
 
 ```bash
 gzip -dc cohort-bff/vcf/genomicVariationsVcf.json.gz \

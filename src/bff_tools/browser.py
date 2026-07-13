@@ -5,16 +5,28 @@ import gzip
 import html
 import json
 import re
+import shutil
+import subprocess
+import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any, Iterable
 
+try:
+    import orjson as _orjson
+except ImportError:  # The standard library codec remains fully supported.
+    _orjson = None
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
+
 ASSET_DIR = Path(__file__).with_name("browser_assets")
 TEMPLATE_FILE = ASSET_DIR / "report.html"
 VENDOR_DIR = ASSET_DIR / "vendor"
 TABULATOR_CSS = VENDOR_DIR / "tabulator-6.5.0.min.css"
 TABULATOR_JS = VENDOR_DIR / "tabulator-6.5.0.min.js"
+REPORT_DATA_MARKER = "__REPORT_DATA__"
+ROWS_MARKER = "__BFF_TOOLS_STREAMED_ROWS__"
+LARGE_REPORT_ROWS = 50_000
+LARGE_REPORT_BYTES = 100 * 1024 * 1024
 
 COLUMNS = [
     ("variantInternalId", "Variant"),
@@ -43,24 +55,71 @@ class BrowserError(RuntimeError):
     pass
 
 
-def _open_text(path: Path):
-    if path.suffix == ".gz":
-        return gzip.open(path, "rt", encoding="utf-8", errors="replace")
-    return path.open("r", encoding="utf-8", errors="replace")
+def _decode_json(value: bytes) -> Any:
+    if _orjson is not None:
+        return _orjson.loads(value)
+    return json.loads(value)
 
 
-def load_bff_variants(path: Path) -> list[dict[str, Any]]:
+def _encode_json(value: Any) -> bytes:
+    if _orjson is not None:
+        return _orjson.dumps(value)
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def iter_bff_variants(path: Path) -> Iterator[dict[str, Any]]:
+    process: subprocess.Popen[bytes] | None = None
     try:
-        with _open_text(path) as handle:
-            payload = json.load(handle)
+        jsonl = path.name.endswith((".jsonl", ".jsonl.gz"))
+        opener = gzip.open if path.suffix == ".gz" else Path.open
+        with opener(path, "rb") as handle:
+            first_token = handle.read(4096).lstrip()[:1]
+            if jsonl and first_token not in (b"", b"{"):
+                raise BrowserError(f"BFF input <{path}> must contain JSON Lines objects")
+            if not jsonl and first_token != b"[":
+                raise BrowserError(f"BFF input <{path}> must contain a JSON array")
+
+        command = "zgrep" if path.suffix == ".gz" else "grep"
+        process = subprocess.Popen(
+            [command, "-F", "-w", "-e", "HIGH", "-e", "MODERATE", "--", str(path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        assert process.stdout is not None
+        for raw in process.stdout:
+            encoded = raw.strip()
+            if encoded.endswith(b","):
+                encoded = encoded[:-1].rstrip()
+            item = _decode_json(encoded)
+            if not isinstance(item, dict):
+                raise BrowserError(
+                    f"BFF input <{path}> must use one JSON object per line"
+                )
+            yield item
+
+        assert process.stderr is not None
+        stderr = process.stderr.read().decode("utf-8", errors="replace").strip()
+        returncode = process.wait()
+        if returncode not in (0, 1):
+            detail = stderr or f"{command} exited with status {returncode}"
+            raise BrowserError(f"Cannot filter BFF input <{path}>: {detail}")
     except OSError as exc:
         raise BrowserError(f"Cannot read BFF input <{path}>: {exc}") from exc
     except json.JSONDecodeError as exc:
         raise BrowserError(f"Cannot parse BFF input <{path}>: {exc}") from exc
-
-    if not isinstance(payload, list) or not all(isinstance(item, dict) for item in payload):
-        raise BrowserError(f"BFF input <{path}> must contain a top-level JSON array of objects")
-    return payload
+    finally:
+        if process is not None:
+            if process.stdout is not None:
+                process.stdout.close()
+            if process.stderr is not None:
+                process.stderr.close()
+            if process.poll() is None:
+                process.terminate()
+            process.wait()
 
 
 def load_gene_panels(panel_dir: Path) -> dict[str, set[str]]:
@@ -144,16 +203,23 @@ def variant_to_row(variant: dict[str, Any]) -> dict[str, Any]:
         if isinstance(item, dict)
     ]
     interpretations = _clinical_interpretations(variant)
-    conditions = []
+    conditions: list[str] = []
+    primary_condition = ""
     relevance = []
     for item in interpretations:
         effect = item.get("effect") if isinstance(item.get("effect"), dict) else {}
         label = effect.get("label") or effect.get("id")
         identifier = effect.get("id")
         if label and identifier and label != identifier:
-            conditions.append(f"{label} ({identifier})")
+            condition = f"{label} ({identifier})"
         elif label:
-            conditions.append(label)
+            condition = str(label)
+        else:
+            condition = ""
+        if condition and condition not in conditions:
+            conditions.append(condition)
+            if not primary_condition:
+                primary_condition = str(label)
         if item.get("clinicalRelevance"):
             relevance.append(item["clinicalRelevance"])
 
@@ -164,7 +230,9 @@ def variant_to_row(variant: dict[str, Any]) -> dict[str, Any]:
         sample_id = str(item.get("biosampleId", "")).strip()
         zygosity = item.get("zygosity") if isinstance(item.get("zygosity"), dict) else {}
         genotype = str(zygosity.get("label", "")).strip()
-        depth = item.get("DP")
+        depth = item.get("depth")
+        if depth is None:
+            depth = item.get("DP")
         detail = genotype + (f":{depth}" if depth not in (None, "") else "")
         biosamples.append(f"{sample_id} ({detail})" if sample_id and detail else sample_id or detail)
 
@@ -191,10 +259,75 @@ def variant_to_row(variant: dict[str, Any]) -> dict[str, Any]:
         "clinicalRelevance": _join(relevance),
         "biosampleId": _join(biosamples),
         "_genes": sorted(_gene_candidates(genes)),
+        "_conditionCount": len(conditions),
+        "_primaryCondition": primary_condition,
     }
     row["_pathogenic"] = "pathogenic" in row["clinicalRelevance"].lower()
     row["_homAlt"] = bool(re.search(r"(?:^|[^0-9])1[/|]1(?:[^0-9]|$)", row["biosampleId"]))
     return row
+
+
+def iter_report_rows(
+    variants: Iterable[dict[str, Any]],
+    panels: dict[str, set[str]],
+) -> Iterator[dict[str, Any]]:
+    for variant in variants:
+        molecular = (
+            variant.get("molecularAttributes")
+            if isinstance(variant.get("molecularAttributes"), dict)
+            else {}
+        )
+        impacts = {
+            str(impact).strip().upper()
+            for impact in _list(molecular.get("annotationImpact"))
+            if str(impact).strip()
+        }
+        if not impacts.intersection({"HIGH", "MODERATE"}):
+            continue
+        row_genes = _gene_candidates(_list(molecular.get("geneIds")))
+        matched = [name for name, genes in panels.items() if row_genes.intersection(genes)]
+        if not matched:
+            continue
+
+        # Build biosample-heavy display fields only for variants retained in the report.
+        row = variant_to_row(variant)
+        row.pop("_genes")
+        row["_panels"] = matched
+        yield row
+
+
+def _report_payload(
+    *,
+    rows: Any,
+    panels: dict[str, set[str]],
+    panel_counts: dict[str, int],
+    project_id: str,
+    job_id: str,
+    source_name: str,
+    variants: int,
+    pathogenic: int,
+    hom_alt: int,
+    warning: str | None = None,
+) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "variants": variants,
+        "panels": sum(1 for count in panel_counts.values() if count),
+        "pathogenic": pathogenic,
+        "homAlt": hom_alt,
+    }
+    if warning:
+        summary["warning"] = warning
+
+    return {
+        "projectId": project_id,
+        "jobId": job_id,
+        "source": source_name,
+        "columns": [{"key": key, "label": label} for key, label in COLUMNS],
+        "rows": rows,
+        "panels": panel_counts,
+        "panelGenes": {name: len(genes) for name, genes in panels.items()},
+        "summary": summary,
+    }
 
 
 def build_report_payload(
@@ -205,44 +338,29 @@ def build_report_payload(
     job_id: str,
     source_name: str,
 ) -> dict[str, Any]:
-    selected: list[dict[str, Any]] = []
-    panel_rows = {name: [] for name in panels}
-    for variant in variants:
-        row = variant_to_row(variant)
-        impacts = {part.strip().upper() for part in row["annotationImpact"].split(",")}
-        if not impacts.intersection({"HIGH", "MODERATE"}):
-            continue
-        row_genes = set(row.pop("_genes"))
-        matched = [name for name, genes in panels.items() if row_genes.intersection(genes)]
-        if not matched:
-            continue
-        row["_panels"] = matched
-        selected.append(row)
-        for name in matched:
-            panel_rows[name].append(row)
-
-    return {
-        "projectId": project_id,
-        "jobId": job_id,
-        "source": source_name,
-        "columns": [{"key": key, "label": label} for key, label in COLUMNS],
-        "rows": selected,
-        "panels": {name: len(rows) for name, rows in panel_rows.items()},
-        "panelGenes": {name: len(genes) for name, genes in panels.items()},
-        "summary": {
-            "variants": len(selected),
-            "panels": sum(1 for rows in panel_rows.values() if rows),
-            "pathogenic": sum(1 for row in selected if row["_pathogenic"]),
-            "homAlt": sum(1 for row in selected if row["_homAlt"]),
-        },
-    }
+    selected = list(iter_report_rows(variants, panels))
+    panel_counts = {name: 0 for name in panels}
+    for row in selected:
+        for name in row["_panels"]:
+            panel_counts[name] += 1
+    return _report_payload(
+        rows=selected,
+        panels=panels,
+        panel_counts=panel_counts,
+        project_id=project_id,
+        job_id=job_id,
+        source_name=source_name,
+        variants=len(selected),
+        pathogenic=sum(1 for row in selected if row["_pathogenic"]),
+        hom_alt=sum(1 for row in selected if row["_homAlt"]),
+    )
 
 
 def _json_for_script(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
-def render_report(payload: dict[str, Any]) -> str:
+def _render_report_frame(payload: dict[str, Any]) -> str:
     try:
         template = TEMPLATE_FILE.read_text(encoding="utf-8")
         tabulator_css = TABULATOR_CSS.read_text(encoding="utf-8")
@@ -255,7 +373,22 @@ def render_report(payload: dict[str, Any]) -> str:
         .replace("__PROJECT_ID__", html.escape(str(payload["projectId"])))
         .replace("__JOB_ID__", html.escape(str(payload["jobId"])))
         .replace("__SOURCE_FILE__", html.escape(str(payload["source"])))
-        .replace("__REPORT_DATA__", _json_for_script(payload))
+    )
+
+
+def render_report(payload: dict[str, Any]) -> str:
+    return _render_report_frame(payload).replace(REPORT_DATA_MARKER, _json_for_script(payload))
+
+
+def _large_report_warning(variants: int, row_bytes: int) -> str | None:
+    if variants < LARGE_REPORT_ROWS and row_bytes < LARGE_REPORT_BYTES:
+        return None
+    size_mib = row_bytes / (1024 * 1024)
+    return (
+        f"The standalone browser contains {variants:,} panel-matched variants "
+        f"({size_mib:.1f} MiB of embedded row data) and may require substantial "
+        "browser memory. Use narrower gene panels or disable bff2html for very "
+        "large cohorts."
     )
 
 
@@ -267,17 +400,60 @@ def generate_browser_report(
     project_id: str,
     job_id: str,
 ) -> dict[str, Any]:
-    variants = load_bff_variants(input_path)
     panels = load_gene_panels(panel_dir)
-    payload = build_report_payload(
-        variants,
-        panels,
-        project_id=project_id,
-        job_id=job_id,
-        source_name=input_path.name,
-    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(render_report(payload), encoding="utf-8")
+    panel_counts = {name: 0 for name in panels}
+    variants = pathogenic = hom_alt = 0
+
+    try:
+        with tempfile.TemporaryFile(mode="w+b", dir=output_path.parent) as rows_file:
+            rows = iter_report_rows(
+                iter_bff_variants(input_path),
+                panels,
+            )
+            for row in rows:
+                if variants:
+                    rows_file.write(b",")
+                rows_file.write(_encode_json(row).replace(b"</", b"<\\/"))
+                variants += 1
+                pathogenic += int(row["_pathogenic"])
+                hom_alt += int(row["_homAlt"])
+                for name in row["_panels"]:
+                    panel_counts[name] += 1
+
+            row_bytes = rows_file.tell()
+            warning = _large_report_warning(variants, row_bytes)
+            payload = _report_payload(
+                rows=ROWS_MARKER,
+                panels=panels,
+                panel_counts=panel_counts,
+                project_id=project_id,
+                job_id=job_id,
+                source_name=input_path.name,
+                variants=variants,
+                pathogenic=pathogenic,
+                hom_alt=hom_alt,
+                warning=warning,
+            )
+            report_json = _json_for_script(payload)
+            quoted_rows_marker = _json_for_script(ROWS_MARKER)
+            json_prefix, json_suffix = report_json.split(quoted_rows_marker, 1)
+            html_prefix, html_suffix = _render_report_frame(payload).split(
+                REPORT_DATA_MARKER, 1
+            )
+
+            rows_file.seek(0)
+            with output_path.open("wb") as output:
+                output.write(html_prefix.encode("utf-8"))
+                output.write(json_prefix.encode("utf-8"))
+                output.write(b"[")
+                shutil.copyfileobj(rows_file, output, length=1024 * 1024)
+                output.write(b"]")
+                output.write(json_suffix.encode("utf-8"))
+                output.write(html_suffix.encode("utf-8"))
+    except OSError as exc:
+        raise BrowserError(f"Cannot write browser report <{output_path}>: {exc}") from exc
+
     return payload["summary"]
 
 

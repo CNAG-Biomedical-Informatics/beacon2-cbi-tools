@@ -215,8 +215,10 @@ bff-tools vcf \
   -o cohort-bff
 ```
 
-:::info[CINECA chr22 conversion benchmark]
-On a 6-core ARM64 Linux workstation, the single-process converter processed an already fully annotated CINECA chr22 VCF with 2,504 samples and 1,110,240 input records in **1 minute 47 seconds**, producing 1,109,368 BFF records with about **20 MB peak RAM**. This measures only VCF-to-BFF conversion; SnpEff/SnpSift annotation and standalone report generation are separate stages. CPU and storage performance will affect runtime.
+:::info[CINECA chr22 observed benchmark]
+On a 6-core ARM64 Linux workstation, an end-to-end run completed in **13 minutes 52 seconds**. It normalized 1,103,547 source records into 1,110,240 records, applied SnpEff, dbNSFP, ClinVar, and COSMIC annotations, produced 1,109,368 BFF records for 2,504 samples, and generated a standalone report containing 14,305 panel-matched variants.
+
+Measured separately on the same workstation, the single-process converter processed the already annotated VCF in **1 minute 47 seconds** with about **20 MB peak RAM**. That VCF uses `FORMAT=GT`; multi-field sample values such as `GT:DP:AD` require additional parsing and may take longer. Browser generation took **44 seconds** with about **22 MB peak RAM**. These are observed timings rather than hardware-independent guarantees; CPU, storage, compression, reference versions, and annotation settings materially affect runtime.
 :::
 
 Resource versions materially affect output and must be recorded with every annotation-enabled run. Complete setup and the download-backed integration test are documented under [Annotation Data](../getting-started/annotation-data).
@@ -316,6 +318,10 @@ bff-tools vcf -i cohort.vcf.gz \
 ```
 
 Open the generated HTML file directly. The adjacent `browser/README.txt` records the exact filename and an optional local HTTP-server command. The report includes searching, sorting, column controls, pagination for large tables, gene panels, a structured variant inspector, and assembly-aware links to external variant databases.
+
+Click any row to open the variant inspector without leaving the table. It groups the clinical interpretation, variant definition, external evidence links, matched panels, and carrier genotypes while preserving the current filters and page.
+
+![BFF Tools Browser variant inspector showing a pathogenic variant, condition identifiers, and its variant definition](/img/bff-variant-detail-inspector.png)
 
 Before handing the BFF files to a Beacon implementation, confirm:
 

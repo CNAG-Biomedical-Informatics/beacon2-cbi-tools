@@ -164,6 +164,7 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         "center": "CNAG",
         "datasetid": "default_beacon_1",
         "genome": "hg19",
+        "jsonl": False,
         "organism": "Homo sapiens",
         "projectdir": "beacon",
         "progress_every": 10_000,
@@ -188,6 +189,7 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
         "genome": arg.get("genome"),
         "sampleid": arg.get("sampleid"),
         "progress_every": arg.get("progress_every"),
+        "jsonl": arg.get("jsonl"),
     }
     for key, value in cli_overrides.items():
         if value is not None:
@@ -221,7 +223,12 @@ def read_param_file(arg: dict[str, Any]) -> dict[str, Any]:
     param["zip"] = "/usr/bin/pigz" if os.access("/usr/bin/pigz", os.X_OK) else "/bin/gzip"
     if str(param.get("organism", "")).lower() == "human":
         param["organism"] = "Homo sapiens"
-    param["gvvcfjson"] = str(Path(param["projectdir"]) / "vcf" / "genomicVariationsVcf.json.gz")
+    output_name = (
+        "genomicVariationsVcf.jsonl.gz"
+        if param.get("jsonl")
+        else "genomicVariationsVcf.json.gz"
+    )
+    param["gvvcfjson"] = str(Path(param["projectdir"]) / "vcf" / output_name)
     param["sampleid"] = str(param["sampleid"]).replace(" ", "_")
 
     if param["genome"] == "b37":

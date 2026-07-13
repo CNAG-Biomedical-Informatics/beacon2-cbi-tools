@@ -26,6 +26,7 @@ except ImportError:  # pragma: no cover - direct script execution from the sourc
     from version import VERSION
 
 OUTPUT_NAME = "genomicVariationsVcf.json.gz"
+JSONL_OUTPUT_NAME = "genomicVariationsVcf.jsonl.gz"
 ISAL_COMPRESSLEVEL = 2
 STDLIB_COMPRESSLEVEL = 6
 SPARSE_GT_THRESHOLD = 256
@@ -321,13 +322,14 @@ def map_case_level_data(
     format_fields = format_value.split(":")
     mapped: list[dict[str, Any]] = []
     if len(format_fields) == 1:
-        # This is the large-cohort hot path. iter_bff_records keeps the GT-only
-        # sample tail as one string (split at most nine times), then this sparse
-        # scan locates only alternate calls instead of allocating and visiting
-        # thousands of genotype strings for every variant. For sparse cohort
-        # data this is faster than splitting every GT/sample field. Dense calls
-        # fall back to a full split; the converter still streams one record at
-        # a time and uses orjson/ISA-L when available for encoding and gzip I/O.
+        # For GT-only records, iter_bff_records uses split("\t", 9), leaving all
+        # sample genotypes in one tab-delimited string. caseLevelData needs only
+        # samples carrying ALT allele 1, so a sparse row is scanned for "1" and
+        # tabs are counted to recover each carrier's sample index; only that GT
+        # substring is then extracted. This avoids allocating a list containing
+        # every sample GT for every variant. The cursor advances to the next tab,
+        # so 1/1 is emitted once. Rows above SPARSE_GT_THRESHOLD use a full tab
+        # split, and multi-field values such as GT:DP use the general path below.
         if not sample_ids or not genotypes:
             return mapped
         if isinstance(genotypes, str):
@@ -712,10 +714,11 @@ def convert_vcf(
     dataset_id: str,
     project_dir: str,
     threads: int,
+    jsonl: bool = False,
     verbose: bool = False,
     progress_every: int = 10_000,
 ) -> tuple[Path, int]:
-    output_path = output_dir / OUTPUT_NAME
+    output_path = output_dir / (JSONL_OUTPUT_NAME if jsonl else OUTPUT_NAME)
     user = os.environ.get("LOGNAME") or os.environ.get("USER") or "unknown"
     provenance = {
         "user": user,
@@ -730,7 +733,8 @@ def convert_vcf(
     records = 0
     encode_record = json_record_encoder()
     with open_bff_output(output_path) as output:
-        output.write(b"[\n")
+        if not jsonl:
+            output.write(b"[\n")
         for record in iter_bff_records(
             input_path,
             genome=genome,
@@ -739,11 +743,14 @@ def convert_vcf(
             verbose=verbose,
             progress_every=progress_every,
         ):
-            if records:
+            if records and not jsonl:
                 output.write(b",\n")
             output.write(encode_record(record))
+            if jsonl:
+                output.write(b"\n")
             records += 1
-        output.write(b"\n]\n")
+        if not jsonl:
+            output.write(b"\n]\n")
     return output_path, records
 
 
@@ -757,6 +764,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--genome", "-g", choices=("hg19", "hg38", "hs37"), required=True)
     parser.add_argument("--out-dir", type=Path, default=Path("."))
     parser.add_argument("--threads", "-t", type=int, default=os.cpu_count() or 1)
+    parser.add_argument(
+        "--jsonl",
+        action="store_true",
+        help="write newline-delimited JSON instead of a JSON array",
+    )
     parser.add_argument("--verbose", "-verbose", action="store_true")
     parser.add_argument(
         "--progress-every",
@@ -788,6 +800,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             dataset_id=args.dataset_id,
             project_dir=args.project_dir,
             threads=args.threads,
+            jsonl=args.jsonl,
             verbose=args.verbose,
             progress_every=args.progress_every,
         )

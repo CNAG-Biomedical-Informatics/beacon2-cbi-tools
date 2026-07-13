@@ -196,6 +196,7 @@ class OrchestratorTests(unittest.TestCase):
                     "genome": "hs37",
                     "datasetid": "ds1",
                     "annotate": True,
+                    "jsonl": True,
                 },
             )
             runner.projectdir.mkdir()
@@ -207,6 +208,7 @@ class OrchestratorTests(unittest.TestCase):
             self.assertIn("PYTHON=/usr/bin/python3", content)
             self.assertIn("VCF2BFF=/opt/bff_tools/vcf2bff.py", content)
             self.assertIn("PROGRESS_EVERY=10000", content)
+            self.assertIn("JSONL=true", content)
             self.assertIn("THREADS=5", content)
             self.assertIn("JAVA=/usr/bin/java", content)
             self.assertIn("SNPEFF=/opt/snpEff.jar", content)
@@ -269,7 +271,14 @@ class OrchestratorTests(unittest.TestCase):
                     "jobid": "12345",
                 },
             )
-            summary = {"variants": 3, "panels": 2, "pathogenic": 1, "homAlt": 1}
+            warning = "Large standalone report"
+            summary = {
+                "variants": 3,
+                "panels": 2,
+                "pathogenic": 1,
+                "homAlt": 1,
+                "warning": warning,
+            }
             with mock.patch(
                 "bff_tools.orchestrator.generate_browser_report",
                 return_value=summary,
@@ -286,11 +295,14 @@ class OrchestratorTests(unittest.TestCase):
             )
             log = (projectdir / "browser" / "run_bff2html.log").read_text(encoding="utf-8")
             self.assertIn("Selected variants: 3", log)
+            self.assertIn(f"Warning: {warning}", log)
+            self.assertEqual(runner.notices, [warning])
             readme = (projectdir / "browser" / "README.txt").read_text(encoding="utf-8")
             self.assertIn("Report: 12345.html", readme)
             self.assertIn("No web server is required", readme)
             self.assertIn("External database links require internet access", readme)
             self.assertIn("not a medical device", readme)
+            self.assertIn(warning, readme)
 
     def test_run_bff2html_wraps_browser_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

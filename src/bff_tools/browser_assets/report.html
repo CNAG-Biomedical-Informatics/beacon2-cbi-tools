@@ -91,18 +91,7 @@
         gap: 24px;
       }
 
-      .brand { display: flex; align-items: center; gap: 12px; }
-      .brand-mark {
-        display: grid;
-        width: 46px;
-        height: 46px;
-        place-items: center;
-        border: 1px solid var(--line);
-        border-radius: 7px;
-        background: #fff;
-        color: var(--brand);
-      }
-      .brand-mark .icon { width: 27px; height: 27px; }
+      .brand { display: flex; align-items: center; }
       .brand-name { font-size: 20px; font-weight: 780; }
       .brand-context { color: var(--muted); font-size: 13px; }
       .report-status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
@@ -331,7 +320,48 @@
       .tabulator .tabulator-footer .tabulator-page.active { border-color: var(--brand); background: var(--brand); color: #fff; }
       .tabulator .tabulator-placeholder { border: 0; }
 
-      .gene-cell, .variant-cell { min-width: 0; }
+      .pagination-bar {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 7px 14px;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-soft);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .page-count { flex: 0 0 auto; }
+      .table-paginator { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; }
+      .table-paginator label { margin-right: 2px; color: var(--ink-soft); font-weight: 700; }
+      .table-paginator .tabulator-page-size {
+        min-height: 32px;
+        margin-right: 7px;
+        padding: 3px 26px 3px 8px;
+        border: 1px solid var(--line-strong);
+        border-radius: 4px;
+        background: #fff;
+        color: var(--ink);
+      }
+      .table-paginator .tabulator-pages { display: inline-flex; gap: 4px; }
+      .table-paginator .tabulator-page {
+        min-width: 32px;
+        min-height: 32px;
+        padding: 3px 7px;
+        border: 1px solid var(--line-strong);
+        border-radius: 4px;
+        background: #fff;
+        color: var(--ink-soft);
+      }
+      .table-paginator .tabulator-page:hover:not(:disabled) { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-dark); }
+      .table-paginator .tabulator-page.active { border-color: var(--brand); background: var(--brand); color: #fff; }
+      .table-paginator .tabulator-page:disabled { opacity: 0.45; }
+
+      .gene-cell, .variant-cell, .condition-cell { min-width: 0; }
+      .condition-cell { width: 100%; overflow: hidden; }
+      .condition-cell .cell-primary, .condition-cell .cell-sub { white-space: nowrap; }
       .cell-primary { display: block; overflow: hidden; color: var(--ink); font-weight: 760; text-overflow: ellipsis; }
       .cell-primary a { color: var(--brand-dark); text-decoration: none; }
       .cell-primary a:hover { text-decoration: underline; }
@@ -357,6 +387,23 @@
       .badge.pathogenic { background: var(--red-soft); color: var(--red); }
       .badge.pass { background: var(--green-soft); color: var(--green); }
       .badge.neutral { background: var(--blue-soft); color: var(--blue); }
+      .effect-list { display: flex; min-width: 0; flex-wrap: wrap; gap: 4px; }
+      .effect-chip {
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 7px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 720;
+        line-height: 1.15;
+      }
+      .effect-chip.disruptive { border-color: #edc6b8; background: var(--orange-soft); color: #93452c; }
+      .effect-chip.protein { border-color: #ead7a8; background: var(--amber-soft); color: #805509; }
+      .effect-chip.noncoding { border-color: #cbdde9; background: var(--blue-soft); color: #315f80; }
+      .effect-chip.neutral { border-color: var(--line); background: var(--surface-soft); color: var(--ink-soft); }
+      .effect-more { align-self: center; color: var(--muted); font-size: 12px; font-weight: 720; white-space: nowrap; }
       .review-button { width: 30px; min-height: 30px; padding: 0; border-color: transparent; background: transparent; color: var(--muted); }
       .review-button:hover { border-color: var(--line); background: #fff; }
       .tabulator-row .tabulator-cell.review-cell { justify-content: flex-end; padding-right: 14px; }
@@ -480,8 +527,7 @@
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-dna"></use></svg></span>
-          <div><div class="brand-name">BFF Tools Browser</div><div class="brand-context">Clinical-style variant review</div></div>
+          <div><div class="brand-name">BFF Tools Browser</div><div class="brand-context">Beacon v2 CBI Tools</div></div>
         </div>
         <div class="report-status"><span class="status-dot"></span>Standalone data snapshot</div>
       </div>
@@ -497,7 +543,7 @@
             <div><dt>Source</dt><dd title="__SOURCE_FILE__">__SOURCE_FILE__</dd></div>
           </dl>
         </div>
-        <div class="metric"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-activity"></use></svg><span class="metric-label">Prioritized variants</span></div><strong class="metric-value" id="metric-variants">0</strong></div>
+        <div class="metric"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-activity"></use></svg><span class="metric-label">Panel-matched variants</span></div><strong class="metric-value" id="metric-variants">0</strong></div>
         <div class="metric panels"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-layers"></use></svg><span class="metric-label">Gene panels hit</span></div><strong class="metric-value" id="metric-panels">0</strong></div>
         <div class="metric pathogenic"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span class="metric-label">Pathogenic</span></div><strong class="metric-value" id="metric-pathogenic">0</strong></div>
         <div class="metric hom-alt"><div class="metric-heading"><svg class="icon" aria-hidden="true"><use href="#icon-samples"></use></svg><span class="metric-label">Homozygous ALT</span></div><strong class="metric-value" id="metric-hom-alt">0</strong></div>
@@ -507,7 +553,7 @@
         <div class="workspace-head">
           <div class="workspace-title">
             <span class="workspace-title-icon"><svg class="icon" aria-hidden="true"><use href="#icon-table"></use></svg></span>
-            <div><p class="section-kicker">Review queue</p><h2>Prioritized variants</h2><p class="workspace-subtitle" id="table-count">0 variants</p></div>
+            <div><p class="section-kicker">Panel results</p><h2>Panel-matched variants</h2><p class="workspace-subtitle" id="table-count">0 variants</p></div>
           </div>
           <div class="workspace-actions">
             <div class="column-control">
@@ -537,6 +583,10 @@
           <button id="clear" class="filter-reset" type="button" title="Reset filters and sorting"><svg class="icon" aria-hidden="true"><use href="#icon-reset"></use></svg>Reset</button>
         </div>
 
+        <div class="pagination-bar" aria-label="Table pagination">
+          <div id="page-count" class="page-count"></div>
+          <div id="table-pagination" class="table-paginator"></div>
+        </div>
         <div class="table-wrap"><div id="variant-table"></div></div>
       </section>
       <p class="footer-note">HIGH and MODERATE impact variants matching a configured gene panel. Display coordinates are 1-based; BFF start coordinates remain 0-based.</p>
@@ -605,6 +655,46 @@
           return String(value || "").split(",").map(function (part) { return part.trim(); }).filter(Boolean);
         }
 
+        var conditionPrefixAliases = {
+          human_phenotype_ontology: "hp"
+        };
+        var conditionPrefixLabels = {
+          efo: "EFO", hp: "HP", medgen: "MedGen", mesh: "MeSH",
+          mondo: "MONDO", omim: "OMIM", orphanet: "Orphanet"
+        };
+
+        function conditionIdentifiers(value) {
+          var identifiers = [];
+          var seen = new Set();
+          var expression = /([A-Za-z][A-Za-z0-9_]*):((?:[A-Za-z][A-Za-z0-9_.-]*:)?[A-Za-z0-9_.-]+)/g;
+          var match;
+          while ((match = expression.exec(String(value || ""))) !== null) {
+            var sourcePrefix = match[1].toLowerCase();
+            var prefix = conditionPrefixAliases[sourcePrefix] || sourcePrefix;
+            var accession = match[2];
+            var embedded = accession.match(/^([A-Za-z][A-Za-z0-9_.-]*):(.*)$/);
+            if (embedded && (embedded[1].toLowerCase() === prefix || embedded[1].toLowerCase() === sourcePrefix)) {
+              accession = embedded[2];
+            }
+            var compact = prefix + ":" + accession;
+            if (seen.has(compact)) continue;
+            seen.add(compact);
+            identifiers.push({
+              label: (conditionPrefixLabels[prefix] || match[1]) + ":" + accession,
+              href: "https://identifiers.org/" + encodeURIComponent(prefix) + ":" + encodeURIComponent(accession)
+            });
+          }
+          return identifiers;
+        }
+
+        function readableCondition(value) {
+          return String(value || "")
+            .replace(/_+/g, " ")
+            .replace(/\s+/g, " ")
+            .replace(/\s+,/g, ",")
+            .trim();
+        }
+
         function oneBasedPosition(row) {
           if (row.position === "" || row.position === null || row.position === undefined) return "";
           var position = Number(row.position);
@@ -640,7 +730,7 @@
           var meta = document.createElement("span");
           meta.className = "panel-tab-meta";
           meta.textContent = geneCount === null
-            ? variantCount.toLocaleString() + " variants"
+            ? variantCount.toLocaleString() + " unique variants"
             : Number(geneCount).toLocaleString() + " genes / " + variantCount.toLocaleString() + " variants";
           button.append(name, meta);
           button.addEventListener("click", function () {
@@ -650,7 +740,7 @@
           panelTabs.appendChild(button);
         }
         appendOption("", "All panels");
-        appendPanelTab("", "All prioritized", report.rows.length, null);
+        appendPanelTab("", "All panels", report.rows.length, null);
         Object.keys(report.panels).sort().forEach(function (name) {
           var geneCount = (report.panelGenes || {})[name];
           appendOption(name, name + " (" + report.panels[name] + " variants)");
@@ -743,22 +833,34 @@
 
         function conditionFormatter(cell) {
           var value = String(cell.getValue() || "");
-          var fragment = document.createDocumentFragment();
-          var expression = /([A-Za-z][A-Za-z0-9_]+:[A-Za-z0-9_.-]+)/g;
-          var offset = 0;
-          var match;
-          while ((match = expression.exec(value)) !== null) {
-            fragment.appendChild(document.createTextNode(value.slice(offset, match.index)));
-            var link = document.createElement("a");
-            link.href = "https://identifiers.org/" + encodeURIComponent(match[1]);
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.textContent = match[1];
-            fragment.appendChild(link);
-            offset = match.index + match[1].length;
+          var row = cell.getRow().getData();
+          var wrapper = document.createElement("div");
+          wrapper.className = "condition-cell";
+          var primary = document.createElement("span");
+          primary.className = "cell-primary";
+          primary.textContent = readableCondition(row._primaryCondition || value) || "Not specified";
+          wrapper.appendChild(primary);
+
+          var identifiers = conditionIdentifiers(value);
+          var additional = Math.max(0, Number(row._conditionCount || 0) - 1);
+          if (identifiers.length || additional) {
+            var secondary = document.createElement("span");
+            secondary.className = "cell-sub";
+            if (identifiers.length) {
+              var identifier = identifiers[0];
+              var link = document.createElement("a");
+              link.href = identifier.href;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.textContent = identifier.label;
+              secondary.appendChild(link);
+            }
+            if (additional) {
+              secondary.appendChild(document.createTextNode((identifiers.length ? " · " : "") + "+" + additional + " more"));
+            }
+            wrapper.appendChild(secondary);
           }
-          fragment.appendChild(document.createTextNode(value.slice(offset)));
-          return fragment;
+          return wrapper;
         }
 
         function badgeKind(field, value) {
@@ -784,6 +886,33 @@
           return list;
         }
 
+        function effectKind(value) {
+          var effect = value.toLowerCase();
+          if (/(stop_gained|frameshift|splice_acceptor|splice_donor|start_lost|transcript_ablation)/.test(effect)) return "disruptive";
+          if (/(missense|inframe|protein_altering|splice_region)/.test(effect)) return "protein";
+          if (/(intron|upstream|downstream|intergenic|regulatory|non_coding|synonymous|utr)/.test(effect)) return "noncoding";
+          return "neutral";
+        }
+
+        function effectFormatter(cell) {
+          var entries = values(cell.getValue());
+          var list = document.createElement("div");
+          list.className = "effect-list";
+          entries.slice(0, 2).forEach(function (value) {
+            var chip = document.createElement("span");
+            chip.className = "effect-chip " + effectKind(value);
+            chip.textContent = value.replace(/_/g, " ");
+            list.appendChild(chip);
+          });
+          if (entries.length > 2) {
+            var more = document.createElement("span");
+            more.className = "effect-more";
+            more.textContent = "+" + (entries.length - 2) + " more";
+            list.appendChild(more);
+          }
+          return list;
+        }
+
         function biosampleFormatter(cell) {
           var allSamples = values(cell.getValue());
           var preview = allSamples.slice(0, 2).join(", ");
@@ -800,6 +929,7 @@
           if (linkedFields.has(field)) return linkedValueFormatter;
           if (field === "conditionId") return conditionFormatter;
           if (field === "biosampleId") return biosampleFormatter;
+          if (field === "molecularEffects") return effectFormatter;
           if (["annotationImpact", "clinicalRelevance", "FILTER", "variantType"].indexOf(field) !== -1) return badgeFormatter;
           return "plaintext";
         }
@@ -809,7 +939,7 @@
           clinicalRelevance: 190, conditionId: 255, dbSNP: 130, ClinVar: 120,
           assemblyId: 105, refseqId: 145, position: 110, referenceBases: 85,
           alternateBases: 85, QUAL: 90, FILTER: 95, variantType: 115,
-          genomicHGVSId: 210, molecularEffects: 190, aminoacidChanges: 175,
+          genomicHGVSId: 210, molecularEffects: 220, aminoacidChanges: 175,
           biosampleId: 270
         };
         var definitionByKey = new Map(report.columns.map(function (column) { return [column.key, column]; }));
@@ -828,7 +958,7 @@
             minWidth: widthByField[column.key] || 105,
             width: widthByField[column.key],
             headerSort: true,
-            tooltip: true,
+            tooltip: column.key !== "conditionId",
             frozen: column.key === "geneIds"
           };
         });
@@ -867,12 +997,17 @@
           });
         }
 
+        function availableTableHeight() {
+          var tableTop = document.getElementById("variant-table").getBoundingClientRect().top;
+          return Math.max(360, Math.floor(window.innerHeight - tableTop - 24));
+        }
+
         var table = new Tabulator("#variant-table", {
           data: report.rows,
           columns: columns,
           index: "variantInternalId",
-          height: "calc(100vh - 420px)",
-          minHeight: 420,
+          height: availableTableHeight(),
+          minHeight: 360,
           layout: "fitDataStretch",
           renderVertical: "virtual",
           pagination: true,
@@ -880,6 +1015,8 @@
           paginationSizeSelector: [25, 50, 100, 250],
           paginationButtonCount: 5,
           paginationCounter: "rows",
+          paginationElement: document.getElementById("table-pagination"),
+          paginationCounterElement: document.getElementById("page-count"),
           selectableRows: 1,
           movableColumns: true,
           placeholder: "No variants match the active filters.",
@@ -893,6 +1030,13 @@
             if (data._pathogenic) row.getElement().classList.add("row-pathogenic");
             else if (String(data.annotationImpact).toUpperCase().indexOf("HIGH") !== -1) row.getElement().classList.add("row-high");
           }
+        });
+        var resizeTimer;
+        window.addEventListener("resize", function () {
+          window.clearTimeout(resizeTimer);
+          resizeTimer = window.setTimeout(function () {
+            table.setHeight(availableTableHeight());
+          }, 100);
         });
 
         var clearButton = document.getElementById("clear");
@@ -982,7 +1126,7 @@
           applyFilters();
         });
         document.getElementById("export").addEventListener("click", function () {
-          table.download("csv", "bff-prioritized-variants.csv", {bom: true});
+          table.download("csv", "bff-panel-matched-variants.csv", {bom: true});
         });
         document.getElementById("print").addEventListener("click", function () {
           table.print(false, true);
@@ -1043,11 +1187,9 @@
           values(row.dbSNP).forEach(function (identifier) { addResource(container, "dbSNP " + identifier, externalLink("dbSNP", identifier, row)); });
           values(row.ClinVar).forEach(function (identifier) { addResource(container, "ClinVar " + identifier, externalLink("ClinVar", identifier, row)); });
           addResource(container, "gnomAD variant", externalLink("alternateBases", row.alternateBases, row));
-          var conditionPattern = /([A-Za-z][A-Za-z0-9_]+:[A-Za-z0-9_.-]+)/g;
-          var match;
-          while ((match = conditionPattern.exec(String(row.conditionId || ""))) !== null) {
-            addResource(container, match[1], "https://identifiers.org/" + encodeURIComponent(match[1]));
-          }
+          conditionIdentifiers(row.conditionId).forEach(function (identifier) {
+            addResource(container, identifier.label, identifier.href);
+          });
           if (!container.children.length) {
             var empty = document.createElement("span");
             empty.className = "empty-inline";

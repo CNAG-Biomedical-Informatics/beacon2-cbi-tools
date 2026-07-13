@@ -35,7 +35,7 @@ The production converter handles SNVs, small insertions/deletions, multisample g
 
 VCF records must have a compatible SnpEff ANN header. Raw VCF and all TSV input therefore use annotation by default. Records within an otherwise annotated VCF that lack `INFO/ANN` are skipped with a warning.
 
-The converter does not filter SNVs or nucleotide indels because `FILTER` is non-PASS or `QUAL` is low. It preserves `FILTER`, `QUAL`, per-sample depth, and assembly metadata for downstream review.
+The converter does not filter SNVs or nucleotide indels because `FILTER` is non-PASS or `QUAL` is low. It preserves `FILTER`, `QUAL`, per-sample `FORMAT/DP`, and assembly metadata for downstream review. Sample depth is stored as `caseLevelData[].depth`; aggregate site-level `INFO/DP` is intentionally not mapped because it has limited practical value in a cohort.
 
 Symbolic and structural alleles remain limited and are currently skipped. The regression fixture records current behavior for symbolic copy-number alleles so future converter changes are deliberate and testable.
 

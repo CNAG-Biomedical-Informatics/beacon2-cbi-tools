@@ -79,6 +79,10 @@ else
 fi
 
 echo "# Running vcf2bff conversion"
-"$PYTHON" "$VCF2BFF" -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" --threads "$THREADS" --progress-every "$PROGRESS_EVERY" --verbose
+FORMAT_ARGS=()
+if [ "$JSONL" == "true" ]; then
+    FORMAT_ARGS+=(--jsonl)
+fi
+"$PYTHON" "$VCF2BFF" -i "$VCF2BFF_INPUT" --project-dir "$PROJECTDIR" --dataset-id "$DATASETID" --genome "$GENOME" --threads "$THREADS" --progress-every "$PROGRESS_EVERY" --verbose "${FORMAT_ARGS[@]}"
 
 echo "# Finished OK"

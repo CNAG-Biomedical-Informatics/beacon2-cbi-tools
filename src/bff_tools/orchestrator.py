@@ -50,12 +50,14 @@ def write_browser_readme(
     report_name: str,
     variants: int,
     panels: int,
+    warning: str | None = None,
 ) -> None:
+    warning_note = f"\nWARNING\n-------\n{warning}\n" if warning else ""
     path.write_text(
         "BFF TOOLS BROWSER\n"
         "=================\n\n"
         f"Report: {report_name}\n"
-        f"Prioritized variants: {variants}\n"
+        f"Panel-matched variants: {variants}\n"
         f"Gene panels with hits: {panels}\n\n"
         "HOW TO OPEN\n"
         "-----------\n"
@@ -77,7 +79,8 @@ def write_browser_readme(
         "- The report contains HIGH and MODERATE impact variants matching a "
         "configured gene panel; it is not an exhaustive copy of the input.\n"
         "- This research-use report is not a medical device and is not sufficient "
-        "for clinical decisions.\n",
+        "for clinical decisions.\n"
+        f"{warning_note}",
         encoding="utf-8",
     )
 
@@ -111,6 +114,7 @@ class PipelineRunner:
         self.config = config
         self.param = param
         self.projectdir = Path(param["projectdir"])
+        self.notices: list[str] = []
 
     def make_log_payload(self) -> dict[str, Any]:
         return {
@@ -167,6 +171,7 @@ class PipelineRunner:
             f"DATASETID={shell_value(self.param['datasetid'])}",
             f"PROJECTDIR={shell_value(self.param['projectdir'])}",
             f"PROGRESS_EVERY={shell_value(self.param.get('progress_every', 10_000))}",
+            f"JSONL={shell_value('true' if self.param.get('jsonl') else 'false')}",
         ]
         fields = ""
         if self.param.get("annotate"):
@@ -218,18 +223,24 @@ class PipelineRunner:
             raise ExecutionError(
                 f"Failed to generate BFF Tools Browser report\nPlease check this file:\n{log_path}\n"
             ) from exc
+        warning = summary.get("warning")
+        warning_line = f"Warning: {warning}\n" if warning else ""
         log_path.write_text(
             "Generated standalone BFF Tools Browser report\n"
             f"Output: {output_path}\n"
             f"Selected variants: {summary['variants']}\n"
-            f"Panels with hits: {summary['panels']}\n",
+            f"Panels with hits: {summary['panels']}\n"
+            f"{warning_line}",
             encoding="utf-8",
         )
+        if warning:
+            self.notices.append(str(warning))
         write_browser_readme(
             target_dir / "README.txt",
             report_name=output_path.name,
             variants=summary["variants"],
             panels=summary["panels"],
+            warning=str(warning) if warning else None,
         )
 
     def run_named(self, pipeline_name: str) -> None:

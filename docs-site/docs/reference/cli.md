@@ -35,7 +35,7 @@ bff-tools validate -i individuals.json biosamples.json
 | `-o`, `--out-dir DIR` | XLSX serialization destination; created when absent |
 | `-s`, `--schema-dir DIR` | Override the packaged dereferenced schemas |
 | `--gv` | Include the workbook `genomicVariations` sheet or JSON collection |
-| `--gv-vcf` | Stream a generated `genomicVariations[Vcf].json[.gz]` array |
+| `--gv-vcf` | Stream generated `genomicVariationsVcf.json[.gz]` or `.jsonl[.gz]` records |
 | `--ignore-validation` | Write workbook output despite validation issues |
 | `--verbose` | Print progress for large inputs |
 
@@ -80,6 +80,7 @@ TSV conversion creates a VCF intermediate, annotates it, and then uses the same 
 | `--sample-id ID` | Sample identifier used by TSV conversion |
 | `--annotate`, `--no-annotate` | Annotation is enabled by default; disable only for a compatibly annotated VCF |
 | `--browser`, `--no-browser` | Enable or disable standalone HTML generation |
+| `--jsonl`, `--no-jsonl` | Write JSON Lines (`.jsonl.gz`) instead of the default JSON array |
 | `--verbose` | Stream stage output rather than showing the interactive spinner |
 | `--progress-every N` | With `--verbose`, report VCF progress every N records (default: 10,000) |
 
@@ -88,6 +89,8 @@ Values supplied directly on the command line override parameter YAML values. YAM
 When `--config` is omitted, `BFF_TOOLS_CONFIG` can point to a shared annotation configuration. An explicit `--config` always takes precedence.
 
 The Python VCF-to-BFF conversion itself is single-process and streaming. Increasing `-t` helps only stages that support threads; it does not partition records across Python workers.
+
+Standard BFF JSON arrays remain the default for compatibility. Use `--jsonl` when a downstream tool such as `mongoimport` benefits from one complete JSON document per line. Browser generation and `validate --gv-vcf` accept either generated format.
 
 For finer-grained diagnostics on a short file, combine `--verbose` with a smaller interval, for example `--progress-every 100`. The same option is available when running `src/bff_tools/vcf2bff.py` directly. Progress is also retained in `<project>/vcf/run_vcf2bff.log`.
 

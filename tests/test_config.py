@@ -61,6 +61,7 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("log", params)
         self.assertIn("threads", params)
         self.assertTrue(params["annotate"])
+        self.assertFalse(params["jsonl"])
         self.assertEqual(params["progress_every"], 10_000)
         self.assertIsInstance(params, dict)
 
@@ -189,6 +190,11 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(params["threadsless"], 4)
         if "pigz" in params["zip"]:
             self.assertEqual(params["zip"], "/usr/bin/pigz")
+
+    def test_jsonl_option_changes_the_genomic_variation_output(self) -> None:
+        params = read_param_file({"mode": "vcf", "jsonl": True})
+        self.assertTrue(params["jsonl"])
+        self.assertTrue(params["gvvcfjson"].endswith("genomicVariationsVcf.jsonl.gz"))
 
     def test_tsv_mode_routes_input_through_tsv2vcf(self) -> None:
         params = read_param_file({"mode": "tsv", "inputfile": "cohort.tsv.gz"})

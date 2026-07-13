@@ -285,7 +285,7 @@ Yes. Cell values and JSON output use UTF-8. Copying from external systems can st
 <details>
 <summary>Does conversion discard variants based on FILTER or QUAL?</summary>
 
-No. SNVs and nucleotide indels are not removed because `FILTER` is non-PASS or `QUAL` is low. `FILTER`, `QUAL`, per-sample `DP`, and assembly metadata are retained for downstream review. Records without ANN and currently unsupported symbolic alleles are separate exceptions and are reported or skipped explicitly.
+No. SNVs and nucleotide indels are not removed because `FILTER` is non-PASS or `QUAL` is low. `FILTER`, `QUAL`, per-sample `FORMAT/DP`, and assembly metadata are retained for downstream review. Aggregate site-level `INFO/DP` is not mapped. Records without ANN and currently unsupported symbolic alleles are separate exceptions and are reported or skipped explicitly.
 
 </details>
 
@@ -317,7 +317,9 @@ Do not concatenate completed JSON arrays with plain `cat`. Import chromosome out
 <details>
 <summary>What performance should I expect?</summary>
 
-Conversion time scales with records, annotations, sample count, compression, and storage speed. On a 6-core ARM64 workstation, the already annotated 2,504-sample CINECA chr22 VCF converted 1,110,240 input records into 1,109,368 BFF records in 1 minute 47 seconds with about 20 MB peak RAM. Annotation itself is a separate, substantially heavier Java workflow.
+Conversion time scales with records, annotations, sample count, compression, and storage speed. On a 6-core ARM64 workstation, a complete CINECA chr22 run covering normalization, SnpEff, dbNSFP, ClinVar and COSMIC annotation, VCF-to-BFF conversion, and browser generation completed in 13 minutes 52 seconds. It normalized 1,103,547 source records into 1,110,240 records, produced 1,109,368 BFF records for 2,504 samples, and selected 14,305 panel-matched variants for the report.
+
+Measured separately, conversion of the already annotated VCF took 1 minute 47 seconds with about 20 MB peak RAM. That VCF uses `FORMAT=GT`; multi-field sample values such as `GT:DP:AD` require additional parsing and may take longer. Browser generation took 44 seconds with about 22 MB peak RAM. Treat these as observed reference measurements rather than runtime guarantees.
 
 </details>
 
@@ -326,7 +328,7 @@ Conversion time scales with records, annotations, sample count, compression, and
 
 Pass `--browser` or set `bff2html: true`. The generated HTML is under `<project>/browser/` and opens directly without a local server. The **BFF Tools Browser** provides search, sorting, column controls, gene panels, database links, and pagination. The `biosamples` column is hidden by default.
 
-Browser memory still scales with the variants embedded in the report. Use gene-panel and impact filters when a cohort contains many thousands of variants.
+Input is streamed, so chromosome size does not determine generator memory. Browser memory still scales with the panel-matched variants embedded in the standalone report. A runtime warning is emitted at 50,000 retained rows or 100 MiB of embedded row data; use narrower panels or disable `bff2html` for very large reports.
 
 </details>
 

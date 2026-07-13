@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import contextlib
+import gzip
 import io
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -166,6 +168,37 @@ class VcfConversionTests(unittest.TestCase):
             result = compare_bff_files(expected, actual)
         self.assertEqual(records_written, 1044)
         self.assertTrue(result.equal)
+
+    def test_jsonl_output_contains_one_complete_document_per_line(self) -> None:
+        source = (
+            ROOT
+            / "testdata"
+            / "vcf"
+            / "ref_beacon_166403275914916"
+            / "vcf"
+            / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path, records_written = convert_vcf(
+                source,
+                Path(tmpdir),
+                genome="hg19",
+                dataset_id="default_beacon_1",
+                project_dir="jsonl-test",
+                threads=1,
+                jsonl=True,
+            )
+            with gzip.open(output_path, "rt", encoding="utf-8") as handle:
+                documents = [json.loads(line) for line in handle if line.strip()]
+            parity = compare_bff_files(
+                source.parent / "genomicVariationsVcf.json.gz",
+                output_path,
+            )
+        self.assertEqual(output_path.name, vcf2bff.JSONL_OUTPUT_NAME)
+        self.assertEqual(records_written, 1044)
+        self.assertEqual(len(documents), records_written)
+        self.assertTrue(all(isinstance(document, dict) for document in documents))
+        self.assertTrue(parity.equal)
 
     def test_converter_cli_supports_configurable_verbose_progress(self) -> None:
         source = (

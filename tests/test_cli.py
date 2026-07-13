@@ -187,6 +187,7 @@ class CliTests(unittest.TestCase):
             "pipeline": {"tsv2vcf": 0, "vcf2bff": 1, "bff2html": 1},
         }
         runner = mock.Mock()
+        runner.notices = []
         with mock.patch(
             "bff_tools.cli.read_param_file", return_value=param
         ), mock.patch("bff_tools.cli.read_config_file", return_value={}) as config_mock, mock.patch(

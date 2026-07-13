@@ -107,6 +107,7 @@ def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], para
         "threads": "--t",
         "debug": "--debug",
         "verbose": "--verbose",
+        "jsonl": "--jsonl",
         "nocolor": "--nc",
         "noemoji": "--ne",
         "projectdir_override": "--po",

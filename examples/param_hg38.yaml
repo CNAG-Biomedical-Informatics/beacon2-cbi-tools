@@ -4,6 +4,7 @@ annotate: true
 
 # Optional parameters
 bff2html: true
+#jsonl: false
 #center: cnag
 #datasetid: my_dataset_id
 #projectdir: cnag_beacon

@@ -127,6 +127,12 @@ def _add_common_options(parser: argparse.ArgumentParser, *, require_input: bool)
         default=None,
         help="generate a standalone HTML variant report",
     )
+    parser.add_argument(
+        "--jsonl",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="write JSON Lines genomic variations instead of a JSON array",
+    )
     parser.add_argument("--debug", dest="debug", type=int, default=0)
     parser.add_argument("--verbose", dest="verbose", action="store_true")
     parser.add_argument(
@@ -289,6 +295,9 @@ def main(argv: list[str] | None = None) -> int:
                     verbose=bool(arg.get("verbose")),
                     no_emoji=bool(arg.get("noemoji")),
                 )
+                for notice in runner.notices:
+                    print(f"Warning: {notice}", file=sys.stderr)
+                runner.notices.clear()
     except (ConfigError, ExecutionError, FileExistsError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
