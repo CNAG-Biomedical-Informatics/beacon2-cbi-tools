@@ -84,6 +84,8 @@ TSV conversion creates a VCF intermediate, annotates it, and then uses the same 
 
 Values supplied directly on the command line override parameter YAML values. YAML values override built-in defaults.
 
+When `--config` is omitted, `BFF_TOOLS_CONFIG` can point to a shared annotation configuration. An explicit `--config` always takes precedence.
+
 The Python VCF-to-BFF conversion itself is single-process and streaming. Increasing `-t` helps only stages that support threads; it does not partition records across Python workers.
 
 ## Common Options

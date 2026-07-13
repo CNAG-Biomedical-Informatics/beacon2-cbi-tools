@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 660" role="img" aria-labelledby="title description">
+  <title id="title">Beacon v2 data flow with beacon2-cbi-tools</title>
+  <desc id="description">Metadata, VCF, and SNP-array inputs are validated or converted into portable Beacon Friendly Format collections. An optional standalone report can be generated. Database storage and the Beacon API remain downstream responsibilities.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#536273"/>
+    </marker>
+    <style>
+      .canvas { fill: #ffffff; }
+      .zone { fill: #f7f9fc; stroke: #c9d2dc; stroke-width: 1.5; }
+      .downstream { fill: #f8f7f4; stroke: #d4cec3; stroke-width: 1.5; }
+      .zone-title { fill: #172536; font: 700 18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .zone-note { fill: #667383; font: 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .heading { fill: #132033; font: 700 25px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .subtitle { fill: #617083; font: 15px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .card { fill: #ffffff; stroke-width: 2; }
+      .metadata { stroke: #218277; }
+      .variants { stroke: #3d789f; }
+      .array { stroke: #b07626; }
+      .action { fill: #172f46; stroke: #172f46; }
+      .bff { fill: #eaf3fb; stroke: #2b6ea6; }
+      .report { fill: #f7efea; stroke: #a85f43; }
+      .external { fill: #ffffff; stroke: #6d7780; }
+      .card-title { fill: #172536; font: 700 17px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .card-title-light { fill: #ffffff; font: 700 16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .card-text { fill: #526173; font: 14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .card-text-light { fill: #dbe7f1; font: 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .tag { fill: #d9eaf7; }
+      .tag-text { fill: #245b86; font: 700 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .arrow { fill: none; stroke: #536273; stroke-width: 2; marker-end: url(#arrow); }
+      .optional { stroke-dasharray: 7 6; }
+      .arrow-label { fill: #687686; font: 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .boundary { stroke: #aab4bf; stroke-width: 1.5; stroke-dasharray: 5 6; }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1240" height="660"/>
+  <text class="heading" x="30" y="42">From source data to a Beacon v2 service</text>
+  <text class="subtitle" x="30" y="70">Prepare and inspect portable BFF files locally; choose and operate the serving stack independently.</text>
+
+  <rect class="zone" x="28" y="101" width="796" height="528" rx="8"/>
+  <rect class="downstream" x="848" y="101" width="364" height="528" rx="8"/>
+  <line class="boundary" x1="836" y1="122" x2="836" y2="608"/>
+
+  <text class="zone-title" x="58" y="136">beacon2-cbi-tools</text>
+  <text class="zone-note" x="58" y="158">Beaconization and review</text>
+  <text class="zone-title" x="878" y="136">Downstream deployment</text>
+  <text class="zone-note" x="878" y="158">Storage, API, and access</text>
+
+  <path class="arrow" d="M 270 219 H 330"/>
+  <path class="arrow" d="M 540 219 H 570 V 290 H 600"/>
+  <path class="arrow" d="M 270 352 H 330"/>
+  <path class="arrow" d="M 270 491 H 300 V 402 H 330"/>
+  <path class="arrow" d="M 540 375 H 570 V 354 H 600"/>
+  <path class="arrow optional" d="M 695 415 V 470"/>
+  <text class="arrow-label" x="704" y="449">optional</text>
+  <path class="arrow" d="M 790 330 H 850 V 295 H 878"/>
+  <text class="arrow-label" x="804" y="319">import</text>
+  <path class="arrow" d="M 1030 340 V 382"/>
+  <path class="arrow" d="M 1030 480 V 518"/>
+
+  <rect class="card metadata" x="58" y="178" width="212" height="82" rx="8"/>
+  <text class="card-title" x="78" y="208">Metadata</text>
+  <text class="card-text" x="78" y="232">XLSX workbook or BFF JSON</text>
+  <text class="card-text" x="78" y="251">Phenotypic and clinical data</text>
+
+  <rect class="card variants" x="58" y="311" width="212" height="82" rx="8"/>
+  <text class="card-title" x="78" y="341">Genomic variants</text>
+  <text class="card-text" x="78" y="365">VCF or VCF.gz</text>
+  <text class="card-text" x="78" y="384">Single sample or cohort</text>
+
+  <rect class="card array" x="58" y="450" width="212" height="82" rx="8"/>
+  <text class="card-title" x="78" y="480">SNP-array data</text>
+  <text class="card-text" x="78" y="504">TSV, TXT, or compressed text</text>
+  <text class="card-text" x="78" y="523">Supported array formats</text>
+
+  <rect class="card action" x="330" y="181" width="210" height="78" rx="8"/>
+  <text class="card-title-light" x="350" y="212">bff-tools validate</text>
+  <text class="card-text-light" x="350" y="236">Validate and serialize metadata</text>
+
+  <rect class="card action" x="330" y="318" width="210" height="114" rx="8"/>
+  <text class="card-title-light" x="350" y="348">bff-tools vcf / tsv</text>
+  <text class="card-text-light" x="350" y="373">TSV to VCF when needed</text>
+  <text class="card-text-light" x="350" y="395">Normalize + annotate if needed</text>
+  <text class="card-text-light" x="350" y="417">Convert with bounded memory</text>
+
+  <rect class="card bff" x="600" y="245" width="190" height="170" rx="8"/>
+  <text class="card-title" x="620" y="278">Beacon Friendly</text>
+  <text class="card-title" x="620" y="300">Format</text>
+  <text class="card-text" x="620" y="329">Metadata collections</text>
+  <text class="card-text" x="620" y="351">genomicVariations</text>
+  <rect class="tag" x="620" y="372" width="135" height="25" rx="6"/>
+  <text class="tag-text" x="633" y="389">JSON / JSON.gz</text>
+
+  <rect class="card report" x="600" y="470" width="190" height="82" rx="8"/>
+  <text class="card-title" x="620" y="500">Standalone report</text>
+  <text class="card-text" x="620" y="524">Clinical-style variant review</text>
+  <text class="card-text" x="620" y="543">No server required</text>
+
+  <rect class="card external" x="878" y="250" width="304" height="90" rx="8"/>
+  <text class="card-title" x="900" y="282">Storage layer</text>
+  <text class="card-text" x="900" y="307">MongoDB or another backend</text>
+  <text class="card-text" x="900" y="327">Owned by the selected server</text>
+
+  <rect class="card external" x="878" y="382" width="304" height="98" rx="8"/>
+  <text class="card-title" x="900" y="414">Beacon v2 implementation</text>
+  <text class="card-text" x="900" y="440">beacon2-pi-api or bycon</text>
+  <text class="card-text" x="900" y="461">Query logic and authorization</text>
+
+  <rect class="card external" x="878" y="518" width="304" height="72" rx="8"/>
+  <text class="card-title" x="900" y="550">Beacon clients</text>
+  <text class="card-text" x="900" y="574">Requests and responses</text>
+
+  <text class="zone-note" x="58" y="606">Produces portable files; it does not operate a database or Beacon API.</text>
+  <text class="zone-note" x="878" y="606">Deploy with the implementation you choose.</text>
+</svg>

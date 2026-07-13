@@ -2,6 +2,8 @@
 title: Overview
 ---
 
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 <div className="beaconDocHero">
   <p className="beaconEyebrow">Beacon v2 data preparation</p>
   <h2>Turn metadata and genomic files into portable BFF collections.</h2>
@@ -17,22 +19,12 @@ title: Overview
 
 `beacon2-cbi-tools` does one job: it prepares data in the Beacon Friendly Format (BFF) for Beacon v2.
 
-<div className="beaconWorkflowBand">
-  <div>
-    <span>Prepare</span>
-    <strong>XLSX or BFF JSON metadata</strong>
-    <strong>VCF or SNP-array TSV</strong>
-  </div>
-  <div>
-    <span>Run</span>
-    <strong>validate</strong>
-    <strong>vcf or tsv</strong>
-  </div>
-  <div>
-    <span>Review</span>
-    <strong>Schema-valid BFF collections</strong>
-    <strong>Optional standalone HTML report</strong>
-  </div>
+<div className="beaconFlowDiagramFrame">
+  <img
+    className="beaconFlowDiagram"
+    src={useBaseUrl('/img/beaconization-workflow.svg')}
+    alt="Flow from metadata, VCF, and SNP-array inputs through bff-tools to portable BFF files, followed by an independently deployed storage layer and Beacon API"
+  />
 </div>
 
 ## Choose a Starting Point

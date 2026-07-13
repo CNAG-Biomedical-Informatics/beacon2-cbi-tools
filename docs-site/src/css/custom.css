@@ -80,6 +80,22 @@
   gap: 0.65rem;
 }
 
+.beaconFlowDiagramFrame {
+  max-width: 100%;
+  margin: 1.5rem 0 2rem;
+  overflow-x: auto;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.beaconFlowDiagram {
+  display: block;
+  width: 100%;
+  min-width: 900px;
+  height: auto;
+}
+
 .beaconWorkflowBand {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -332,6 +348,10 @@
 [data-theme='dark'] .about-hero p,
 [data-theme='dark'] .about-card p {
   color: #cbd5e1;
+}
+
+[data-theme='dark'] .beaconFlowDiagramFrame {
+  border-color: rgba(226, 232, 240, 0.14);
 }
 
 [data-theme='dark'] .beaconWorkflowBand > div,

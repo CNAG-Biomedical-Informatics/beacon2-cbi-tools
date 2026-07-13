@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from typing import Sequence
 
-__all__ = ["main"]
+from .version import VERSION
+
+__version__ = VERSION
+
+__all__ = ["VERSION", "__version__", "main"]
 
 
 def main(argv: Sequence[str] | None = None) -> int:

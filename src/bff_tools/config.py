@@ -14,6 +14,7 @@ import yaml
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 PACKAGE_DIR = Path(__file__).resolve().parent
+CONFIG_PATH_ENV = "BFF_TOOLS_CONFIG"
 
 
 class ConfigError(RuntimeError):
@@ -39,10 +40,12 @@ def load_yaml_file(path: Path, allowed_keys: Iterable[str] | None = None) -> dic
 
 
 def default_config_path() -> Path:
-    user = os.environ.get("LOGNAME") or os.environ.get("USER") or ""
-    host = socket.gethostname()
-    if user == "mrueda" and host in {"mrueda-ws1", "mrueda-ws5"}:
-        return ROOT_DIR / "bin" / "mrueda_ws1_config.yaml"
+    override = os.environ.get(CONFIG_PATH_ENV)
+    if override:
+        path = Path(override).expanduser().resolve()
+        if not path.is_file():
+            raise ConfigError(f"{CONFIG_PATH_ENV} points to a missing file: {path}")
+        return path
     return ROOT_DIR / "bin" / "config.yaml"
 
 
@@ -85,6 +88,11 @@ def read_config_file(
     browser: bool = False,
 ) -> dict[str, Any]:
     config_path = Path(config_file).resolve() if config_file else default_config_path()
+    if (mode == "tsv" or annotate) and not config_path.is_file():
+        raise ConfigError(
+            "Annotation requires --config FILE or "
+            f"{CONFIG_PATH_ENV}=/path/to/config.yaml"
+        )
     config = load_yaml_file(config_path) if config_path.is_file() else {}
 
     arch = platform.machine()

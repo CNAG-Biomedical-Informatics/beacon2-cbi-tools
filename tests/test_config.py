@@ -13,6 +13,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from bff_tools.config import (  # noqa: E402
+    CONFIG_PATH_ENV,
     ConfigError,
     default_config_path,
     load_yaml_file,
@@ -72,7 +73,7 @@ class ConfigTests(unittest.TestCase):
 
     def test_annotation_profile_reports_missing_configuration(self) -> None:
         with mock.patch("bff_tools.config.default_config_path", return_value=Path("/missing/config.yaml")):
-            with self.assertRaisesRegex(ConfigError, "bcftools"):
+            with self.assertRaisesRegex(ConfigError, "Annotation requires --config"):
                 read_config_file(None, mode="vcf", annotate=True)
 
     def test_requested_threads_control_runtime_parameters(self) -> None:
@@ -97,11 +98,33 @@ class ConfigTests(unittest.TestCase):
                 }
             )
 
-    def test_default_config_path_uses_host_override(self) -> None:
-        with mock.patch("bff_tools.config.socket.gethostname", return_value="mrueda-ws5"):
-            with mock.patch.dict("os.environ", {"USER": "mrueda"}, clear=False):
+    def test_default_config_path_uses_repository_default(self) -> None:
+        with mock.patch.dict("os.environ", {}, clear=True):
+            path = default_config_path()
+        self.assertEqual(path, ROOT / "bin" / "config.yaml")
+
+    def test_default_config_path_uses_environment_override(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "annotation.yaml"
+            config_path.write_text("base: /data\n", encoding="utf-8")
+            with mock.patch.dict(
+                "os.environ",
+                {CONFIG_PATH_ENV: str(config_path)},
+                clear=False,
+            ):
                 path = default_config_path()
-        self.assertEqual(path.name, "mrueda_ws1_config.yaml")
+        self.assertEqual(path, config_path)
+
+    def test_default_config_path_rejects_missing_environment_override(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "missing.yaml"
+            with mock.patch.dict(
+                "os.environ",
+                {CONFIG_PATH_ENV: str(config_path)},
+                clear=False,
+            ):
+                with self.assertRaisesRegex(ConfigError, CONFIG_PATH_ENV):
+                    default_config_path()
 
 
 if __name__ == "__main__":

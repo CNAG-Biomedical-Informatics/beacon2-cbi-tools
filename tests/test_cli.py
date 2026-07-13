@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -15,6 +16,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from bff_tools import cli  # noqa: E402
+from bff_tools.parity import compare_bff_files  # noqa: E402
 
 
 class CliTests(unittest.TestCase):
@@ -64,6 +66,56 @@ class CliTests(unittest.TestCase):
         )
         self.assertIn("usage: bff-tools", result.stdout)
         self.assertIn("validate", result.stdout)
+
+    def test_bin_bff_tools_beaconizes_annotated_vcf_end_to_end(self) -> None:
+        fixture_dir = ROOT / "testdata" / "vcf" / "ref_beacon_166403275914916" / "vcf"
+        input_path = fixture_dir / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
+        expected_path = fixture_dir / "genomicVariationsVcf.json.gz"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_dir = Path(tmpdir) / "beaconized"
+            result = subprocess.run(
+                [
+                    str(ROOT / "bin" / "bff-tools"),
+                    "vcf",
+                    "--input",
+                    str(input_path),
+                    "--no-annotate",
+                    "--browser",
+                    "--genome",
+                    "hg19",
+                    "--dataset-id",
+                    "default_beacon_1",
+                    "--project-dir",
+                    str(project_dir),
+                    "--no-color",
+                    "--no-emoji",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(
+                result.returncode,
+                0,
+                msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+            )
+
+            actual_path = project_dir / "vcf" / "genomicVariationsVcf.json.gz"
+            browser_path = project_dir / "browser"
+            self.assertTrue(actual_path.is_file())
+            self.assertTrue((project_dir / "log.json").is_file())
+            self.assertEqual(len(list(browser_path.glob("*.html"))), 1)
+
+            comparison = compare_bff_files(expected_path, actual_path)
+            self.assertTrue(
+                comparison.equal,
+                msg=(
+                    f"difference at record {comparison.first_difference} "
+                    f"path {comparison.path}: "
+                    f"{comparison.expected!r} != {comparison.actual!r}"
+                ),
+            )
 
 
 if __name__ == "__main__":

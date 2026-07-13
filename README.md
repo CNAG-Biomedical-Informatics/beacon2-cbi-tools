@@ -42,6 +42,10 @@ The project is maintained by [CNAG Biomedical Informatics](https://www.cnag.eu) 
 
 The output remains independent of a particular Beacon server or database. For serving, consider the [Beacon v2 Production Implementation](https://github.com/EGA-archive/beacon2-pi-api) or [bycon](https://codeberg.org/Progenetix/bycon/).
 
+## How data flows
+
+![Flow from source metadata and variants through beacon2-cbi-tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
+
 ## Install
 
 Python 3.10 or newer is required:

@@ -20,8 +20,11 @@ try:
 except ImportError:  # pragma: no cover - exercised by the explicit fallback test
     _igzip = None
 
+try:
+    from .version import VERSION
+except ImportError:  # pragma: no cover - direct script execution from the source tree
+    from version import VERSION
 
-VERSION = "2.0.13-dev"
 OUTPUT_NAME = "genomicVariationsVcf.json.gz"
 ISAL_COMPRESSLEVEL = 2
 STDLIB_COMPRESSLEVEL = 6

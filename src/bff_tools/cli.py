@@ -17,8 +17,8 @@ from .output import (
     print_start_banner,
 )
 from .validator import ValidatorError, export_template, print_report, validate_inputs
+from .version import VERSION
 
-VERSION = "2.0.13-dev"
 GOODBYES = [
     "Aavjo",
     "Abar Dekha-Hobe",

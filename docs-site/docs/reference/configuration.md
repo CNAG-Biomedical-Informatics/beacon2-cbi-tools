@@ -62,7 +62,16 @@ mem: 8G
 dbnsfpset: all
 ```
 
-Start from the installed or repository `bin/config.yaml` rather than retyping paths. `{base}` and `{arch}` placeholders are expanded after loading; `{arch}` becomes `x86_64` or `arm64`. `dbnsfpset` accepts `cnag` for the focused field set or `all` for every dbNSFP header field.
+Start from the repository [`bin/config.yaml`](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/bin/config.yaml) rather than retyping paths. `{base}` and `{arch}` placeholders are expanded after loading; `{arch}` becomes `x86_64` or `arm64`. `dbnsfpset` accepts `cnag` for the focused field set or `all` for every dbNSFP header field.
+
+Pass the file with `--config`. For a stable workstation or HPC installation, set it once in the environment instead:
+
+```bash
+export BFF_TOOLS_CONFIG=/shared/beacon2-cbi-tools/config.yaml
+bff-tools vcf -i cohort.vcf.gz --genome hg38
+```
+
+An explicit `--config` takes precedence over `BFF_TOOLS_CONFIG`. Source checkouts fall back to `bin/config.yaml`; installed packages require one of the explicit forms for annotation.
 
 For `hs37`, ClinVar, COSMIC, and dbNSFP default to the configured `hg19` resources, while a distinct `hs37fasta` is still required.
 
