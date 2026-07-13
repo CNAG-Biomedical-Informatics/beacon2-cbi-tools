@@ -31,7 +31,7 @@ const guideLinks = [
 ];
 
 export default function Home() {
-  const browserVisual = useBaseUrl('/img/bff-genomic-variations-browser.png');
+  const browserVisual = useBaseUrl('/img/bff-variant-detail-inspector.png');
 
   return (
     <Layout
@@ -83,7 +83,7 @@ export default function Home() {
             <img
               className={styles.outputImage}
               src={browserVisual}
-              alt="BFF Tools Browser showing annotated CINECA chromosome 22 variants"
+              alt="BFF Tools Browser showing the clinical inspector for an annotated CINECA chromosome 22 variant"
             />
             <div className={styles.mobileFlow}>
               <div><span>Input</span><strong>XLSX, JSON, VCF, or SNP-array data</strong></div>
