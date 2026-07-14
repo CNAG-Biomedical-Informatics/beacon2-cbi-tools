@@ -29,8 +29,9 @@ A [raw file](./uk1.tsv) with phenoclinic data was gently donated to us from our 
 
 The workbook and its generated BFF collections are kept together under
 `versions/<schema-version>/`. User-facing documentation follows `current`, which
-selects the version tested against the schemas bundled with Beacon v2 CBI
-Tools. The top-level workbook and `bff` paths are compatibility symlinks into
+mirrors the version tested against the schemas bundled with Beacon v2 CBI
+Tools. Keeping `current` as a real directory makes these files browsable on
+GitHub. The top-level workbook and `bff` paths are compatibility symlinks into
 `current`.
 
 The original publication snapshot is retained unchanged under `versions/v2.0.0`.

@@ -1,0 +1,39 @@
+{
+  "dataset": "CINECA_synthetic_cohort_EUROPE_UK1",
+  "schemaVersion": "v2.0.0",
+  "description": "Original workbook and Perl-generated BFF publication snapshot",
+  "sharedInputs": {
+    "phenoclinicData": "../../uk1.tsv",
+    "etlScripts": "../../scripts"
+  },
+  "workbook": {
+    "path": "Beacon-v2-Models_CINECA_UK1.xlsx",
+    "sha256": "1aa9787addbdd14b0e05f1cf05a22bddccadbf0b782444550af74007695ca4d8"
+  },
+  "bffCollections": {
+    "analyses": {
+      "path": "bff/analyses.json",
+      "sha256": "92df741b79b105ffd7f02d4e6ead6473babc3a61d06b7b909d7fb48a3518c9a7"
+    },
+    "biosamples": {
+      "path": "bff/biosamples.json",
+      "sha256": "817426882db2a1f5b1b711c1e5f44cbfa057e6564e775215d90d34ff1c3e49d3"
+    },
+    "cohorts": {
+      "path": "bff/cohorts.json",
+      "sha256": "056d25a4a88d5ac66f343b1321a43b644d4d7f8d935b27c808731bbf417dedac"
+    },
+    "datasets": {
+      "path": "bff/datasets.json",
+      "sha256": "eb2b39db27476aa4324dc8d487e3d828be5d91a2994d263aeb8e4c26692a7175"
+    },
+    "individuals": {
+      "path": "bff/individuals.json",
+      "sha256": "bd0c85a781c59e394f612e4baf3f8d5853286ddffb7388e6e744afcb839279d9"
+    },
+    "runs": {
+      "path": "bff/runs.json",
+      "sha256": "6d77a9e765692ffdd01e2e34341580a8ed58dea25c1e663cd02f9dd65243c257"
+    }
+  }
+}

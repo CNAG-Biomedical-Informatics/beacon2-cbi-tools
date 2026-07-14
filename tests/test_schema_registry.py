@@ -54,27 +54,36 @@ class SchemaRegistryTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValidatorError, "does not exist"):
                     validator.default_schema_dir()
 
-    def test_cineca_current_alias_matches_schema_and_snapshot_checksums(self) -> None:
+    def test_cineca_current_mirror_matches_schema_and_snapshot_checksums(self) -> None:
         root = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1"
         current = root / "current"
         snapshot = root / "versions" / "v2.0.0"
 
-        self.assertTrue(current.is_symlink())
-        self.assertEqual(current.resolve(), snapshot.resolve())
-        self.assertEqual(current.resolve().name, validator.current_schema_version())
+        self.assertTrue(current.is_dir())
+        self.assertFalse(current.is_symlink())
         self.assertTrue((root / "Beacon-v2-Models_CINECA_UK1.xlsx").is_symlink())
         self.assertTrue((root / "bff").is_symlink())
+        self.assertEqual(
+            (root / "Beacon-v2-Models_CINECA_UK1.xlsx").resolve(),
+            (current / "Beacon-v2-Models_CINECA_UK1.xlsx").resolve(),
+        )
+        self.assertEqual((root / "bff").resolve(), (current / "bff").resolve())
 
         manifest = json.loads(
             (snapshot / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["schemaVersion"], "v2.0.0")
+        self.assertEqual(manifest["schemaVersion"], validator.current_schema_version())
+        self.assertEqual(
+            (current / "manifest.json").read_bytes(),
+            (snapshot / "manifest.json").read_bytes(),
+        )
 
         artifacts = [manifest["workbook"], *manifest["bffCollections"].values()]
         for metadata in artifacts:
             with self.subTest(path=metadata["path"]):
                 payload = (snapshot / metadata["path"]).read_bytes()
                 self.assertEqual(hashlib.sha256(payload).hexdigest(), metadata["sha256"])
+                self.assertEqual((current / metadata["path"]).read_bytes(), payload)
 
 
 if __name__ == "__main__":
