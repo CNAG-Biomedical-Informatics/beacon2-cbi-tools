@@ -32,5 +32,5 @@ jobs:
       - name: Run with existing bundle
         if: ${{ !inputs.download_bundle }}
         env:
-          BFF_ANNOTATION_DATA: ${{ inputs.data_directory }}
+          BFF_TOOLS_DATA: ${{ inputs.data_directory }}
         run: deploy/02_test_deployment.sh

@@ -38,25 +38,17 @@ mkdir -p data/tmp
 
 The download is split into multiple Google Drive objects. The script skips parts already present, so an interrupted download can be resumed. If Google Drive rejects an automated request, use the printed URL to retrieve that part manually and rerun the checksum.
 
-## Configure SnpEff
+## Select the Bundle
 
-For a container mount at `/beacon2-cbi-tools-data`, edit the `snpEff.config` beside the bundled SnpEff jar. Depending on the compatibility-bundle revision, it is under `data/soft/snpEff/` or `data/soft/NGSutils/snpEff_v5.0/`.
+Set one environment variable to the extracted `data` directory:
 
-```text
-data/soft/snpEff/snpEff.config
+```bash
+export BFF_TOOLS_DATA=/absolute/path/to/data
 ```
 
-Set its database directory to the path visible inside the container:
+The PyPI wheel, container image, and source checkout contain the standard resource layout. The driver expands and resolves `BFF_TOOLS_DATA`, validates the files needed for the selected assembly, and records the resolved paths in `log.json`. It also passes the local SnpEff directory through `-dataDir` with downloads disabled, so `snpEff.config` does not need to be edited.
 
-```text
-data.dir = /beacon2-cbi-tools-data/databases/snpeff/v5.0
-```
-
-For a direct or HPC installation, use the absolute host path instead.
-
-## Configure `bff-tools`
-
-Start from [`bin/config.yaml`](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/bin/config.yaml). Its `{base}` and `{arch}` placeholders keep the configuration portable across x86-64 and ARM64 installations.
+The packaged layout is equivalent to [`bin/config.yaml`](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/bin/config.yaml):
 
 ```yaml
 base: /beacon2-cbi-tools-data
@@ -74,6 +66,7 @@ hg19dbnsfp: "{base}/databases/snpeff/v5.0/hg19/dbNSFP4.1a_hg19.txt.gz"
 hg38dbnsfp: "{base}/databases/snpeff/v5.0/hg38/dbNSFP4.1a_hg38.txt.gz"
 
 snpeff: "{base}/soft/snpEff/snpEff.jar"
+snpeffdata: "{base}/databases/snpeff/v5.0"
 snpsift: "{base}/soft/snpEff/SnpSift.jar"
 bcftools: "{base}/soft/NGSutils/bcftools-1.21-103_{arch}/bcftools"
 tmpdir: "{base}/tmp"
@@ -83,34 +76,36 @@ dbnsfpset: all
 
 `hs37` uses its own FASTA and the configured hg19 annotation resources. Confirm that this is appropriate for the contigs and coordinates in your VCF.
 
+`BFF_TOOLS_DATA` overrides `base` in this mapping. Use `--config` or `BFF_TOOLS_CONFIG` only for a different directory structure or site-managed executable paths.
+
 ## Run with Docker
 
-Build or pull the annotation-capable image, then mount the bundle at the same path used by the configuration:
+Build or pull the annotation-capable image, then mount the bundle and expose its in-container root:
 
 ```bash
 docker run --rm \
   -v "$PWD:/work" \
   -v "/absolute/path/to/data:/beacon2-cbi-tools-data" \
+  -e BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   beacon2-cbi-tools:annotation \
   vcf -i /work/cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
   --annotate \
-  -c /work/config.yaml \
   -o /work/cohort-bff
 ```
 
 ## Run Directly or on HPC
 
-Install Java and the configured bcftools binary, then point `base` and `data.dir` to host-visible paths:
+Install Java and the configured bcftools binary, then select the host-visible bundle root:
 
 ```bash
+export BFF_TOOLS_DATA=/absolute/path/to/data
 bff-tools vcf \
   -i cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
-  --annotate \
-  -c config.yaml
+  --annotate
 ```
 
 On a scheduler, request memory and temporary storage for both Java annotation and all intermediate VCF files. `mem` controls the Java heap; it is not a total-job memory limit.
@@ -124,7 +119,7 @@ The CLI checks every required executable, reference file, and temporary director
 The repository retains a full annotation integration test. Reuse an extracted bundle:
 
 ```bash
-BFF_ANNOTATION_DATA=/absolute/path/to/data \
+BFF_TOOLS_DATA=/absolute/path/to/data \
   deploy/02_test_deployment.sh
 ```
 

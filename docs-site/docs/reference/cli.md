@@ -48,10 +48,11 @@ Validation exits nonzero when schema issues are found, unless they are explicitl
 Annotate and convert raw VCF input:
 
 ```bash
-bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 -c config.yaml
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1
 ```
 
-Annotation is enabled by default because the converter requires a compatible SnpEff `ANN` header. Pass `--no-annotate` only when the input VCF is already annotated. Raw input requires the external annotation bundle and `config.yaml`.
+Annotation is enabled by default because the converter requires a compatible SnpEff `ANN` header. Pass `--no-annotate` only when the input VCF is already annotated. Raw input requires the external annotation bundle selected through `BFF_TOOLS_DATA`.
 
 ```bash
 bff-tools vcf -i cohort.annotated.vcf.gz \
@@ -74,7 +75,7 @@ TSV conversion creates a VCF intermediate, annotates it, and then uses the same 
 |---|---|
 | `-i`, `--input FILE` | Input VCF, TSV, or supported compressed equivalent |
 | `-p`, `--param FILE` | Optional YAML parameters |
-| `-c`, `--config FILE` | External tool and annotation-resource configuration |
+| `-c`, `--config FILE` | Override the packaged external-tool and annotation-resource layout |
 | `-o`, `--project-dir DIR` | Explicit new run directory |
 | `-t`, `--threads N` | Positive thread count passed to external stages and compression |
 | `--genome NAME` | `hg19`, `hg38`, `hs37`, or `b37` |
@@ -88,7 +89,7 @@ TSV conversion creates a VCF intermediate, annotates it, and then uses the same 
 
 Values supplied directly on the command line override parameter YAML values. YAML values override built-in defaults.
 
-When `--config` is omitted, `BFF_TOOLS_CONFIG` can point to a shared annotation configuration. An explicit `--config` always takes precedence.
+`BFF_TOOLS_DATA` overrides the `{base}` root in the selected resource layout. Layout selection is explicit `--config`, then `BFF_TOOLS_CONFIG`, then the repository or packaged default. Absolute paths in a custom layout remain unchanged.
 
 The Python VCF-to-BFF conversion itself is single-process and streaming. Increasing `-t` helps only stages that support threads; it does not partition records across Python workers.
 

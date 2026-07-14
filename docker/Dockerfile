@@ -11,6 +11,7 @@ LABEL org.opencontainers.image.authors="Manuel Rueda <manuel.rueda@cnag.eu>" \
       org.opencontainers.image.licenses="GPL-3.0-or-later"
 
 ENV DEBIAN_FRONTEND=noninteractive \
+    BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 

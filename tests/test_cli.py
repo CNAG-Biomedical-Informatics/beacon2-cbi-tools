@@ -22,6 +22,13 @@ from bff_tools.parity import compare_bff_files  # noqa: E402
 
 
 class CliTests(unittest.TestCase):
+    def test_vcf_help_names_external_data_environment(self) -> None:
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as ctx:
+            cli.build_parser().parse_args(["vcf", "--help"])
+        self.assertEqual(ctx.exception.code, 0)
+        self.assertIn("BFF_TOOLS_DATA", stdout.getvalue())
+
     def test_version_option_exits_cleanly(self) -> None:
         with contextlib.redirect_stdout(io.StringIO()):
             with self.assertRaises(SystemExit) as ctx:

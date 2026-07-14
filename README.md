@@ -52,7 +52,7 @@ Python 3.10 or newer is required:
 python3 -m pip install beacon2-cbi-tools
 ```
 
-Docker, Apptainer, and source/HPC installations are first-class options in the [installation guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/). The large annotation databases are installed separately and mounted or referenced through `config.yaml`.
+Docker, Apptainer, and source/HPC installations are first-class options in the [installation guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/). The large annotation bundle remains outside the package and is selected with `BFF_TOOLS_DATA`.
 
 ## Main command
 
@@ -78,8 +78,9 @@ bff-tools validate -i metadata.xlsx -o bff
 Convert and annotate a cohort VCF:
 
 ```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 \
-  --annotate --browser -c config.yaml
+  --annotate --browser
 ```
 
 Annotation is enabled by default and requires the external bundle. Use `--no-annotate` only when the input already contains a compatible SnpEff `ANN` header and records; dbNSFP and ClinVar fields remain strongly recommended for complete BFF output.

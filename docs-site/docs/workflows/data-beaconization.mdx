@@ -169,12 +169,12 @@ A successful metadata run normally writes six collections: `analyses.json`, `bio
 Most raw VCFs should use the fully configured annotation workflow:
 
 ```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools vcf \
   -i cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
   --annotate \
-  -c config.yaml \
   -o cohort-bff
 ```
 
@@ -232,7 +232,7 @@ Start with the log path printed by `bff-tools`; the generated stage script recor
 <details>
 <summary>The VCF has no usable SnpEff ANN header</summary>
 
-Raw VCF input must run annotation, which is enabled by default. This error usually means `--no-annotate` or `annotate: false` was used on an unannotated file. Remove that override and supply the [annotation configuration](../getting-started/annotation-data).
+Raw VCF input must run annotation, which is enabled by default. This error usually means `--no-annotate` or `annotate: false` was used on an unannotated file. Remove that override and select the [annotation data](../getting-started/annotation-data) through `BFF_TOOLS_DATA`.
 
 </details>
 
@@ -251,9 +251,9 @@ Select resources with matching coordinates and names. `chr22` versus `22` is a c
 </details>
 
 <details>
-<summary>SnpEff tries to download a database</summary>
+<summary>SnpEff reports a missing database</summary>
 
-The local genome database is missing or `data.dir` in `snpEff.config` points to the host path rather than the path visible inside the container. Set it to the mounted bundle path, for example `/beacon2-cbi-tools-data/databases/snpeff/v5.0`.
+The local genome database is missing or `BFF_TOOLS_DATA` does not name the bundle path visible inside the container. The standard database directory is `$BFF_TOOLS_DATA/databases/snpeff/v5.0`; the generated command passes it with `-dataDir` and disables downloads.
 
 </details>
 
@@ -314,7 +314,7 @@ Generate the standalone **BFF Tools Browser** during conversion:
 ```bash
 bff-tools vcf -i cohort.vcf.gz \
   --genome hg38 --dataset-id cohort-1 \
-  -c config.yaml --browser -o cohort-bff-browser
+  --browser -o cohort-bff-browser
 ```
 
 Open the generated HTML file directly. The adjacent `browser/README.txt` records the exact filename and an optional local HTTP-server command. The report includes searching, sorting, column controls, pagination for large tables, gene panels, a structured variant inspector, and assembly-aware links to external variant databases.

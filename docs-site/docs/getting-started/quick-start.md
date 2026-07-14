@@ -15,8 +15,8 @@ This path builds and validates BFF metadata and shows the normal raw-VCF workflo
 
 Raw VCF and TSV input is annotated by default and requires the external annotation data. Only an already annotated VCF can use `--no-annotate`.
 
-:::info[Two YAML files]
-The optional **parameter file** (`-p`) stores run choices such as `genome`, `datasetid`, and `bff2html`. The annotation **configuration file** (`-c`) stores executable and database paths. A parameter file does not replace the annotation configuration required for raw VCF or TSV input.
+:::info[Configuration inputs]
+The optional **parameter file** (`-p`) stores run choices such as `genome`, `datasetid`, and `bff2html`. The installed package already contains the standard annotation-resource layout; `BFF_TOOLS_DATA` selects its external root. Use `-c` only for a different layout or site-specific executable paths.
 :::
 
 :::warning[Research use]
@@ -59,12 +59,12 @@ bff-tools validate -i bff/individuals.json bff/biosamples.json
 For most raw VCFs, first prepare the [annotation data](annotation-data), then run:
 
 ```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools vcf \
   -i cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
   --annotate \
-  -c config.yaml \
   -o cohort-bff
 ```
 
@@ -81,7 +81,7 @@ bff2html: true
 Then keep the command shorter:
 
 ```bash
-bff-tools vcf -i cohort.vcf.gz -p cohort.yaml -c config.yaml
+bff-tools vcf -i cohort.vcf.gz -p cohort.yaml
 ```
 
 CLI options override values from `cohort.yaml`. See [Configuration](../reference/configuration) for all accepted keys and defaults.
@@ -104,12 +104,12 @@ Add `--browser` to generate a standalone HTML report alongside the BFF output:
 ```bash
 bff-tools vcf -i cohort.vcf.gz \
   --genome hg38 --dataset-id cohort-1 \
-  -c config.yaml --browser -o cohort-bff-browser
+  --browser -o cohort-bff-browser
 ```
 
 ## 4. Convert SNP-Array Data
 
-TSV/TXT conversion needs a sample identifier, the matching reference assembly, and the annotation configuration:
+TSV/TXT conversion needs a sample identifier, the matching reference assembly, and the annotation bundle selected above:
 
 ```bash
 bff-tools tsv \
@@ -117,7 +117,6 @@ bff-tools tsv \
   --sample-id sample-1 \
   --genome hg19 \
   --dataset-id cohort-1 \
-  -c config.yaml \
   -o sample-1-bff
 ```
 

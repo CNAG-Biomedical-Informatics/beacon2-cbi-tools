@@ -27,7 +27,13 @@ bff-tools --version
 
 The package installs the command as `bff-tools`. The `bin/bff-tools` path is only a compatibility shim for running directly from a Git checkout.
 
-The PyPI package provides the Python application and its bundled schemas, templates, panels, and browser assets. It does not install Java, bcftools, SnpEff/SnpSift, reference FASTA files, or the external annotation databases. Metadata validation and conversion of a compatible pre-annotated VCF can run immediately; raw VCF and TSV workflows also require the annotation layer described below.
+The PyPI package provides the Python application, default annotation-resource layout, schemas, templates, panels, and browser assets. It does not contain the large external annotation bundle. Metadata validation and conversion of a compatible pre-annotated VCF can run immediately; raw VCF and TSV workflows also require the annotation layer described below.
+
+After extracting that bundle, select it without editing anything under `site-packages`:
+
+```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+```
 
 Upgrade an existing environment with:
 
@@ -38,7 +44,7 @@ python3 -m pip install --upgrade beacon2-cbi-tools
 ## Two Installation Layers
 
 1. Install the application from PyPI, Docker, Apptainer, or source.
-2. Prepare the [annotation data](annotation-data) used by most real-world VCF workflows.
+2. Prepare the [annotation data](annotation-data) used by most real-world VCF workflows and export `BFF_TOOLS_DATA`.
 
 Metadata validation can run after layer 1. Raw VCF and TSV conversion requires both layers. A VCF with a compatible SnpEff `ANN` header can skip re-annotation with `--no-annotate` and still use the same converter.
 

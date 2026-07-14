@@ -180,6 +180,7 @@ class OrchestratorTests(unittest.TestCase):
                     "javabin": "/usr/bin/java",
                     "mem": "8G",
                     "snpeff": "/opt/snpEff.jar",
+                    "snpeffdata": "/opt/snpEff-data",
                     "snpsift": "/opt/SnpSift.jar",
                     "pythonbin": "/usr/bin/python3",
                     "vcf2bff": "/opt/bff_tools/vcf2bff.py",
@@ -212,6 +213,7 @@ class OrchestratorTests(unittest.TestCase):
             self.assertIn("THREADS=5", content)
             self.assertIn("JAVA=/usr/bin/java", content)
             self.assertIn("SNPEFF=/opt/snpEff.jar", content)
+            self.assertIn("SNPEFF_DATA=/opt/snpEff-data", content)
             self.assertIn("FIELD1,FIELD2", content)
             submit_mock.assert_called_once()
             self.assertNotIn("shell", submit_mock.call_args.kwargs)

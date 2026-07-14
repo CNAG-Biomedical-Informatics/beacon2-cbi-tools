@@ -22,6 +22,7 @@ hg19dbnsfp: "{base}/databases/snpeff/v5.0/hg19/dbNSFP4.1a_hg19.txt.gz"
 hg38dbnsfp: "{base}/databases/snpeff/v5.0/hg38/dbNSFP4.1a_hg38.txt.gz"
 
 # Miscellanea software
+snpeffdata: "{base}/databases/snpeff/v5.0"
 snpeff: "{base}/soft/snpEff/snpEff.jar"
 snpsift: "{base}/soft/snpEff/SnpSift.jar"
 bcftools: "{base}/soft/NGSutils/bcftools-1.21-103_{arch}/bcftools"

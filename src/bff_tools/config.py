@@ -15,6 +15,9 @@ import yaml
 ROOT_DIR = Path(__file__).resolve().parents[2]
 PACKAGE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH_ENV = "BFF_TOOLS_CONFIG"
+DATA_ROOT_ENV = "BFF_TOOLS_DATA"
+DEFAULT_DATA_ROOT = Path("/beacon2-cbi-tools-data")
+PACKAGED_CONFIG_PATH = PACKAGE_DIR / "resources" / "config.yaml"
 
 
 class ConfigError(RuntimeError):
@@ -46,7 +49,25 @@ def default_config_path() -> Path:
         if not path.is_file():
             raise ConfigError(f"{CONFIG_PATH_ENV} points to a missing file: {path}")
         return path
-    return ROOT_DIR / "bin" / "config.yaml"
+    repository_default = ROOT_DIR / "bin" / "config.yaml"
+    if repository_default.is_file():
+        return repository_default
+    return PACKAGED_CONFIG_PATH
+
+
+def _resolve_data_root(config: dict[str, Any]) -> tuple[Path, bool]:
+    uses_data_root = any(
+        isinstance(value, str) and "{base}" in value
+        for value in config.values()
+    )
+    configured = (
+        os.environ.get(DATA_ROOT_ENV)
+        or config.get("base")
+        or DEFAULT_DATA_ROOT
+    )
+    data_root = Path(str(configured)).expanduser().resolve()
+    config["base"] = str(data_root)
+    return data_root, uses_data_root
 
 
 def _require_config_value(config: dict[str, Any], key: str, context: str) -> str:
@@ -95,6 +116,14 @@ def read_config_file(
         )
     config = load_yaml_file(config_path) if config_path.is_file() else {}
 
+    data_root, uses_data_root = _resolve_data_root(config)
+    if (mode == "tsv" or annotate) and uses_data_root and not data_root.is_dir():
+        raise ConfigError(
+            f"External data directory does not exist: {data_root}. "
+            f"Set {DATA_ROOT_ENV} to the extracted bundle root or use "
+            "--config for a custom layout"
+        )
+
     arch = platform.machine()
     if arch == "x86_64":
         arch = "x86_64"
@@ -112,6 +141,9 @@ def read_config_file(
         hg19_key = f"hg19{suffix}"
         if hg19_key in config:
             config.setdefault(f"hs37{suffix}", config[hg19_key])
+    if not config.get("snpeffdata") and config.get(f"{genome}clinvar"):
+        clinvar_path = Path(str(config[f"{genome}clinvar"]))
+        config["snpeffdata"] = str(clinvar_path.parent.parent)
     config.setdefault("tmpdir", "/tmp")
     config.setdefault("mem", "8G")
     config.setdefault("dbnsfpset", "all")
@@ -140,13 +172,17 @@ def read_config_file(
         _require_executable(config, "javabin", context)
         for key in (
             "snpeff",
+            "snpeffdata",
             "snpsift",
             f"{genome}fasta",
             f"{genome}clinvar",
             f"{genome}cosmic",
             f"{genome}dbnsfp",
         ):
-            _require_file(config, key, context)
+            if key == "snpeffdata":
+                _require_directory(config, key, context)
+            else:
+                _require_file(config, key, context)
         _require_directory(config, "tmpdir", context)
 
     if browser:

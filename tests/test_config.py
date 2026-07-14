@@ -14,6 +14,8 @@ if str(SRC) not in sys.path:
 
 from bff_tools.config import (  # noqa: E402
     CONFIG_PATH_ENV,
+    DATA_ROOT_ENV,
+    PACKAGED_CONFIG_PATH,
     ConfigError,
     default_config_path,
     load_yaml_file,
@@ -95,6 +97,10 @@ class ConfigTests(unittest.TestCase):
             '--progress-every "$PROGRESS_EVERY"',
             Path(config["bash4bff"]).read_text(encoding="utf-8"),
         )
+        self.assertIn(
+            '-dataDir "$SNPEFF_DATA" -nodownload',
+            Path(config["bash4bff"]).read_text(encoding="utf-8"),
+        )
         self.assertTrue(Path(config["vcf2bff"]).is_file())
         self.assertTrue(Path(config["pythonbin"]).is_file())
         self.assertNotIn("hg19fasta", config)
@@ -120,6 +126,8 @@ class ConfigTests(unittest.TestCase):
                 path.write_text("fixture\n", encoding="utf-8")
                 resources[key] = path
             config_path = tmp / "config.yaml"
+            snpeff_data = tmp / "snpeff-data"
+            snpeff_data.mkdir()
             config_path.write_text(
                 "\n".join(
                     [
@@ -127,6 +135,7 @@ class ConfigTests(unittest.TestCase):
                         "custom_path: '{base}/{arch}'",
                         "bcftools: /bin/sh",
                         "javabin: /bin/sh",
+                        f"snpeffdata: {snpeff_data}",
                         f"tmpdir: {tmp}",
                         f"paneldir: {tmp}",
                         "dbnsfpset: cnag",
@@ -154,6 +163,90 @@ class ConfigTests(unittest.TestCase):
         self.assertIn(annotated["arch"], annotated["custom_path"])
         self.assertEqual(annotated["hs37clinvar"], annotated["hg19clinvar"])
         self.assertEqual(tsv["dbnsfpset"], "cnag")
+
+    def test_data_root_environment_overrides_base_and_expands_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            home = tmp / "home"
+            data_root = home / "annotation data"
+            data_root.mkdir(parents=True)
+            config_path = tmp / "config.yaml"
+            config_path.write_text(
+                "base: /ignored\nmarker: '{base}/databases'\n",
+                encoding="utf-8",
+            )
+            with mock.patch.dict(
+                "os.environ",
+                {"HOME": str(home), DATA_ROOT_ENV: "~/annotation data"},
+                clear=False,
+            ):
+                config = read_config_file(str(config_path), annotate=False)
+
+        self.assertEqual(config["base"], str(data_root.resolve()))
+        self.assertEqual(config["marker"], str(data_root.resolve() / "databases"))
+
+    def test_data_root_reaches_every_packaged_resource_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, mock.patch.dict(
+            "os.environ",
+            {CONFIG_PATH_ENV: "", DATA_ROOT_ENV: tmpdir},
+            clear=False,
+        ):
+            config = read_config_file(None, annotate=False)
+
+        for key in (
+            "hs37fasta",
+            "hg19fasta",
+            "hg38fasta",
+            "hg19clinvar",
+            "hg38clinvar",
+            "hg19cosmic",
+            "hg38cosmic",
+            "hg19dbnsfp",
+            "hg38dbnsfp",
+            "snpeffdata",
+            "snpeff",
+            "snpsift",
+            "bcftools",
+            "tmpdir",
+        ):
+            with self.subTest(key=key):
+                self.assertTrue(config[key].startswith(str(Path(tmpdir).resolve())))
+        self.assertEqual(config["javabin"], "/usr/bin/java")
+
+    def test_missing_data_root_is_rejected_only_when_annotation_needs_it(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            missing = tmp / "missing-data"
+            config_path = tmp / "config.yaml"
+            config_path.write_text(
+                "base: /ignored\nhg19fasta: '{base}/reference.fa.gz'\n",
+                encoding="utf-8",
+            )
+            with mock.patch.dict(
+                "os.environ",
+                {DATA_ROOT_ENV: str(missing)},
+                clear=False,
+            ):
+                basic = read_config_file(str(config_path), annotate=False)
+                with self.assertRaisesRegex(ConfigError, DATA_ROOT_ENV):
+                    read_config_file(str(config_path), annotate=True)
+
+        self.assertEqual(basic["base"], str(missing.resolve()))
+
+    def test_legacy_config_derives_snpeff_data_from_clinvar_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            snpeff_data = tmp / "snpeff" / "v5.0"
+            clinvar = snpeff_data / "hg19" / "clinvar.vcf.gz"
+            clinvar.parent.mkdir(parents=True)
+            config_path = tmp / "config.yaml"
+            config_path.write_text(
+                f"hg19clinvar: {clinvar}\n",
+                encoding="utf-8",
+            )
+            config = read_config_file(str(config_path), annotate=False)
+
+        self.assertEqual(config["snpeffdata"], str(snpeff_data))
 
     def test_config_preflight_rejects_bad_values_and_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -265,6 +358,20 @@ class ConfigTests(unittest.TestCase):
         with mock.patch.dict("os.environ", {}, clear=True):
             path = default_config_path()
         self.assertEqual(path, ROOT / "bin" / "config.yaml")
+
+    def test_default_config_path_uses_packaged_default_outside_checkout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, mock.patch.object(
+            config_module, "ROOT_DIR", Path(tmpdir)
+        ), mock.patch.dict("os.environ", {}, clear=True):
+            path = default_config_path()
+        self.assertEqual(path, PACKAGED_CONFIG_PATH)
+        self.assertTrue(path.is_file())
+
+    def test_packaged_and_repository_configs_have_the_same_layout(self) -> None:
+        self.assertEqual(
+            load_yaml_file(ROOT / "bin" / "config.yaml"),
+            load_yaml_file(PACKAGED_CONFIG_PATH),
+        )
 
     def test_default_config_path_uses_environment_override(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

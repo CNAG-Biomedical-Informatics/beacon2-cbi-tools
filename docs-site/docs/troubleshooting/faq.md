@@ -13,9 +13,9 @@ description: Practical answers for installing bff-tools, correcting Beacon metad
 |---|---|---|
 | XLSX metadata | `bff-tools validate -i metadata.xlsx -o bff` | Validated BFF JSON collections |
 | Existing BFF JSON | `bff-tools validate -i individuals.json biosamples.json` | Validation report only |
-| Raw VCF or VCF.gz | `bff-tools vcf -i input.vcf.gz -c config.yaml` | Annotated BFF genomic variations |
+| Raw VCF or VCF.gz | `bff-tools vcf -i input.vcf.gz` | Annotated BFF genomic variations |
 | VCF with compatible SnpEff ANN data | `bff-tools vcf -i input.vcf.gz --no-annotate` | BFF genomic variations |
-| SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz -c config.yaml` | BFF genomic variations |
+| SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz` | BFF genomic variations |
 | Generated genomic BFF | `bff-tools validate -i genomicVariationsVcf.json.gz --gv-vcf` | Validation report only |
 
 ## Installation and Annotation
@@ -34,22 +34,19 @@ Metadata workbook conversion and JSON validation do not need the bundle. See [An
 </details>
 
 <details>
-<summary>Why is SnpEff trying to download a database?</summary>
+<summary>Why does SnpEff report a missing database?</summary>
 
-A message such as this usually means SnpEff cannot find the mounted local database:
+A current `bff-tools` run does not allow SnpEff to download databases. A missing-genome or missing-database error means SnpEff cannot find the selected local database directory.
 
-```text
-ERROR while connecting to https://snpeff.blob.core.windows.net/...
-java.net.UnknownHostException: snpeff.blob.core.windows.net
-```
-
-Confirm that the annotation bundle is mounted at the path used by `config.yaml`. Then edit the `snpEff.config` beside the configured SnpEff jar and set `data.dir` to the database directory as seen **inside** Docker or Apptainer, not only on the host.
+Confirm that `BFF_TOOLS_DATA` names the extracted bundle root as seen by the process or **inside** Docker or Apptainer. The expected standard directory is:
 
 For example:
 
 ```text
-data.dir = /beacon2-cbi-tools-data/databases/snpeff/v5.0
+/beacon2-cbi-tools-data/databases/snpeff/v5.0
 ```
+
+`bff-tools` passes this directory to SnpEff through `-dataDir` and uses `-nodownload`; do not edit the packaged application or `snpEff.config`.
 
 </details>
 
@@ -63,7 +60,7 @@ Configured hg38clinvar file does not exist: /data/.../clinvar.vcf.gz
 Configured bcftools executable is not available: /data/.../bcftools
 ```
 
-identify the unresolved key after `{base}` and `{arch}` expansion. Check the selected genome, host or container path, executable permission, architecture (`x86_64` or `arm64`), Java path, temporary directory, and all FASTA, dbNSFP, ClinVar, and COSMIC files.
+identify the unresolved key after `BFF_TOOLS_DATA`, `{base}`, and `{arch}` resolution. Check the selected genome, host or container path, executable permission, architecture (`x86_64` or `arm64`), Java path, temporary directory, and all FASTA, dbNSFP, ClinVar, and COSMIC files.
 
 </details>
 
@@ -174,7 +171,7 @@ Yes. Use `bff-tools tsv` for the supported TSV/TXT layout:
 
 ```bash
 bff-tools tsv -i genotypes.txt.gz \
-  --sample-id sample-1 --genome hg19 -c config.yaml
+  --sample-id sample-1 --genome hg19
 ```
 
 bcftools first converts coordinates and alleles with the matching FASTA. The resulting VCF is then annotated because it does not yet contain SnpEff `ANN` data.

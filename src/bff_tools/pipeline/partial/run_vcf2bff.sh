@@ -60,7 +60,7 @@ if [ "$ANNOTATION" == "true" ]; then
     "$BCFTOOLS" norm --threads "$THREADS" -cs -m -both "$INPUT_VCF" -f "$REF" -Oz -o "$BASE.norm.vcf.gz"
     
     echo "# Running SnpEff annotation"
-    "$JAVA" "-Xmx$MEM" -jar "$SNPEFF" -noStats -i vcf -o vcf "$GENOME" "$BASE.norm.vcf.gz" | compress > "$BASE.norm.ann.vcf.gz"
+    "$JAVA" "-Xmx$MEM" -jar "$SNPEFF" -dataDir "$SNPEFF_DATA" -nodownload -noStats -i vcf -o vcf "$GENOME" "$BASE.norm.vcf.gz" | compress > "$BASE.norm.ann.vcf.gz"
     
     echo "# Running SnpSift dbNSFP annotation"
     "$JAVA" "-Xmx$MEM" -jar "$SNPSIFT" dbnsfp -v -db "$DBNSFP" -f #____WRAPPER_FIELDS____# "$BASE.norm.ann.vcf.gz" | compress > "$BASE.norm.ann.dbnsfp.vcf.gz"

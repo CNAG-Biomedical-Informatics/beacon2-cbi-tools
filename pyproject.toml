@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77", "wheel"]
+requires = ["setuptools>=77", "wheel", "packaging>=24.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -59,6 +59,7 @@ bff_tools = [
   "panels/*",
   "pipeline/partial/*.sh",
   "resources/*.xlsx",
+  "resources/*.yaml",
   "schemas/CURRENT",
   "schemas/*/manifest.json",
   "schemas/*/*/*.json",

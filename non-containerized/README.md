@@ -74,7 +74,13 @@ sudo apt-get install --no-install-recommends \
   bcftools default-jre-headless libsnpsift-java snpeff
 ```
 
-HPC users should prefer site modules when available. Prepare the shared databases using the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/) and update `config.yaml` with host-visible absolute paths.
+HPC users should prefer site modules when available. Prepare the shared bundle using the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/), then select its extracted root once:
+
+```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+```
+
+The installed package contains the standard resource layout. Use `--config` or `BFF_TOOLS_CONFIG` only when the bundle layout or site-managed executable paths differ from that default.
 
 ## 5. Annotate and Convert
 
@@ -82,7 +88,6 @@ HPC users should prefer site modules when available. Prepare the shared database
 bff-tools vcf -i cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
-  -c config.yaml \
   -o cohort-bff
 ```
 
@@ -110,7 +115,7 @@ pytest -q
 After installing the complete external bundle, run the full annotation integration:
 
 ```bash
-BFF_ANNOTATION_DATA=/absolute/path/to/data \
+BFF_TOOLS_DATA=/absolute/path/to/data \
   deploy/02_test_deployment.sh
 ```
 
@@ -119,9 +124,9 @@ That test covers normalization, SnpEff, dbNSFP, ClinVar, COSMIC, VCF-to-BFF conv
 ## Troubleshooting
 
 - **Python import failure:** reactivate the intended virtual environment and reinstall the package.
-- **Executable not available:** use an absolute executable path in `config.yaml` or load the required module before running.
-- **Configured file missing:** verify `{base}` expansion, assembly selection, and filesystem permissions.
-- **SnpEff attempts a download:** set `data.dir` in `snpEff.config` to the local database directory.
+- **Executable not available:** use an absolute executable path in a custom configuration or load the required module before running.
+- **Configured file missing:** verify `BFF_TOOLS_DATA`, assembly selection, architecture, and filesystem permissions.
+- **SnpEff database missing:** verify the `snpeffdata` directory in the resolved configuration. `bff-tools` supplies it with `-dataDir` and disables network downloads.
 - **Output directory exists:** choose a new `-o` path; runs do not overwrite previous results.
 
 MongoDB clients are optional downstream tools and must be installed separately.

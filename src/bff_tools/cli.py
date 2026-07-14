@@ -112,7 +112,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _add_common_options(parser: argparse.ArgumentParser, *, require_input: bool) -> None:
     parser.add_argument("-i", "--input", dest="inputfile", required=require_input)
-    parser.add_argument("-c", "--config", dest="configfile")
+    parser.add_argument(
+        "-c",
+        "--config",
+        dest="configfile",
+        help=(
+            "override the packaged annotation-resource layout "
+            "(data root: BFF_TOOLS_DATA)"
+        ),
+    )
     parser.add_argument("-p", "--param", dest="paramfile")
     parser.add_argument("-t", "--threads", dest="threads", type=int)
     parser.add_argument("--genome", choices=("b37", "hs37", "hg19", "hg38"))

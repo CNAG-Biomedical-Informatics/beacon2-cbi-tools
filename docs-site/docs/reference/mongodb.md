@@ -83,7 +83,7 @@ For new runs, `--jsonl` produces a directly streamable `genomicVariationsVcf.jso
 
 ```bash
 bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 \
-  --jsonl -c config.yaml
+  --jsonl
 
 gzip -dc cohort-bff/vcf/genomicVariationsVcf.jsonl.gz \
   | mongoimport \

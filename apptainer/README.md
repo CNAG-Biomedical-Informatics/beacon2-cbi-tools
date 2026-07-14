@@ -54,19 +54,23 @@ Apptainer runs with the invoking user's identity, so output files retain normal 
 
 Raw VCF and SNP-array input requires the external annotation bundle. Download and verify it once, then follow the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
 
-Use a stable bind destination such as `/beacon2-cbi-tools-data`, and make all paths in `config.yaml` refer to the paths visible inside the container.
+Select the extracted host directory once. The commands below bind it to the portable in-container default:
+
+```bash
+export BFF_TOOLS_DATA=/shared/beacon2-data
+```
 
 ## 5. Annotate and Convert a Raw VCF
 
 ```bash
 apptainer exec \
   --bind "$PWD:/work" \
-  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  --bind "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  --env BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   beacon2-cbi-tools.sif \
   bff-tools vcf -i /work/cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
-  -c /work/config.yaml \
   -o /work/cohort-bff
 ```
 
@@ -81,7 +85,8 @@ mkdir -p /path/to/project/bff-tmp
 
 apptainer exec \
   --bind "$PWD:/work" \
-  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  --bind "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  --env BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   --bind "/path/to/project/bff-tmp:/bff-tmp" \
   beacon2-cbi-tools.sif \
   bff-tools vcf -i /work/cohort.vcf.gz \
@@ -95,7 +100,8 @@ Set `tmpdir: /bff-tmp` in the configuration used by that command.
 ```bash
 apptainer shell \
   --bind "$PWD:/work" \
-  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  --bind "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  --env BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   beacon2-cbi-tools.sif
 ```
 
@@ -112,15 +118,16 @@ Direct `apptainer exec` commands are preferred in scheduler scripts because they
 
 set -euo pipefail
 module load apptainer
+export BFF_TOOLS_DATA=/shared/beacon2-data
 
 apptainer exec \
   --bind "$SLURM_SUBMIT_DIR:/work" \
-  --bind "/shared/beacon2-data:/beacon2-cbi-tools-data" \
+  --bind "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  --env BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   /shared/images/beacon2-cbi-tools.sif \
   bff-tools vcf -i /work/cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
-  -c /work/config.yaml \
   -t "$SLURM_CPUS_PER_TASK" \
   -o /work/cohort-bff
 ```
@@ -139,8 +146,8 @@ After binding the complete annotation bundle, run the repository's [full annotat
 ## Common HPC Problems
 
 - **Quota exceeded:** move `APPTAINER_CACHEDIR` and `APPTAINER_TMPDIR` to project storage.
-- **Configured file not found:** bind every input, output, configuration, reference, and temporary path used inside the container.
-- **SnpEff attempts a download:** set `data.dir` to the mounted local database path.
+- **Configured file not found:** confirm the bind source exists and `BFF_TOOLS_DATA` names its destination inside the container.
+- **SnpEff database missing:** verify `$BFF_TOOLS_DATA/databases/snpeff/v5.0`; the command supplies this directory directly and does not download databases.
 - **Permission denied:** ensure output and scratch bind sources are writable by the submitting user.
 - **Killed by scheduler:** keep the Java heap below the requested memory and account for bcftools, compression, and filesystem cache.
 - **Slow shared storage:** use node-local scratch for intermediates when site policy permits, then copy final output and provenance back to project storage.

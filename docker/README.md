@@ -44,30 +44,30 @@ docker run --rm \
 
 ## 3. Prepare Annotation Data
 
-Raw VCF and SNP-array input requires the external annotation bundle. Download it once on the host, verify its checksum, and configure SnpEff as described in the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
+Raw VCF and SNP-array input requires the external annotation bundle. Download it once on the host, verify its checksum, and select it as described in the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
 
-Keep the mount point stable. The examples use:
+Select the extracted host directory and keep the container mount point stable. The examples use:
 
-```text
-/beacon2-cbi-tools-data
+```bash
+export BFF_TOOLS_DATA=/absolute/path/to/data
 ```
 
-The host directory and container path do not have to match, but every path in `config.yaml` must be valid **inside** the container.
+The image defaults `BFF_TOOLS_DATA` to `/beacon2-cbi-tools-data`. The host directory and container path do not have to match; the environment value must name the path visible **inside** the container.
 
 ## 4. Annotate and Convert a Raw VCF
 
-Place `cohort.vcf.gz` and a copy of `config.yaml` in the working directory:
+Place `cohort.vcf.gz` in the working directory:
 
 ```bash
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -v "$PWD:/work" \
-  -v "/absolute/path/to/data:/beacon2-cbi-tools-data" \
+  -v "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  -e BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   manuelrueda/beacon2-cbi-tools:latest \
   vcf -i /work/cohort.vcf.gz \
   --genome hg38 \
   --dataset-id cohort-1 \
-  -c /work/config.yaml \
   -o /work/cohort-bff
 ```
 
@@ -102,7 +102,8 @@ docker run --rm -it \
   --user "$(id -u):$(id -g)" \
   --entrypoint bash \
   -v "$PWD:/work" \
-  -v "/absolute/path/to/data:/beacon2-cbi-tools-data" \
+  -v "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  -e BFF_TOOLS_DATA=/beacon2-cbi-tools-data \
   manuelrueda/beacon2-cbi-tools:latest
 ```
 
@@ -167,11 +168,11 @@ After mounting the complete bundle, run the repository's [full annotation integr
 
 ### A configured file does not exist
 
-The path is checked inside the container. Confirm the host bind source exists, the destination matches `{base}` in `config.yaml`, and architecture-specific paths resolve to `x86_64` or `arm64`.
+The path is checked inside the container. Confirm the host bind source exists, `BFF_TOOLS_DATA` names the bind destination, and architecture-specific paths resolve to `x86_64` or `arm64`.
 
 ### SnpEff tries to use the network
 
-Set `data.dir` in the `snpEff.config` beside the configured jar to the mounted database path visible inside the container.
+Verify that `$BFF_TOOLS_DATA/databases/snpeff/v5.0` is present inside the container. `bff-tools` passes this path to SnpEff with `-dataDir` and disables network downloads; no edit to `snpEff.config` is required.
 
 ### The output directory already exists
 

@@ -179,6 +179,7 @@ class PipelineRunner:
                 f"JAVA={shell_value(self.config['javabin'])}",
                 f"MEM={shell_value(self.config['mem'])}",
                 f"SNPEFF={shell_value(self.config['snpeff'])}",
+                f"SNPEFF_DATA={shell_value(self.config['snpeffdata'])}",
                 f"SNPSIFT={shell_value(self.config['snpsift'])}",
                 f"BCFTOOLS={shell_value(self.config['bcftools'])}",
                 f"REF={shell_value(self.config[self.param['genome'] + 'fasta'])}",
