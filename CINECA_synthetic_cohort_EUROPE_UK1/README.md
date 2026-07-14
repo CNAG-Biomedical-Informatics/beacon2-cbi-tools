@@ -20,9 +20,23 @@ A [raw file](./uk1.tsv) with phenoclinic data was gently donated to us from our 
 ### Files included:
 
 * `uk1.tsv` - Raw file with the metadata/phenoclinic data for 2504 fake individuals.
-* `Beacon-v2-Models_CINECA_UK1.xlsx` - Excel file with the metadata/phenoclinic data (INPUT).
-* `bff/*json` - Collections (JSON arrays) created from the Excel file (OUTPUT).
+* `current/Beacon-v2-Models_CINECA_UK1.xlsx` - Workbook for the currently supported schema version (INPUT).
+* `current/bff/*.json` - Collections generated from that workbook (OUTPUT).
+* `Beacon-v2-Models_CINECA_UK1.xlsx` and `bff` - Compatibility aliases into `current`.
 * `scripts/` - Directory containing miscellaneous (ad hoc) scripts utilized by the author for converting `uk1.tsv` into multiple `csv` files, which were then used to populate `Beacon-v2-Models_CINECA_UK1.xlsx`. The primary purpose of these scripts is to demonstrate the methods used for data transformation. It's important to note that **these scripts are tailored to the author's specific data set and are not directly applicable to other data sets. Users are encouraged to develop their own ETL methods for transforming raw data into the CSV format**.
+
+### Schema versions
+
+The workbook and its generated BFF collections are kept together under
+`versions/<schema-version>/`. User-facing documentation follows `current`, which
+selects the version tested against the schemas bundled with Beacon v2 CBI
+Tools. The top-level workbook and `bff` paths are compatibility symlinks into
+`current`.
+
+The original publication snapshot is retained unchanged under `versions/v2.0.0`.
+Its manifest records checksums for the workbook and all six BFF collections.
+Raw input data and ETL scripts remain at the top level because they are shared
+between schema versions.
 
 ## External Files (Google Drive Downloads)
 

@@ -18,6 +18,11 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+CINECA_ROOT = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1"
+CINECA_CURRENT = CINECA_ROOT / "current"
+CINECA_V2 = CINECA_ROOT / "versions" / "v2.0.0"
+SCHEMA_V2 = SRC / "bff_tools" / "schemas" / "v2.0.0"
+
 import bff_tools.validator as validator  # noqa: E402
 from bff_tools.validator import (  # noqa: E402
     CollectionReport,
@@ -136,19 +141,21 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotIn("✓", plain_output.getvalue())
 
     def test_mixed_xlsx_and_json_inputs_are_rejected(self) -> None:
-        workbook = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1" / "Beacon-v2-Models_CINECA_UK1.xlsx"
-        individuals = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1" / "bff" / "individuals.json"
+        workbook = CINECA_CURRENT / "Beacon-v2-Models_CINECA_UK1.xlsx"
+        individuals = CINECA_CURRENT / "bff" / "individuals.json"
         with self.assertRaisesRegex(ValidatorError, "cannot be mixed"):
             validate_inputs([workbook, individuals])
 
     def test_cineca_workbook_matches_perl_generated_bff_byte_for_byte(self) -> None:
-        workbook = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1" / "Beacon-v2-Models_CINECA_UK1.xlsx"
-        expected_dir = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1" / "bff"
+        workbook = CINECA_V2 / "Beacon-v2-Models_CINECA_UK1.xlsx"
+        expected_dir = CINECA_V2 / "bff"
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir)
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", message="Unknown extension is not supported")
-                report = validate_inputs([workbook], output_dir=output_dir)
+                report = validate_inputs(
+                    [workbook], schema_dir=SCHEMA_V2, output_dir=output_dir
+                )
             self.assertTrue(report.ok)
             self.assertEqual(report.checked, 10018)
             for collection in (
@@ -164,7 +171,7 @@ class ValidatorTests(unittest.TestCase):
                 self.assertEqual(actual, expected, collection)
 
     def test_workbook_output_directory_is_created(self) -> None:
-        workbook = ROOT / "CINECA_synthetic_cohort_EUROPE_UK1" / "Beacon-v2-Models_CINECA_UK1.xlsx"
+        workbook = CINECA_CURRENT / "Beacon-v2-Models_CINECA_UK1.xlsx"
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "nested" / "bff"
             with warnings.catch_warnings():
@@ -346,11 +353,7 @@ class ValidatorTests(unittest.TestCase):
             with self.assertRaisesRegex(ValidatorError, "Schema directory"):
                 validate_inputs([data], schema_dir=tmp / "missing-schemas")
 
-            workbook = (
-                ROOT
-                / "CINECA_synthetic_cohort_EUROPE_UK1"
-                / "Beacon-v2-Models_CINECA_UK1.xlsx"
-            )
+            workbook = CINECA_CURRENT / "Beacon-v2-Models_CINECA_UK1.xlsx"
             output_file = tmp / "output-file"
             output_file.write_text("not a directory", encoding="utf-8")
             with mock.patch.object(Path, "mkdir", return_value=None):

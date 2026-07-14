@@ -29,6 +29,8 @@ METADATA_COLLECTIONS = tuple(
 )
 NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$")
 ARRAY_HEADER_RE = re.compile(r"^[A-Za-z0-9-]+_")
+SCHEMA_VERSION_RE = re.compile(r"^v\d+\.\d+\.\d+$")
+SCHEMA_ROOT = Path(__file__).resolve().parent / "schemas"
 RESET = "\033[0m"
 BOLD = "\033[1m"
 BLUE = "\033[34m"
@@ -77,8 +79,25 @@ class ValidationReport:
         return not self.issues
 
 
+def current_schema_version() -> str:
+    pointer = SCHEMA_ROOT / "CURRENT"
+    try:
+        version = pointer.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        raise ValidatorError(f"Cannot read current schema version: {pointer}") from exc
+    if not SCHEMA_VERSION_RE.fullmatch(version):
+        raise ValidatorError(f"Invalid current schema version in {pointer}: {version!r}")
+    return version
+
+
 def default_schema_dir() -> Path:
-    return Path(__file__).resolve().parent / "schemas"
+    version = current_schema_version()
+    directory = SCHEMA_ROOT / version
+    if not directory.is_dir():
+        raise ValidatorError(
+            f"Current schema directory does not exist for {version}: {directory}"
+        )
+    return directory
 
 
 def template_path() -> Path:

@@ -13,12 +13,12 @@ UTILITY_PATH = ROOT / "utils" / "_models2xlsx" / "models2xlsx.py"
 LEGACY_PARSER = (
     ROOT / "utils" / "_models2xlsx" / "test" / "parse_defaultSchema.pl"
 )
-SCHEMA_DIR = ROOT / "src" / "bff_tools" / "schemas"
 SPEC = importlib.util.spec_from_file_location("models2xlsx", UTILITY_PATH)
 if SPEC is None or SPEC.loader is None:  # pragma: no cover - fixed repository path
     raise RuntimeError(f"cannot load {UTILITY_PATH}")
 MODELS2XLSX = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODELS2XLSX)
+SCHEMA_DIR = MODELS2XLSX.default_schema_dir()
 
 
 class Models2XlsxTests(unittest.TestCase):

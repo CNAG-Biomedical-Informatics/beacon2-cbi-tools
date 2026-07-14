@@ -59,7 +59,9 @@ bff_tools = [
   "panels/*",
   "pipeline/partial/*.sh",
   "resources/*.xlsx",
-  "schemas/*/*.json",
+  "schemas/CURRENT",
+  "schemas/*/manifest.json",
+  "schemas/*/*/*.json",
 ]
 
 [tool.pytest.ini_options]

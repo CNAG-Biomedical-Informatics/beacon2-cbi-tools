@@ -135,7 +135,18 @@ def write_workbook(headers: dict[str, list[str]], output_path: Path) -> None:
 
 
 def default_schema_dir() -> Path:
-    return Path(__file__).resolve().parents[2] / "src" / "bff_tools" / "schemas"
+    schema_root = Path(__file__).resolve().parents[2] / "src" / "bff_tools" / "schemas"
+    pointer = schema_root / "CURRENT"
+    try:
+        version = pointer.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        raise FileNotFoundError(f"cannot read current schema version: {pointer}") from exc
+    schema_dir = schema_root / version
+    if not schema_dir.is_dir():
+        raise FileNotFoundError(
+            f"current schema directory does not exist for {version}: {schema_dir}"
+        )
+    return schema_dir
 
 
 def build_parser() -> argparse.ArgumentParser:

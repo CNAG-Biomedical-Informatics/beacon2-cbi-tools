@@ -20,8 +20,10 @@ utils/_models2xlsx/defaultSchema2xlsx.sh \
   --no-csv
 ```
 
-The source schemas default to `src/bff_tools/schemas`. An alternate directory
-of dereferenced schemas can be supplied with `--schema-dir`.
+The source schemas default to the version selected by
+`src/bff_tools/schemas/CURRENT`. Versioned, dereferenced schema sets are stored
+under `src/bff_tools/schemas/vX.Y.Z`; an alternate schema set can be supplied
+with `--schema-dir`.
 
 The historical Perl parser is retained under `test/` as a parity oracle. The
 automated tests compare its headers with the Python generator when its Perl

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "v2.0.0",
+  "dereferenced": true,
+  "origin": {
+    "description": "Historical Beacon v2 schema snapshot retained from the Perl validator",
+    "repositoryRevision": "8c132350a97fe5fb65e4f9b1537ce168c81594a5",
+    "repositoryPath": "utils/bff_validator/deref_schemas"
+  },
+  "collections": {
+    "analyses": {
+      "path": "analyses/defaultSchema.json",
+      "sha256": "cc9377c19e56d857ae292dcdc3149992eab070ed8bed38b4b2cc98ab0056102b"
+    },
+    "biosamples": {
+      "path": "biosamples/defaultSchema.json",
+      "sha256": "dc427828f46324a15c283abeacdbf771373b4f13906698a2857730881e86cd3e"
+    },
+    "cohorts": {
+      "path": "cohorts/defaultSchema.json",
+      "sha256": "430e3d7d2af5ac6b1da246fd1a0b105256300215b40e985e8c4ba1ddfc259cef"
+    },
+    "datasets": {
+      "path": "datasets/defaultSchema.json",
+      "sha256": "fe771f4fa69b91c0c1aa018b807c2cbee0ef1a3b007b700e30b2e522f5d6f58f"
+    },
+    "genomicVariations": {
+      "path": "genomicVariations/defaultSchema.json",
+      "sha256": "f8a667ed7f8000d32e7649d64d0668d744ecca107f15578bd7b261bd297b2f6c"
+    },
+    "individuals": {
+      "path": "individuals/defaultSchema.json",
+      "sha256": "1e4bda2ac951cb21d737ccf3f414b6e1eeb67ef27f5076e3ee07a2f6ed68ee7b"
+    },
+    "runs": {
+      "path": "runs/defaultSchema.json",
+      "sha256": "4e4457313b0d5b5ddc3d12abe95a24be7f0bf1ab82b82018f8d0ff6ac0b54221"
+    }
+  }
+}

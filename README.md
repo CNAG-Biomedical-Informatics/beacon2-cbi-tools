@@ -96,7 +96,7 @@ Annotation is enabled by default and requires the external bundle. Use `--no-ann
 3. Inspect the generated BFF files and optional standalone browser.
 4. Import the collections into the storage layer used by the selected Beacon implementation.
 
-The populated [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) provides a real-world metadata example. Compact annotated VCF fixtures are kept in `testdata/`; full release acceptance uses the complete 2,504-sample CINECA chromosome 22 data outside Git.
+The populated [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) provides a real-world metadata example. Its workbook and generated BFF collections are preserved together by Beacon schema version, with compatibility aliases pointing to the current snapshot. Compact annotated VCF fixtures are kept in `testdata/`; full release acceptance uses the complete 2,504-sample CINECA chromosome 22 data outside Git.
 
 ## Roadmap
 

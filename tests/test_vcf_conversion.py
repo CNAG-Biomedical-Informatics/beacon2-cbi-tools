@@ -17,6 +17,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from bff_tools.parity import compare_bff_files  # noqa: E402
+from bff_tools.validator import validate_inputs  # noqa: E402
 import bff_tools.vcf2bff as vcf2bff  # noqa: E402
 from bff_tools.vcf2bff import (  # noqa: E402
     ConversionError,
@@ -125,6 +126,34 @@ class VcfConversionTests(unittest.TestCase):
         self.assertTrue(
             result.equal,
             f"first semantic difference at BFF record {result.first_difference}",
+        )
+
+    def test_legacy_pathogenic_fixture_matches_perl_and_schema(self) -> None:
+        fixture_dir = ROOT / "testdata" / "vcf" / "legacy_pathogenic"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            actual, records_written = convert_vcf(
+                fixture_dir / "test_pathogenic.vcf.gz",
+                Path(tmpdir),
+                genome="hg19",
+                dataset_id="foo",
+                project_dir="123456789",
+                threads=1,
+            )
+            result = compare_bff_files(
+                fixture_dir / "genomicVariationsVcf.json.gz",
+                actual,
+            )
+            validation = validate_inputs([actual], streamed_genomic=True)
+        self.assertEqual(records_written, 15)
+        self.assertTrue(
+            result.equal,
+            f"first semantic difference at BFF record {result.first_difference}",
+        )
+        self.assertTrue(validation.ok, validation.issues)
+        self.assertEqual(validation.checked, 15)
+        self.assertEqual(
+            [(collection.name, collection.checked) for collection in validation.collections],
+            [("genomicVariations", 15)],
         )
 
     def test_cineca_annotated_converter_matches_perl_generated_bff(self) -> None:

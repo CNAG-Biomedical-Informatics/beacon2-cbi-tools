@@ -10,6 +10,21 @@ Schema validation is necessary, but it is not evidence that a dataset is biologi
 
 The Python validator is regression-tested against all 10,018 records in the CINECA synthetic workbook. All six generated collections must match the Perl-generated reference files byte-for-byte.
 
+## Schema Versions
+
+The package retains each dereferenced Beacon schema set under its specification version. `CURRENT` selects the one version used by default by `bff-tools validate`; archived versions remain available for reproducibility but are not maintained as additional active targets.
+
+Every schema version includes a manifest with its source revision and SHA-256 checksums. The CINECA workbook and its generated BFF collections use the same version hierarchy, keeping each input/output pair together. Documentation uses `CINECA_synthetic_cohort_EUROPE_UK1/current/`, while top-level CINECA paths remain compatibility aliases to the same snapshot.
+
+Use `--schema-dir` when an explicit archived or local dereferenced schema set is required:
+
+```bash
+bff-tools validate -i metadata.json \
+  --schema-dir /path/to/schemas/v2.0.0
+```
+
+The current package supports Beacon schema `v2.0.0`.
+
 ## What Validation Does Not Establish
 
 Validation does not prove that:
