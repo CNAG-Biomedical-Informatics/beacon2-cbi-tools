@@ -319,9 +319,9 @@ bff-tools vcf -i cohort.vcf.gz \
 
 Open the generated HTML file directly. The adjacent `browser/README.txt` records the exact filename and an optional local HTTP-server command. The report includes searching, sorting, column controls, pagination for large tables, gene panels, a structured variant inspector, and assembly-aware links to external variant databases.
 
-Click any row to open the variant inspector without leaving the table. It groups the clinical interpretation, variant definition, external evidence links, matched panels, and carrier genotypes while preserving the current filters and page.
+Click any row to open the variant inspector without leaving the table. It groups the clinical interpretation, variant definition, external evidence links, matched panels, and carrier genotypes while preserving the current filters and page. Categorical values retain the same color semantics used in the table.
 
-![BFF Tools Browser variant inspector showing a pathogenic variant, condition identifiers, and its variant definition](/img/bff-variant-detail-inspector.png)
+![BFF Tools Browser variant inspector showing a pathogenic variant with colored impact, clinical relevance, molecular effect, type, and filter labels](/img/bff-variant-detail-inspector.png)
 
 Before handing the BFF files to a Beacon implementation, confirm:
 

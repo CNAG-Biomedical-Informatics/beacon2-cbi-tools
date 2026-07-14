@@ -473,6 +473,7 @@
       .detail-field dt { margin: 0 0 3px; color: var(--muted); font-size: 12px; font-weight: 740; text-transform: uppercase; }
       .detail-field dd { margin: 0; color: var(--ink-soft); font-size: 14px; overflow-wrap: anywhere; }
       .detail-field dd.mono { color: var(--ink); }
+      .detail-field dd .badge-list, .detail-field dd .effect-list { margin-top: 2px; }
       .resource-links { display: flex; flex-wrap: wrap; gap: 7px; }
       .resource-link { min-height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; color: var(--blue); font-size: 13px; font-weight: 720; text-decoration: none; }
       .resource-link:hover { border-color: var(--blue); background: var(--blue-soft); }
@@ -908,10 +909,8 @@
           return "neutral";
         }
 
-        function badgeFormatter(cell) {
-          var field = cell.getField();
-          var entries = values(cell.getValue());
-          if (!entries.length) return "";
+        function badgeList(field, value) {
+          var entries = values(value);
           var list = document.createElement("div");
           list.className = "badge-list";
           entries.forEach(function (value) {
@@ -923,6 +922,11 @@
           return list;
         }
 
+        function badgeFormatter(cell) {
+          var list = badgeList(cell.getField(), cell.getValue());
+          return list.children.length ? list : "";
+        }
+
         function effectKind(value) {
           var effect = value.toLowerCase();
           if (/(stop_gained|frameshift|splice_acceptor|splice_donor|start_lost|transcript_ablation)/.test(effect)) return "disruptive";
@@ -931,23 +935,28 @@
           return "neutral";
         }
 
-        function effectFormatter(cell) {
-          var entries = values(cell.getValue());
+        function effectList(value, limit) {
+          var entries = values(value);
           var list = document.createElement("div");
           list.className = "effect-list";
-          entries.slice(0, 2).forEach(function (value) {
+          var displayed = typeof limit === "number" ? entries.slice(0, limit) : entries;
+          displayed.forEach(function (value) {
             var chip = document.createElement("span");
             chip.className = "effect-chip " + effectKind(value);
             chip.textContent = value.replace(/_/g, " ");
             list.appendChild(chip);
           });
-          if (entries.length > 2) {
+          if (typeof limit === "number" && entries.length > limit) {
             var more = document.createElement("span");
             more.className = "effect-more";
-            more.textContent = "+" + (entries.length - 2) + " more";
+            more.textContent = "+" + (entries.length - limit) + " more";
             list.appendChild(more);
           }
           return list;
+        }
+
+        function effectFormatter(cell) {
+          return effectList(cell.getValue(), 2);
         }
 
         function biosampleFormatter(cell) {
@@ -1267,8 +1276,14 @@
             var term = document.createElement("dt");
             term.textContent = field.label;
             var description = document.createElement("dd");
-            description.textContent = text(field.value);
-            if (field.mono) description.className = "mono";
+            if (field.badgeField) {
+              description.appendChild(badgeList(field.badgeField, field.value));
+            } else if (field.effects) {
+              description.appendChild(effectList(field.value));
+            } else {
+              description.textContent = text(field.value);
+              if (field.mono) description.className = "mono";
+            }
             wrapper.append(term, description);
             container.appendChild(wrapper);
           });
@@ -1341,10 +1356,10 @@
             });
           });
           addDetailFields(document.getElementById("detail-clinical"), [
-            {label: "Clinical relevance", value: row.clinicalRelevance},
-            {label: "Annotation impact", value: row.annotationImpact},
+            {label: "Clinical relevance", value: row.clinicalRelevance, badgeField: "clinicalRelevance"},
+            {label: "Annotation impact", value: row.annotationImpact, badgeField: "annotationImpact"},
             {label: "Condition", value: row.conditionId, wide: true},
-            {label: "Molecular effect", value: row.molecularEffects, wide: true},
+            {label: "Molecular effect", value: row.molecularEffects, wide: true, effects: true},
             {label: "Amino acid change", value: row.aminoacidChanges, wide: true, mono: true}
           ]);
           addDetailFields(document.getElementById("detail-definition"), [
@@ -1353,11 +1368,11 @@
             {label: "Reference sequence", value: row.refseqId, mono: true},
             {label: "Display locus (1-based)", value: displayCoordinate(row), wide: true, mono: true},
             {label: "BFF start (0-based)", value: row.position, mono: true},
-            {label: "Variant type", value: row.variantType},
+            {label: "Variant type", value: row.variantType, badgeField: "variantType"},
             {label: "Reference", value: row.referenceBases, mono: true},
             {label: "Alternate", value: row.alternateBases, mono: true},
             {label: "QUAL", value: row.QUAL},
-            {label: "FILTER", value: row.FILTER}
+            {label: "FILTER", value: row.FILTER, badgeField: "FILTER"}
           ]);
           populateResources(row);
           addTags(document.getElementById("detail-panels"), row._panels || []);

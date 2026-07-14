@@ -149,6 +149,18 @@ class BrowserTests(unittest.TestCase):
             self.assertNotIn('class="brand-mark"', text)
             self.assertIn('function effectFormatter(cell)', text)
             self.assertIn('.effect-chip.disruptive', text)
+            self.assertIn(
+                'description.appendChild(badgeList(field.badgeField, field.value))',
+                text,
+            )
+            self.assertIn(
+                '{label: "Molecular effect", value: row.molecularEffects, wide: true, effects: true}',
+                text,
+            )
+            self.assertIn(
+                '{label: "FILTER", value: row.FILTER, badgeField: "FILTER"}',
+                text,
+            )
             self.assertNotIn("Variant landscape", text)
             self.assertIn("project &lt;one&gt;", text)
             self.assertIn("<\\/script><script>alert(1)<\\/script>", text)

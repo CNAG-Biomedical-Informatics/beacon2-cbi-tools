@@ -83,7 +83,7 @@ export default function Home() {
             <img
               className={styles.outputImage}
               src={browserVisual}
-              alt="BFF Tools Browser showing the clinical inspector for an annotated CINECA chromosome 22 variant"
+              alt="BFF Tools Browser showing an annotated CINECA variant with colored clinical, molecular-effect, type, and filter labels"
             />
             <div className={styles.mobileFlow}>
               <div><span>Input</span><strong>XLSX, JSON, VCF, or SNP-array data</strong></div>
