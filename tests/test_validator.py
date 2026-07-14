@@ -130,6 +130,10 @@ class ValidatorTests(unittest.TestCase):
             print_report(report, no_color=True)
         rendered = output.getvalue()
         self.assertIn("🧬 BFF Tools Validator", rendered)
+        self.assertIn(
+            "Build and validate BFF metadata from XLSX, or validate existing BFF JSON",
+            rendered,
+        )
         self.assertIn("== 🧍 individuals ==", rendered)
         self.assertIn("✓ individuals: validation passed (1 record)", rendered)
         self.assertNotIn("\033[", rendered)

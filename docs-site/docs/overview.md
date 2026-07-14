@@ -8,7 +8,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
   <p className="beaconEyebrow">Beacon v2 data preparation</p>
   <h2>Turn metadata and genomic files into portable BFF collections.</h2>
   <p>
-    Validate XLSX or JSON metadata, convert VCF and SNP-array data, and inspect the result before connecting it to a Beacon implementation.
+    Build and validate BFF metadata from XLSX, validate existing JSON, convert genomic data, and inspect the result before connecting it to a Beacon implementation.
   </p>
   <div className="beaconHeroActions">
     <a className="button button--primary" href="workflows/data-beaconization">Start the tutorial</a>
@@ -32,7 +32,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 <div className="beaconPathGrid">
   <a href="getting-started/quick-start">
     <span>Five minutes</span>
-    <h3>Validate metadata</h3>
+    <h3>Build metadata JSON</h3>
     <p>Export the workbook template and produce your first BFF JSON collections.</p>
   </a>
   <a href="workflows/data-beaconization">
@@ -61,7 +61,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 | Command | Use it for |
 |---|---|
-| `bff-tools validate` | Validate XLSX or JSON metadata and write BFF collections |
+| `bff-tools validate` | Build and validate BFF metadata from XLSX, or validate existing BFF JSON |
 | `bff-tools vcf` | Convert a VCF or VCF.gz file into BFF `genomicVariations` |
 | `bff-tools tsv` | Convert supported SNP-array text data through VCF into BFF |
 

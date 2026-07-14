@@ -9,14 +9,14 @@ description: Practical answers for installing bff-tools, correcting Beacon metad
 
 ## Command Guide
 
-| Starting data | Command |
-|---|---|
-| XLSX metadata | `bff-tools validate -i metadata.xlsx -o bff` |
-| Existing BFF JSON | `bff-tools validate -i individuals.json biosamples.json` |
-| Raw VCF or VCF.gz | `bff-tools vcf -i input.vcf.gz -c config.yaml` |
-| VCF with compatible SnpEff ANN data | `bff-tools vcf -i input.vcf.gz --no-annotate` |
-| SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz -c config.yaml` |
-| Generated genomic BFF | `bff-tools validate -i genomicVariationsVcf.json.gz --gv-vcf` |
+| Starting data | Command | Result |
+|---|---|---|
+| XLSX metadata | `bff-tools validate -i metadata.xlsx -o bff` | Validated BFF JSON collections |
+| Existing BFF JSON | `bff-tools validate -i individuals.json biosamples.json` | Validation report only |
+| Raw VCF or VCF.gz | `bff-tools vcf -i input.vcf.gz -c config.yaml` | Annotated BFF genomic variations |
+| VCF with compatible SnpEff ANN data | `bff-tools vcf -i input.vcf.gz --no-annotate` | BFF genomic variations |
+| SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz -c config.yaml` | BFF genomic variations |
+| Generated genomic BFF | `bff-tools validate -i genomicVariationsVcf.json.gz --gv-vcf` | Validation report only |
 
 ## Installation and Annotation
 
@@ -29,7 +29,7 @@ For a raw VCF or SNP-array file, **yes**. The converter requires SnpEff `ANN` da
 
 Use `--no-annotate` only when a VCF already has a compatible SnpEff `ANN` header and per-record annotations. If the header is absent, conversion stops with an actionable error instead of writing an empty BFF collection.
 
-Metadata validation does not need the bundle. See [Annotation Data](../getting-started/annotation-data) for download, storage, and configuration instructions.
+Metadata workbook conversion and JSON validation do not need the bundle. See [Annotation Data](../getting-started/annotation-data) for download, storage, and configuration instructions.
 
 </details>
 

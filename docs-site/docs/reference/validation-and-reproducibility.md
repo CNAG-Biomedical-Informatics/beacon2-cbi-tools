@@ -6,7 +6,7 @@ Schema validation is necessary, but it is not evidence that a dataset is biologi
 
 ## What Validation Establishes
 
-`bff-tools validate` checks every entity against the packaged dereferenced Beacon v2 schema. It catches missing required properties, incompatible JSON types, malformed ontology structures, invalid enumerations, and other structural constraints.
+With XLSX input, `bff-tools validate` first builds BFF JSON collections from the populated worksheets and writes each collection that passes validation. With JSON input, it validates existing collections without rewriting them. Both paths check every entity against the packaged dereferenced Beacon v2 schema and catch missing required properties, incompatible JSON types, malformed ontology structures, invalid enumerations, and other structural constraints.
 
 The Python validator is regression-tested against all 10,018 records in the CINECA synthetic workbook. All six generated collections must match the Perl-generated reference files byte-for-byte.
 

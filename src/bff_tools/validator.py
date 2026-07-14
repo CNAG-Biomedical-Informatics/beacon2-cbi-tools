@@ -557,7 +557,13 @@ def print_report(
     use_color = not no_color and os.environ.get("ANSI_COLORS_DISABLED") != "1"
     header_prefix = "" if no_emoji else "🧬 "
     print(_colorize(f"{header_prefix}BFF Tools Validator  v{VERSION}", BOLD, CYAN, use_color=use_color))
-    print(_colorize("Validate Beacon XLSX or JSON input and write BFF JSON collections", CYAN, use_color=use_color))
+    print(
+        _colorize(
+            "Build and validate BFF metadata from XLSX, or validate existing BFF JSON",
+            CYAN,
+            use_color=use_color,
+        )
+    )
 
     grouped: dict[str, list[ValidationIssue]] = {}
     for issue in report.issues:

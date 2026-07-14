@@ -79,7 +79,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     validate = subparsers.add_parser(
         "validate",
-        help="validate Beacon metadata and write BFF JSON collections",
+        help=(
+            "build and validate BFF metadata from XLSX, or validate existing "
+            "BFF JSON"
+        ),
     )
     input_group = validate.add_mutually_exclusive_group(required=True)
     input_group.add_argument(

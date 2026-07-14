@@ -2,15 +2,16 @@
 title: Quick Start
 ---
 
-This path validates metadata and shows the normal raw-VCF workflow, the explicit shortcut for compatible pre-annotated VCFs, and SNP-array conversion.
+This path builds and validates BFF metadata and shows the normal raw-VCF workflow, the explicit shortcut for compatible pre-annotated VCFs, and SNP-array conversion.
 
 ## Which Command Do I Need?
 
-| Starting data | Command |
-|---|---|
-| XLSX workbook or BFF JSON | `bff-tools validate` |
-| Raw or annotated VCF | `bff-tools vcf` |
-| Supported SNP-array TSV/TXT | `bff-tools tsv` |
+| Starting data | Command | Result |
+|---|---|---|
+| XLSX metadata workbook | `bff-tools validate` | Validated BFF JSON collections |
+| Existing BFF JSON | `bff-tools validate` | Validation report only |
+| Raw or annotated VCF | `bff-tools vcf` | BFF `genomicVariations` |
+| Supported SNP-array TSV/TXT | `bff-tools tsv` | BFF `genomicVariations` |
 
 Raw VCF and TSV input is annotated by default and requires the external annotation data. Only an already annotated VCF can use `--no-annotate`.
 
@@ -31,7 +32,7 @@ bff-tools --help
 
 The public commands are `validate`, `vcf`, and `tsv`.
 
-## 2. Create and Validate Metadata
+## 2. Create and Validate Metadata JSON
 
 Export the packaged Beacon workbook template:
 
@@ -39,15 +40,15 @@ Export the packaged Beacon workbook template:
 bff-tools validate --template-out metadata.xlsx
 ```
 
-After filling the workbook, write validated BFF collections:
+After filling the workbook, convert each populated worksheet into a BFF JSON collection and validate its records:
 
 ```bash
 bff-tools validate -i metadata.xlsx -o bff
 ```
 
-The output directory contains collections such as `individuals.json`, `biosamples.json`, `analyses.json`, and `datasets.json`. Files are written only when their rows pass the corresponding Beacon v2 schema, unless `--ignore-validation` is explicitly used.
+The output directory contains collections such as `individuals.json`, `biosamples.json`, `analyses.json`, and `datasets.json`. Each collection is written only when its rows pass the corresponding Beacon v2 schema, unless `--ignore-validation` is explicitly used.
 
-You can validate existing JSON directly:
+Existing JSON follows a validation-only path and is not rewritten:
 
 ```bash
 bff-tools validate -i bff/individuals.json bff/biosamples.json

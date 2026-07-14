@@ -25,15 +25,10 @@ The two historical image badges preserve the download record of earlier distribu
 ## Quick links
 
 - Documentation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/>
-- Installation choices: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/>
+- Installation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/>
 - Quick start: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/quick-start/>
 - End-to-end tutorial: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/workflows/data-beaconization/>
-- Annotation data: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/>
-- Outputs: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/reference/outputs/>
-- MongoDB import: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/reference/mongodb/>
-- Troubleshooting: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/troubleshooting/faq/>
 - Docker image: <https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags>
-- Disclaimer: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/about/disclaimer/>
 
 ## What it does
 
@@ -63,7 +58,7 @@ Docker, Apptainer, and source/HPC installations are first-class options in the [
 
 The `bff-tools` command has three focused modes:
 
-- `validate`: validate XLSX or JSON metadata and write BFF collections.
+- `validate`: build and validate BFF metadata from XLSX, or validate existing BFF JSON.
 - `vcf`: annotate and convert VCF data, with optional browser generation.
 - `tsv`: convert SNP-array TSV input through VCF into BFF.
 
@@ -73,7 +68,7 @@ bff-tools --help
 
 ## Quick start
 
-Create a workbook template, fill it, and validate the result:
+Create a workbook template, fill it, then build and validate BFF JSON:
 
 ```bash
 bff-tools validate --template-out metadata.xlsx

@@ -10,13 +10,15 @@ Run `bff-tools <command> --help` for the installed version. Conversion creates a
 
 ## `validate`
 
+With XLSX input, this command converts each populated worksheet into a BFF JSON collection, validates its records, and writes valid collections to the output directory. With JSON input, it validates the existing collections without rewriting them.
+
 Export the packaged template:
 
 ```bash
 bff-tools validate --template-out metadata.xlsx
 ```
 
-Validate and serialize a workbook:
+Build and validate BFF JSON from a workbook:
 
 ```bash
 bff-tools validate -i metadata.xlsx -o bff

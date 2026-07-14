@@ -78,7 +78,7 @@ Workbook headers encode JSON structure:
 
 Most projects leave the workbook `genomicVariations` sheet empty because VCF or TSV conversion creates that collection in Step 2. Use `--gv` only when you intentionally maintain complementary genomic-variation records in the workbook or as a named JSON collection.
 
-Validate the completed workbook:
+Convert and validate the completed workbook:
 
 ```bash
 bff-tools validate -i metadata.xlsx -o bff
@@ -86,7 +86,7 @@ bff-tools validate -i metadata.xlsx -o bff
 
 ```text title="Successful metadata validation"
 🧬 BFF Tools Validator  v2.0.13-dev
-Validate Beacon XLSX or JSON input and write BFF JSON collections
+Build and validate BFF metadata from XLSX, or validate existing BFF JSON
 
 == 🗂 analyses ==
 ✓ analyses: validation passed (2,504 records)
@@ -115,7 +115,7 @@ Validate Beacon XLSX or JSON input and write BFF JSON collections
 ✓ Validation passed; checked 10,018 records
 ```
 
-Valid worksheets become deterministic BFF JSON collections. Use `--no-color` or `--no-emoji` when plain output is required for a log processor.
+Each valid worksheet becomes a deterministic BFF JSON collection in the output directory. Use `--no-color` or `--no-emoji` when plain output is required for a log processor.
 
 ### Diagnose a Failed Workbook Row
 

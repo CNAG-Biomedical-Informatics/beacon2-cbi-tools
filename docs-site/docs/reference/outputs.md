@@ -2,9 +2,9 @@
 title: Outputs
 ---
 
-## Metadata Validation
+## Metadata Conversion and Validation
 
-An XLSX validation run writes one JSON array per selected worksheet:
+An XLSX conversion and validation run writes one JSON array per selected worksheet:
 
 ```text
 bff/
