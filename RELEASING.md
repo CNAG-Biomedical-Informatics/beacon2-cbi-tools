@@ -1,25 +1,25 @@
 # Release Process
 
-Releases are built from an explicit Git tag. All GitHub Actions workflows remain manually dispatched so that a selected tag, rather than a moving branch, determines the packaged source.
+TestPyPI betas are built from committed `main` without creating Git tags. Stable releases are built from explicit tags. All GitHub Actions workflows remain manually dispatched so the source ref is selected deliberately.
 
 ## Prerelease
 
-1. Use a PEP 440 version such as `2.0.13b1` in `VERSION` and `src/bff_tools/version.py`; use the matching Git tag `v2.0.13b1`.
+1. Use a PEP 440 version such as `2.0.13b1` in `VERSION` and `src/bff_tools/version.py`.
 2. Run the unit suite, coverage gate, documentation build, wheel smoke test, packaged annotation test, and full external CINECA chromosome 22 release gate.
-3. Commit the release metadata, create the tag, and push it.
+3. Commit the beta release metadata and push `main`. Do not create a beta tag.
 4. Configure the same OIDC trusted-publishing path used by CBIcall, without repository secrets: GitHub owner `CNAG-Biomedical-Informatics`, repository `beacon2-cbi-tools`, workflow `publish-testpypi.yml`, environment `testpypi`. TestPyPI requires this project-specific publisher entry even when the account and authorization model are shared with CBIcall.
-5. Manually launch **Publish to TestPyPI** and select the prerelease tag as the workflow ref. The workflow follows the same build, isolated-wheel test, artifact, and trusted-publishing handoff used by CBIcall.
+5. Manually launch **Publish to TestPyPI** with `main` selected as the workflow ref. The workflow follows the same build, isolated-wheel test, artifact, and trusted-publishing handoff used by CBIcall.
 6. Confirm the TestPyPI artifact independently without changing the system installation:
 
    ```bash
-   python3 -m pip install \
+   python3 -m venv /tmp/bff-tools-testpypi
+   /tmp/bff-tools-testpypi/bin/python -m pip install \
      --index-url https://test.pypi.org/simple/ \
-     --no-deps \
-     --target /tmp/bff-tools-testpypi \
+     --extra-index-url https://pypi.org/simple/ \
      "beacon2-cbi-tools==2.0.13b1"
 
-   PYTHONPATH=/tmp/bff-tools-testpypi python3 -m bff_tools --version
-   PYTHONPATH=/tmp/bff-tools-testpypi python3 -m bff_tools validate --check-schema
+   /tmp/bff-tools-testpypi/bin/bff-tools --version
+   /tmp/bff-tools-testpypi/bin/bff-tools validate --check-schema
    ```
 
 ## Stable Release
@@ -29,4 +29,4 @@ Releases are built from an explicit Git tag. All GitHub Actions workflows remain
 3. Create the GitHub Release from the same tag and manually launch the multi-architecture Docker workflow against it.
 4. Verify that the PyPI, GitHub, and Docker versions identify the same source revision.
 
-Never reuse a published Python version or move a release tag. TestPyPI and PyPI artifacts are immutable.
+Never reuse a published Python version or move a stable release tag. TestPyPI and PyPI artifacts are immutable.
