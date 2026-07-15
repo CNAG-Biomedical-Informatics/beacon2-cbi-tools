@@ -17,6 +17,8 @@ description: Practical answers for installing bff-tools, correcting Beacon metad
 | VCF with compatible SnpEff ANN data | `bff-tools vcf -i input.vcf.gz --no-annotate` | BFF genomic variations |
 | SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz` | BFF genomic variations |
 | Generated genomic BFF | `bff-tools validate -i genomicVariationsVcf.json.gz --gv-vcf` | Validation report only |
+| External annotation bundle | `bff-tools install-resources` | Verified local resources |
+| Installed annotation stack | `bff-tools test` | Full annotation and semantic-parity result |
 
 ## Installation and Annotation
 
@@ -29,7 +31,7 @@ For a raw VCF or SNP-array file, **yes**. The converter requires SnpEff `ANN` da
 
 Use `--no-annotate` only when a VCF already has a compatible SnpEff `ANN` header and per-record annotations. If the header is absent, conversion stops with an actionable error instead of writing an empty BFF collection.
 
-Metadata workbook conversion and JSON validation do not need the bundle. See [Annotation Data](../getting-started/annotation-data) for download, storage, and configuration instructions.
+Metadata workbook conversion and JSON validation do not need the bundle. Install it for annotation with `bff-tools install-resources`; see [Annotation Data](../getting-started/annotation-data) for storage and configuration instructions.
 
 </details>
 

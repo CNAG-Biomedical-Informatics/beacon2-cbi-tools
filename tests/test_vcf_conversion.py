@@ -17,6 +17,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from bff_tools.parity import compare_bff_files  # noqa: E402
+from bff_tools.integration import ANNOTATED_VCF, EXPECTED_BFF, INPUT_VCF  # noqa: E402
 from bff_tools.validator import validate_inputs  # noqa: E402
 import bff_tools.vcf2bff as vcf2bff  # noqa: E402
 from bff_tools.vcf2bff import (  # noqa: E402
@@ -31,7 +32,7 @@ class VcfConversionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             with self.assertRaisesRegex(ConversionError, "SnpEff ANN header"):
                 convert_vcf(
-                    ROOT / "testdata" / "vcf" / "test_1000G.vcf.gz",
+                    INPUT_VCF,
                     Path(tmpdir),
                     genome="hg19",
                     dataset_id="default_beacon_1",
@@ -109,19 +110,16 @@ class VcfConversionTests(unittest.TestCase):
         )
 
     def test_python_converter_matches_perl_generated_bff(self) -> None:
-        fixture_dir = ROOT / "testdata" / "vcf" / "ref_beacon_166403275914916" / "vcf"
-        source = fixture_dir / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
-        expected = fixture_dir / "genomicVariationsVcf.json.gz"
         with tempfile.TemporaryDirectory() as tmpdir:
             actual, records_written = convert_vcf(
-                source,
+                ANNOTATED_VCF,
                 Path(tmpdir),
                 genome="hg19",
                 dataset_id="default_beacon_1",
                 project_dir="beacon_166403275914916",
                 threads=1,
             )
-            result = compare_bff_files(expected, actual)
+            result = compare_bff_files(EXPECTED_BFF, actual)
         self.assertEqual(records_written, 1044)
         self.assertTrue(
             result.equal,
@@ -178,38 +176,27 @@ class VcfConversionTests(unittest.TestCase):
         )
 
     def test_standard_library_codec_fallback_matches_perl_output(self) -> None:
-        fixture_dir = ROOT / "testdata" / "vcf" / "ref_beacon_166403275914916" / "vcf"
-        source = fixture_dir / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
-        expected = fixture_dir / "genomicVariationsVcf.json.gz"
         with tempfile.TemporaryDirectory() as tmpdir:
             with (
                 mock.patch.object(vcf2bff, "_igzip", None),
                 mock.patch.object(vcf2bff, "_orjson", None),
             ):
                 actual, records_written = vcf2bff.convert_vcf(
-                    source,
+                    ANNOTATED_VCF,
                     Path(tmpdir),
                     genome="hg19",
                     dataset_id="default_beacon_1",
                     project_dir="beacon_166403275914916",
                     threads=1,
                 )
-            result = compare_bff_files(expected, actual)
+            result = compare_bff_files(EXPECTED_BFF, actual)
         self.assertEqual(records_written, 1044)
         self.assertTrue(result.equal)
 
     def test_jsonl_output_contains_one_complete_document_per_line(self) -> None:
-        source = (
-            ROOT
-            / "testdata"
-            / "vcf"
-            / "ref_beacon_166403275914916"
-            / "vcf"
-            / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
-        )
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path, records_written = convert_vcf(
-                source,
+                ANNOTATED_VCF,
                 Path(tmpdir),
                 genome="hg19",
                 dataset_id="default_beacon_1",
@@ -220,7 +207,7 @@ class VcfConversionTests(unittest.TestCase):
             with gzip.open(output_path, "rt", encoding="utf-8") as handle:
                 documents = [json.loads(line) for line in handle if line.strip()]
             parity = compare_bff_files(
-                source.parent / "genomicVariationsVcf.json.gz",
+                EXPECTED_BFF,
                 output_path,
             )
         self.assertEqual(output_path.name, vcf2bff.JSONL_OUTPUT_NAME)
@@ -230,14 +217,6 @@ class VcfConversionTests(unittest.TestCase):
         self.assertTrue(parity.equal)
 
     def test_converter_cli_supports_configurable_verbose_progress(self) -> None:
-        source = (
-            ROOT
-            / "testdata"
-            / "vcf"
-            / "ref_beacon_166403275914916"
-            / "vcf"
-            / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
-        )
         with tempfile.TemporaryDirectory() as tmpdir:
             output = io.StringIO()
             with contextlib.redirect_stdout(output), mock.patch(
@@ -246,7 +225,7 @@ class VcfConversionTests(unittest.TestCase):
                 result = vcf2bff.main(
                     [
                         "-i",
-                        str(source),
+                        str(ANNOTATED_VCF),
                         "--dataset-id",
                         "default_beacon_1",
                         "--project-dir",
@@ -279,10 +258,9 @@ class VcfConversionTests(unittest.TestCase):
         self.assertIn("Info: vcf2bff finished OK", flushed)
 
     def test_converter_cli_rejects_invalid_runtime_arguments_and_errors(self) -> None:
-        source = ROOT / "testdata" / "vcf" / "test_1000G.vcf.gz"
         common = [
             "-i",
-            str(source),
+            str(INPUT_VCF),
             "--dataset-id",
             "dataset",
             "--project-dir",

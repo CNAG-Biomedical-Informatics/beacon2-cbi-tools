@@ -52,15 +52,17 @@ Python 3.10 or newer is required:
 python3 -m pip install beacon2-cbi-tools
 ```
 
-Docker, Apptainer, and source/HPC installations are first-class options in the [installation guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/). The large annotation bundle remains outside the package and is selected with `BFF_TOOLS_DATA`.
+Docker, Apptainer, and source/HPC installations are first-class options in the [installation guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/). The large annotation bundle remains outside the package and is installed with `bff-tools install-resources` into the directory selected by `BFF_TOOLS_DATA`.
 
 ## Main command
 
-The `bff-tools` command has three focused modes:
+The `bff-tools` command has three focused data modes and two operational commands:
 
 - `validate`: build and validate BFF metadata from XLSX, or validate existing BFF JSON.
 - `vcf`: annotate and convert VCF data, with optional browser generation.
 - `tsv`: convert SNP-array TSV input through VCF into BFF.
+- `install-resources`: download and verify the external annotation bundle.
+- `test`: exercise the installed annotation stack and compare its BFF output with the packaged oracle.
 
 ```bash
 bff-tools --help
@@ -79,6 +81,8 @@ Convert and annotate a cohort VCF:
 
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools install-resources
+bff-tools test
 bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 \
   --annotate --browser
 ```

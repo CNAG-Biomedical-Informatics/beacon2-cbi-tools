@@ -31,6 +31,8 @@ Verify it:
 bff-tools --version
 bff-tools validate --help
 bff-tools vcf --help
+bff-tools install-resources --help
+bff-tools test --help
 ```
 
 ## 2. Install from a Source Checkout
@@ -78,6 +80,7 @@ HPC users should prefer site modules when available. Prepare the shared bundle u
 
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools install-resources
 ```
 
 The installed package contains the standard resource layout. Use `--config` or `BFF_TOOLS_CONFIG` only when the bundle layout or site-managed executable paths differ from that default.
@@ -112,14 +115,14 @@ python3 -m pip install ".[test]"
 pytest -q
 ```
 
-After installing the complete external bundle, run the full annotation integration:
+After installing the complete external bundle, run the packaged acceptance test:
 
 ```bash
-BFF_TOOLS_DATA=/absolute/path/to/data \
-  deploy/02_test_deployment.sh
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools test
 ```
 
-That test covers normalization, SnpEff, dbNSFP, ClinVar, COSMIC, VCF-to-BFF conversion, schema validation, and semantic comparison with the committed expected output.
+That installed-package test covers normalization, SnpEff, dbNSFP, ClinVar, COSMIC, VCF-to-BFF conversion, schema validation, and semantic comparison with the packaged expected output. Then process a small representative VCF with the production configuration before starting a cohort-scale run.
 
 ## Troubleshooting
 

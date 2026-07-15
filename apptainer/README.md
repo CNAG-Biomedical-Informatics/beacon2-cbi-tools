@@ -52,13 +52,18 @@ Apptainer runs with the invoking user's identity, so output files retain normal 
 
 ## 4. Prepare Annotation Data
 
-Raw VCF and SNP-array input requires the external annotation bundle. Download and verify it once, then follow the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
-
-Select the extracted host directory once. The commands below bind it to the portable in-container default:
+Raw VCF and SNP-array input requires the external annotation bundle. Select a persistent shared directory and run the image installer on a login or data-transfer node:
 
 ```bash
-export BFF_TOOLS_DATA=/shared/beacon2-data
+export BFF_TOOLS_DATA=/shared/beacon2-cbi-tools-data
+mkdir -p "$BFF_TOOLS_DATA"
+apptainer exec \
+  --bind "$BFF_TOOLS_DATA:/bundle" \
+  beacon2-cbi-tools.sif \
+  bff-tools install-resources --data-dir /bundle
 ```
+
+Use `install-resources --print-links` when automated Google Drive access is unavailable. Full storage and recovery guidance is in [Annotation Data](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/). The commands below bind the extracted host directory to the portable in-container default.
 
 ## 5. Annotate and Convert a Raw VCF
 
@@ -118,7 +123,7 @@ Direct `apptainer exec` commands are preferred in scheduler scripts because they
 
 set -euo pipefail
 module load apptainer
-export BFF_TOOLS_DATA=/shared/beacon2-data
+export BFF_TOOLS_DATA=/shared/beacon2-cbi-tools-data
 
 apptainer exec \
   --bind "$SLURM_SUBMIT_DIR:/work" \
@@ -141,7 +146,16 @@ apptainer exec beacon2-cbi-tools.sif bff-tools validate --help
 apptainer exec beacon2-cbi-tools.sif bff-tools vcf --help
 ```
 
-After binding the complete annotation bundle, run the repository's [full annotation integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-deployment-integration) before a production cohort.
+After binding the complete annotation bundle, run the packaged acceptance test before starting a cohort-scale run:
+
+```bash
+apptainer exec \
+  --bind "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  beacon2-cbi-tools.sif \
+  bff-tools test
+```
+
+The [full annotation test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-annotation-test) uses the same fixture and oracle as PyPI, Docker, and source installations.
 
 ## Common HPC Problems
 

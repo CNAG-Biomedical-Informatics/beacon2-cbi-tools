@@ -25,15 +25,9 @@ export PYTHONPATH="/software/biomed/cbi_py3/lib/python3.10/site-packages:${PYTHO
 # Variable definition
 BFFTOOLS_DIR="/software/biomed/beacon2-cbi-tools"
 BFFTOOLS="$BFFTOOLS_DIR/bin/bff-tools"
-INPUT="$BFFTOOLS_DIR/testdata/vcf/test_1000G.vcf.gz"
-PARAM="$BFFTOOLS_DIR/testdata/vcf/param.yaml"
-CONFIG="$BFFTOOLS_DIR/bin/cnag-hpc-config.yaml"
+export BFF_TOOLS_DATA="/software/biomed/beacon2-cbi-tools-data"
 
 # Job execution
-"$BFFTOOLS" vcf \
-    -i "$INPUT" \
-    -p "$PARAM" \
-    -c "$CONFIG" \
-    --no-color \
-    --no-emoji \
-    -t 1
+"$BFFTOOLS" test \
+    --threads 1 \
+    --output-dir "bff-tools-integration-${SLURM_JOB_ID}"

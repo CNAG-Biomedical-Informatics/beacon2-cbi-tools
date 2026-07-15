@@ -3,7 +3,7 @@ title: CLI
 ---
 
 ```text
-bff-tools {validate,vcf,tsv} [options]
+bff-tools {validate,vcf,tsv,install-resources,test} [options]
 ```
 
 Run `bff-tools <command> --help` for the installed version. Conversion creates a new project directory and never overwrites an existing one.
@@ -42,6 +42,28 @@ bff-tools validate -i individuals.json biosamples.json
 | `--verbose` | Print progress for large inputs |
 
 Validation exits nonzero when schema issues are found, unless they are explicitly ignored.
+
+## `install-resources`
+
+Install the maintained external annotation bundle into the directory selected by `BFF_TOOLS_DATA`:
+
+```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools install-resources
+```
+
+Pass `--data-dir DIR` instead of exporting the environment variable, or use `--print-links` to list the public Google Drive files for manual download. The command reuses existing files, verifies every archive part, assembles and extracts the bundle, and creates its writable `tmp/` directory.
+
+## `test`
+
+Run the packaged full-annotation acceptance test against the selected external bundle:
+
+```bash
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools test
+```
+
+The command annotates the packaged 1000 Genomes fixture, validates the resulting BFF, and compares all records semantically with the packaged Perl-generated oracle. Use `--data-dir DIR` instead of the environment variable, `--threads N` for annotation, or `--output-dir DIR` to retain the generated project. Add `--verbose` for detailed pipeline output.
 
 ## `vcf`
 

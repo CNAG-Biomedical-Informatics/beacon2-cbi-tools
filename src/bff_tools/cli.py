@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 
 from .config import ConfigError, read_config_file, read_param_file
+from .integration import IntegrationTestError, run_annotation_integration
 from .orchestrator import ExecutionError, PipelineRunner
 from .output import (
     format_duration,
@@ -15,6 +16,12 @@ from .output import (
     print_pipeline_status,
     print_run_summary,
     print_start_banner,
+)
+from .resource_installer import (
+    ResourceInstallError,
+    install_resources,
+    print_download_links,
+    resolve_data_directory,
 )
 from .validator import ValidatorError, export_template, print_report, validate_inputs
 from .version import VERSION
@@ -107,6 +114,45 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--verbose", action="store_true")
     validate.add_argument("-nc", "--no-color", action="store_true")
     validate.add_argument("-ne", "--no-emoji", action="store_true")
+
+    resources = subparsers.add_parser(
+        "install-resources",
+        help="download and install the external annotation bundle",
+    )
+    resources.add_argument(
+        "--data-dir",
+        help="installation root (default: BFF_TOOLS_DATA)",
+    )
+    resources.add_argument(
+        "--print-links",
+        action="store_true",
+        help="print manual Google Drive links and exit",
+    )
+
+    integration = subparsers.add_parser(
+        "test",
+        help="run the full annotation and BFF parity test",
+    )
+    integration.add_argument(
+        "--data-dir",
+        help="annotation-resource root (default: BFF_TOOLS_DATA)",
+    )
+    integration.add_argument(
+        "--output-dir",
+        help="retain the generated project at this path",
+    )
+    integration.add_argument(
+        "-t",
+        "--threads",
+        type=int,
+        default=1,
+        help="number of annotation threads (default: 1)",
+    )
+    integration.add_argument(
+        "--verbose",
+        action="store_true",
+        help="show detailed pipeline command output",
+    )
     return parser
 
 
@@ -213,6 +259,27 @@ def handle_validate(arg: dict[str, object]) -> int:
     return 0 if report.ok or bool(arg.get("ignore_validation")) else 1
 
 
+def handle_install_resources(arg: dict[str, object]) -> int:
+    if arg.get("print_links"):
+        print_download_links()
+        return 0
+    data_dir = resolve_data_directory(
+        str(arg["data_dir"]) if arg.get("data_dir") else None
+    )
+    install_resources(data_dir)
+    return 0
+
+
+def handle_test(arg: dict[str, object]) -> int:
+    run_annotation_integration(
+        data_dir=str(arg["data_dir"]) if arg.get("data_dir") else None,
+        output_dir=str(arg["output_dir"]) if arg.get("output_dir") else None,
+        threads=int(arg.get("threads") or 1),
+        verbose=bool(arg.get("verbose")),
+    )
+    return 0
+
+
 def _spinner_worker(*, stop_event: threading.Event, no_emoji: bool) -> None:
     start = time.time()
     index = 0
@@ -259,6 +326,18 @@ def main(argv: list[str] | None = None) -> int:
         try:
             return handle_validate(arg)
         except ValidatorError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+    if arg["mode"] == "install-resources":
+        try:
+            return handle_install_resources(arg)
+        except (ResourceInstallError, OSError) as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+    if arg["mode"] == "test":
+        try:
+            return handle_test(arg)
+        except (IntegrationTestError, ResourceInstallError, OSError) as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1
 

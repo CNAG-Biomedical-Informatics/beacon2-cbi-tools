@@ -1,43 +1,23 @@
 # Test Data and Reproducible Examples
 
-This directory contains compact inputs and expected outputs for VCF-to-BFF, TSV-to-VCF-to-BFF, validator, and browser regression tests. These files are small enough for normal development and CI; the full CINECA chromosome 22 acceptance input remains outside Git.
+This directory contains compact inputs and expected outputs for TSV-to-VCF-to-BFF, validator, and browser regression tests. The GRCh37 VCF integration fixture is packaged under `src/bff_tools/integration_assets/` so the installed `bff-tools test` command and repository tests use the same files. The full CINECA chromosome 22 acceptance input remains outside Git.
 
 ## Before Running the Raw Inputs
 
-Both `testdata/vcf/test_1000G.vcf.gz` and `testdata/tsv/input.txt.gz` require annotation. Prepare the external annotation bundle and ensure `bin/config.yaml` points to its FASTA, SnpEff, SnpSift, dbNSFP, ClinVar, and COSMIC resources.
+The packaged `test_1000G.vcf.gz` and `testdata/tsv/input.txt.gz` require annotation. Prepare the external annotation bundle and select it with `BFF_TOOLS_DATA`.
 
 Run commands from a fresh checkout or choose output paths that do not already exist.
 
 ## GRCh37 / hs37 VCF
 
-`vcf/test_1000G.vcf.gz` is a compact 1000 Genomes Phase 3 chromosome 1 subset using hs37-style contigs.
-
-From `testdata/vcf/`:
+`src/bff_tools/integration_assets/test_1000G.vcf.gz` is a compact 1000 Genomes Phase 3 chromosome 1 subset using hs37-style contigs. Run its complete annotation, validation, and semantic-parity contract through the installed CLI:
 
 ```bash
-../../bin/bff-tools vcf \
-  -i test_1000G.vcf.gz \
-  -p param.yaml \
-  -c ../../bin/config.yaml \
-  --no-browser \
-  -o local-hs37-test
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools test
 ```
 
-Validate the generated collection:
-
-```bash
-../../bin/bff-tools validate \
-  -i local-hs37-test/vcf/genomicVariationsVcf.json.gz \
-  --gv-vcf
-```
-
-Compare it semantically with the Perl-generated reference while ignoring only run-specific provenance and the two legacy hash-order arrays:
-
-```bash
-python3 ../../tools/compare_bff_outputs.py \
-  ref_beacon_166403275914916/vcf/genomicVariationsVcf.json.gz \
-  local-hs37-test/vcf/genomicVariationsVcf.json.gz
-```
+Pass `--output-dir local-hs37-test` to retain the generated project for inspection. The command validates the output and compares it semantically with the Perl-generated oracle while ignoring only run-specific provenance and the two legacy hash-order arrays.
 
 The historical source region can be recreated from the 1000 Genomes GRCh37 release:
 
@@ -46,7 +26,7 @@ wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3
 wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi
 
 bcftools view -r 1:10000-200000 \
-  -Oz -o test_1000G.vcf.gz \
+  -Oz -o src/bff_tools/integration_assets/test_1000G.vcf.gz \
   ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
 ```
 
@@ -74,7 +54,7 @@ TSV conversion cannot use `--no-annotate` because its VCF intermediate does not 
 
 ## Fully Annotated Parity Fixtures
 
-- `vcf/ref_beacon_166403275914916/` contains the compact fully annotated 1000 Genomes input and Perl-generated BFF expected output.
+- `src/bff_tools/integration_assets/` contains the compact raw and fully annotated 1000 Genomes inputs plus the Perl-generated BFF expected output.
 - `vcf/cineca_annotated/` contains 5,002 fully annotated source records with all 2,504 CINECA samples and a 4,998-record Perl-generated BFF expected output.
 
 These fixtures test ANN, dbNSFP, ClinVar, COSMIC, SNVs, indels, missing genotypes, homozygous alternate calls, and large multi-sample lines without committing the full chromosome.

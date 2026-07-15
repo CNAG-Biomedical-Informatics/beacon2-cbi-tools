@@ -44,14 +44,19 @@ jobs:
           cd /tmp
           bff-tools --version
           bff-tools validate --help
+          bff-tools install-resources --help
+          bff-tools install-resources --print-links
+          bff-tools test --help
           python - <<'PY'
           import os
           from pathlib import Path
           from bff_tools.config import DATA_ROOT_ENV, default_config_path, read_config_file
+          from bff_tools.integration import REQUIRED_ASSETS
 
           config_path = default_config_path()
           assert config_path.is_file(), config_path
           assert config_path.name == "config.yaml", config_path
+          assert all(path.is_file() for path in REQUIRED_ASSETS), REQUIRED_ASSETS
           os.environ[DATA_ROOT_ENV] = "~/bff-tools-wheel-data"
           config = read_config_file(None, annotate=False)
           assert config["base"] == str(Path("~/bff-tools-wheel-data").expanduser().resolve())
@@ -63,7 +68,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Check shell syntax
-        run: bash -n deploy/02_test_deployment.sh src/bff_tools/pipeline/partial/*.sh utils/_models2xlsx/*.sh
+        run: bash -n src/bff_tools/pipeline/partial/*.sh utils/_models2xlsx/*.sh
 
       - name: Check patch whitespace
         run: git diff --check HEAD

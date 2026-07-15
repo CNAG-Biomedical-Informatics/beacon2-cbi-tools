@@ -22,15 +22,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install project dependencies
-        run: python3 -m pip install .
+      - name: Build and install wheel
+        run: |
+          python3 -m pip install build
+          python3 -m build --wheel
+          python3 -m pip install --force-reinstall dist/*.whl
 
-      - name: Run with downloaded bundle
+      - name: Install and test downloaded bundle
         if: inputs.download_bundle
-        run: deploy/02_test_deployment.sh --download "$RUNNER_TEMP/beacon2-cbi-tools-data"
+        run: |
+          bff-tools install-resources --data-dir "$RUNNER_TEMP/beacon2-cbi-tools-data"
+          bff-tools test --data-dir "$RUNNER_TEMP/beacon2-cbi-tools-data"
 
       - name: Run with existing bundle
         if: ${{ !inputs.download_bundle }}
-        env:
-          BFF_TOOLS_DATA: ${{ inputs.data_directory }}
-        run: deploy/02_test_deployment.sh
+        run: bff-tools test --data-dir "${{ inputs.data_directory }}"

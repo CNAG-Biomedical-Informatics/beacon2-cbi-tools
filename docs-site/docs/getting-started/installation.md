@@ -27,12 +27,13 @@ bff-tools --version
 
 The package installs the command as `bff-tools`. The `bin/bff-tools` path is only a compatibility shim for running directly from a Git checkout.
 
-The PyPI package provides the Python application, default annotation-resource layout, schemas, templates, panels, and browser assets. It does not contain the large external annotation bundle. Metadata validation and conversion of a compatible pre-annotated VCF can run immediately; raw VCF and TSV workflows also require the annotation layer described below.
+The PyPI package provides the Python application, bundle installer, default annotation-resource layout, schemas, templates, panels, and browser assets. It does not contain the large external annotation bundle. Metadata validation and conversion of a compatible pre-annotated VCF can run immediately; raw VCF and TSV workflows also require the annotation layer described below.
 
-After extracting that bundle, select it without editing anything under `site-packages`:
+Install and select that bundle without editing anything under `site-packages`:
 
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+bff-tools install-resources
 ```
 
 Upgrade an existing environment with:
@@ -64,6 +65,8 @@ Every installation should provide:
 bff-tools --version
 bff-tools validate --help
 bff-tools vcf --help
+bff-tools install-resources --help
+bff-tools test --help
 ```
 
-After preparing annotation data, run the [full deployment integration](annotation-data#full-deployment-integration) before processing a cohort.
+After preparing annotation data, run the installed [full annotation test](annotation-data#full-annotation-test), then process a small representative VCF with the production configuration before starting a cohort-scale run.

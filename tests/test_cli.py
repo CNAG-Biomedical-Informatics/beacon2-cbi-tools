@@ -18,6 +18,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from bff_tools import cli  # noqa: E402
+from bff_tools.integration import ANNOTATED_VCF, EXPECTED_BFF  # noqa: E402
 from bff_tools.parity import compare_bff_files  # noqa: E402
 
 
@@ -285,10 +286,6 @@ class CliTests(unittest.TestCase):
         self.assertIn("validate", result.stdout)
 
     def test_bin_bff_tools_beaconizes_annotated_vcf_end_to_end(self) -> None:
-        fixture_dir = ROOT / "testdata" / "vcf" / "ref_beacon_166403275914916" / "vcf"
-        input_path = fixture_dir / "test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz"
-        expected_path = fixture_dir / "genomicVariationsVcf.json.gz"
-
         with tempfile.TemporaryDirectory() as tmpdir:
             project_dir = Path(tmpdir) / "beaconized"
             result = subprocess.run(
@@ -296,7 +293,7 @@ class CliTests(unittest.TestCase):
                     str(ROOT / "bin" / "bff-tools"),
                     "vcf",
                     "--input",
-                    str(input_path),
+                    str(ANNOTATED_VCF),
                     "--no-annotate",
                     "--browser",
                     "--genome",
@@ -324,7 +321,7 @@ class CliTests(unittest.TestCase):
             self.assertTrue((project_dir / "log.json").is_file())
             self.assertEqual(len(list(browser_path.glob("*.html"))), 1)
 
-            comparison = compare_bff_files(expected_path, actual_path)
+            comparison = compare_bff_files(EXPECTED_BFF, actual_path)
             self.assertTrue(
                 comparison.equal,
                 msg=(

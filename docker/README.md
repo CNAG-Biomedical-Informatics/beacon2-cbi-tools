@@ -44,13 +44,19 @@ docker run --rm \
 
 ## 3. Prepare Annotation Data
 
-Raw VCF and SNP-array input requires the external annotation bundle. Download it once on the host, verify its checksum, and select it as described in the [annotation-data guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
-
-Select the extracted host directory and keep the container mount point stable. The examples use:
+Raw VCF and SNP-array input requires the external annotation bundle. Create a persistent host directory and run the installer from the image:
 
 ```bash
-export BFF_TOOLS_DATA=/absolute/path/to/data
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+mkdir -p "$BFF_TOOLS_DATA"
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$BFF_TOOLS_DATA:/bundle" \
+  manuelrueda/beacon2-cbi-tools:latest \
+  install-resources --data-dir /bundle
 ```
+
+Use `install-resources --print-links` when Google Drive requires manual download. Full storage and recovery guidance is in [Annotation Data](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/).
 
 The image defaults `BFF_TOOLS_DATA` to `/beacon2-cbi-tools-data`. The host directory and container path do not have to match; the environment value must name the path visible **inside** the container.
 
@@ -162,7 +168,16 @@ docker run --rm manuelrueda/beacon2-cbi-tools:latest validate --help
 docker run --rm manuelrueda/beacon2-cbi-tools:latest vcf --help
 ```
 
-After mounting the complete bundle, run the repository's [full annotation integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-deployment-integration) before processing a production cohort.
+After mounting the complete bundle, run the packaged acceptance test through the image before starting a cohort-scale run:
+
+```bash
+docker run --rm \
+  -v "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
+  manuelrueda/beacon2-cbi-tools:latest \
+  test
+```
+
+The [full annotation test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-annotation-test) uses the same fixture and oracle as PyPI and source installations.
 
 ## Troubleshooting
 

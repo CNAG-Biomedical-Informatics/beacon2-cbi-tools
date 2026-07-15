@@ -338,6 +338,6 @@ Before handing the BFF files to a Beacon implementation, confirm:
 - Follow [MongoDB Import](../reference/mongodb) for indexes, repeatable upserts, and large streamed collections.
 - See [EGA Beacon v2 PI API](https://github.com/EGA-archive/beacon2-pi-api) or [Progenetix bycon](https://codeberg.org/Progenetix/bycon/) for complete Beacon server implementations.
 
-MongoDB clients are external to the application and Docker image. The current compatibility archive may still contain legacy copies, but `bff-tools` does not use them; the next versioned annotation bundle will omit them.
+MongoDB clients are external to the application, Docker image, and current `r3` annotation bundle. Install them separately only when required by the downstream Beacon implementation.
 
 Continue with [Validation and Reproducibility](../reference/validation-and-reproducibility) for the release checklist or the [FAQ](../troubleshooting/faq) for failed runs.
