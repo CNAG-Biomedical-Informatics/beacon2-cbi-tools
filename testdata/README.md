@@ -17,7 +17,7 @@ export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools test
 ```
 
-Pass `--output-dir local-hs37-test` to retain the generated project for inspection. The command validates the output and compares it semantically with the Perl-generated oracle while ignoring only run-specific provenance and the two legacy hash-order arrays.
+Pass `--output-dir local-hs37-test` to retain the generated project for inspection. The command validates the output and compares it semantically with the versioned reference BFF output while ignoring only run-specific provenance and the two legacy hash-order arrays.
 
 The historical source region can be recreated from the 1000 Genomes GRCh37 release:
 

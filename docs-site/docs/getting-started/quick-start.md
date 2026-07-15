@@ -13,7 +13,6 @@ This path builds and validates BFF metadata and shows the normal raw-VCF workflo
 | Raw or annotated VCF | `bff-tools vcf` | BFF `genomicVariations` |
 | Supported SNP-array TSV/TXT | `bff-tools tsv` | BFF `genomicVariations` |
 | External annotation bundle | `bff-tools install-resources` | Verified local annotation resources |
-| Installed annotation stack | `bff-tools test` | Validation and semantic-parity result |
 
 Raw VCF and TSV input is annotated by default and requires the external annotation data. Only an already annotated VCF can use `--no-annotate`.
 
@@ -32,7 +31,7 @@ bff-tools --version
 bff-tools --help
 ```
 
-The public commands are `validate`, `vcf`, `tsv`, `install-resources`, and `test`.
+The primary user commands are `validate`, `vcf`, `tsv`, and `install-resources`. The separate `test` command is a developer integration check.
 
 ## 2. Create and Validate Metadata JSON
 

@@ -89,10 +89,12 @@ dbNSFP and ClinVar fields remain strongly recommended for complete BFF output.
 
 ## GRCh37 / hs37
 
-Compact GRCh37 fixtures and Perl-generated reference outputs are under [`testdata/vcf`](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/testdata/vcf). Use `hs37` for hs37d5-style contigs such as `22`; use `hg19` only with matching hg19 coordinates, contigs, FASTA, and annotation resources.
+The compact GRCh37 integration fixture and versioned reference output are under [`src/bff_tools/integration_assets`](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/src/bff_tools/integration_assets). Use `hs37` for hs37d5-style contigs such as `22`; use `hg19` only with matching hg19 coordinates, contigs, FASTA, and annotation resources.
+
+The full CINECA chromosome 22 release fixture is also GRCh37/hs37d5. Its raw VCF, tabix index, and versioned BFF reference output are available from the public [`CINECA_synthetic_cohort_EUROPE_UK1/vcf`](https://drive.google.com/drive/folders/1_B30lOZKndJQZPW4Wza3ho-xGsekH4fM) folder.
 
 ## Metadata
 
 The populated [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) is the real-world metadata example. It accompanies the packaged workbook template and serves as the 10,018-record validator parity fixture.
 
-Full VCF release acceptance uses an external, fully annotated CINECA chromosome 22 file with 2,504 samples. That full file is not committed to Git or included in the PyPI package.
+Full VCF release acceptance uses the external CINECA chromosome 22 data with 2,504 samples. Those files are not committed to Git or included in the PyPI package.

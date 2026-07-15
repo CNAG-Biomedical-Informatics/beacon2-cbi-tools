@@ -146,16 +146,7 @@ apptainer exec beacon2-cbi-tools.sif bff-tools validate --help
 apptainer exec beacon2-cbi-tools.sif bff-tools vcf --help
 ```
 
-After binding the complete annotation bundle, run the packaged acceptance test before starting a cohort-scale run:
-
-```bash
-apptainer exec \
-  --bind "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
-  beacon2-cbi-tools.sif \
-  bff-tools test
-```
-
-The [full annotation test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-annotation-test) uses the same fixture and oracle as PyPI, Docker, and source installations.
+After binding the complete annotation bundle, process a small representative VCF with the production configuration before starting a cohort-scale run. Image and bundle maintainers can additionally run the [developer integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#developer-integration-test).
 
 ## Common HPC Problems
 

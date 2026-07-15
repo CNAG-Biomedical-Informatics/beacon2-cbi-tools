@@ -131,7 +131,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     integration = subparsers.add_parser(
         "test",
-        help="run the full annotation and BFF parity test",
+        help="run the developer annotation integration test",
     )
     integration.add_argument(
         "--data-dir",

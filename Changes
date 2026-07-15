@@ -9,7 +9,7 @@ Revision history for beacon2-cbi-tools:
     - Added Python packaging, tests, CI, and streamlined documentation
     - Added source revision metadata to container images
     - Versioned the bundled schemas and CINECA metadata snapshots
-    - Added BFF_TOOLS_DATA, install-resources, and an installed annotation test
+    - Added BFF_TOOLS_DATA, install-resources, and a developer annotation test
 
 2.0.12  2026-03-25
 

@@ -66,7 +66,6 @@ bff-tools --version
 bff-tools validate --help
 bff-tools vcf --help
 bff-tools install-resources --help
-bff-tools test --help
 ```
 
-After preparing annotation data, run the installed [full annotation test](annotation-data#full-annotation-test), then process a small representative VCF with the production configuration before starting a cohort-scale run.
+After preparing annotation data, process a small representative VCF with the production configuration before starting a cohort-scale run. Project and bundle maintainers can additionally run the [developer integration test](annotation-data#developer-integration-test).

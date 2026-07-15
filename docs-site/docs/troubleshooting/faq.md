@@ -18,7 +18,6 @@ description: Practical answers for installing bff-tools, correcting Beacon metad
 | SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz` | BFF genomic variations |
 | Generated genomic BFF | `bff-tools validate -i genomicVariationsVcf.json.gz --gv-vcf` | Validation report only |
 | External annotation bundle | `bff-tools install-resources` | Verified local resources |
-| Installed annotation stack | `bff-tools test` | Full annotation and semantic-parity result |
 
 ## Installation and Annotation
 
@@ -122,7 +121,7 @@ The CLI does not rename contigs or lift coordinates. `hg19` and `hs37` are not i
 <details>
 <summary>Are worked GRCh38 and GRCh37 inputs available?</summary>
 
-Yes. The repository includes a compact [GRCh38 / hg38 worked example](../examples/hg38) derived from 1000 Genomes chromosome 22, including the commands used to recreate and beaconize it. Compact [GRCh37 / hs37 fixtures](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/testdata) provide converter regression inputs and expected outputs. The [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) provides a populated metadata example.
+Yes. The repository includes a compact [GRCh38 / hg38 worked example](../examples/hg38) derived from 1000 Genomes chromosome 22, including the commands used to recreate and beaconize it. Compact [GRCh37 / hs37 fixtures](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/src/bff_tools/integration_assets) provide converter regression inputs and expected outputs. The [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) provides a populated metadata example; its full GRCh37/hs37d5 chromosome 22 release fixture is [downloaded separately](https://drive.google.com/drive/folders/1_B30lOZKndJQZPW4Wza3ho-xGsekH4fM).
 
 The compact files are suitable for learning and CI. The complete CINECA chr22 VCF used for release acceptance is intentionally kept outside Git.
 
@@ -375,7 +374,7 @@ Generally, yes. Releases contain converter fixes, schema alignment, dependency u
 <details>
 <summary>Where can I get the full CINECA synthetic cohort?</summary>
 
-The populated metadata workbook is included in the repository. The full synthetic WGS data is available through EGA dataset [EGAD00001006673](https://ega-archive.org/datasets/EGAD00001006673). The full chromosome 22 VCF is used for local release acceptance and is intentionally not committed to Git or included in the PyPI distribution.
+The populated metadata workbook is included in the repository. The full synthetic WGS data is available through EGA dataset [EGAD00001006673](https://ega-archive.org/datasets/EGAD00001006673). The GRCh37/hs37d5 chromosome 22 release fixture, its tabix index, and the versioned BFF reference output are available from the public [CINECA fixture folder](https://drive.google.com/drive/folders/1_B30lOZKndJQZPW4Wza3ho-xGsekH4fM). These developer assets are intentionally not committed to Git or included in the PyPI distribution.
 
 </details>
 

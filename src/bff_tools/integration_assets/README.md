@@ -8,6 +8,6 @@ This directory contains the compact GRCh37/hs37 fixture used by
 - `param.yaml` selects the historical b37 annotation profile.
 - `test_1000G.norm.ann.dbnsfp.clinvar.cosmic.vcf.gz` is the fully annotated
   converter fixture.
-- `genomicVariationsVcf.json.gz` is the Perl-generated semantic oracle.
+- `genomicVariationsVcf.json.gz` is the versioned reference BFF output.
 
 The full CINECA chromosome 22 acceptance input remains outside Git.

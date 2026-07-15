@@ -17,7 +17,7 @@ The public workflows are:
 - `vcf`: convert VCF input into BFF `genomicVariations`;
 - `tsv`: convert supported SNP-array text input through VCF into BFF.
 - `install-resources`: download, verify, assemble, and extract the annotation bundle.
-- `test`: run the packaged full-annotation and BFF-parity acceptance test.
+- `test`: run the developer annotation integration and BFF-parity test.
 
 Conversion parameters can be supplied in YAML with `-p`, directly on the command line, or through defaults. CLI values take precedence. Annotation is enabled by default. Use `--no-annotate` only for VCF input that already has a compatible SnpEff `ANN` header and annotations; TSV input always requires annotation.
 

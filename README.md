@@ -56,13 +56,12 @@ Docker, Apptainer, and source/HPC installations are first-class options in the [
 
 ## Main command
 
-The `bff-tools` command has three focused data modes and two operational commands:
+The `bff-tools` command has three focused data modes and one resource setup command:
 
 - `validate`: build and validate BFF metadata from XLSX, or validate existing BFF JSON.
 - `vcf`: annotate and convert VCF data, with optional browser generation.
 - `tsv`: convert SNP-array TSV input through VCF into BFF.
 - `install-resources`: download and verify the external annotation bundle.
-- `test`: exercise the installed annotation stack and compare its BFF output with the packaged oracle.
 
 ```bash
 bff-tools --help
@@ -82,7 +81,6 @@ Convert and annotate a cohort VCF:
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools install-resources
-bff-tools test
 bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 \
   --annotate --browser
 ```
@@ -110,7 +108,9 @@ python3 -m pip install ".[test]"
 pytest -q
 ```
 
-The Python validator reproduces the former Perl output byte-for-byte across all 10,018 CINECA metadata records. The VCF converter is checked against Perl-generated output with strict type-sensitive streamed comparisons, including the complete 1,110,240-record chromosome 22 acceptance dataset.
+Maintainers can run `bff-tools test` with `BFF_TOOLS_DATA` set to exercise the complete annotation integration against the versioned reference output.
+
+The Python validator reproduces the former Perl output byte-for-byte across all 10,018 CINECA metadata records. The VCF converter is checked against versioned reference output with strict type-sensitive streamed comparisons, including the complete 1,110,240-record normalized chromosome 22 acceptance dataset.
 
 ## Citation
 

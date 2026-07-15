@@ -32,7 +32,6 @@ bff-tools --version
 bff-tools validate --help
 bff-tools vcf --help
 bff-tools install-resources --help
-bff-tools test --help
 ```
 
 ## 2. Install from a Source Checkout
@@ -115,14 +114,16 @@ python3 -m pip install ".[test]"
 pytest -q
 ```
 
-After installing the complete external bundle, run the packaged acceptance test:
+Before processing a cohort, run a small representative VCF with the production configuration and validate its output.
+
+Project and bundle maintainers can additionally run the developer integration test:
 
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools test
 ```
 
-That installed-package test covers normalization, SnpEff, dbNSFP, ClinVar, COSMIC, VCF-to-BFF conversion, schema validation, and semantic comparison with the packaged expected output. Then process a small representative VCF with the production configuration before starting a cohort-scale run.
+That test covers normalization, SnpEff, dbNSFP, ClinVar, COSMIC, VCF-to-BFF conversion, schema validation, and semantic comparison with the versioned reference output. It is not required for routine beaconization.
 
 ## Troubleshooting
 

@@ -168,16 +168,7 @@ docker run --rm manuelrueda/beacon2-cbi-tools:latest validate --help
 docker run --rm manuelrueda/beacon2-cbi-tools:latest vcf --help
 ```
 
-After mounting the complete bundle, run the packaged acceptance test through the image before starting a cohort-scale run:
-
-```bash
-docker run --rm \
-  -v "$BFF_TOOLS_DATA:/beacon2-cbi-tools-data" \
-  manuelrueda/beacon2-cbi-tools:latest \
-  test
-```
-
-The [full annotation test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#full-annotation-test) uses the same fixture and oracle as PyPI and source installations.
+After mounting the complete bundle, process a small representative VCF with the production configuration before starting a cohort-scale run. Image and bundle maintainers can additionally run the [developer integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#developer-integration-test).
 
 ## Troubleshooting
 
