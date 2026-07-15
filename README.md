@@ -16,7 +16,7 @@
 [![Docker pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-cbi-tools?icon=docker&label=current-image-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/)
 [![Historical Docker pulls](https://badgen.net/docker/pulls/manuelrueda/beacon2-ri-tools?icon=docker&label=beacon2-ri-tools-historical-pulls)](https://hub.docker.com/r/manuelrueda/beacon2-ri-tools/)
 [![Historical EGA Docker pulls](https://badgen.net/docker/pulls/beacon2ri/beacon_reference_implementation?icon=docker&label=EGA-RI-historical-pulls)](https://hub.docker.com/r/beacon2ri/beacon_reference_implementation/)
-![Version](https://img.shields.io/badge/version-2.0.13b1-blue)
+![Version](https://img.shields.io/badge/version-2.0.13b2-blue)
 
 **Beacon v2 CBI Tools** prepares portable [Beacon Friendly Format (BFF)](https://docs.genomebeacons.org/models/) data for Beacon v2. Its command-line interface is called **`bff-tools`**. It validates phenotypic and clinical metadata, converts VCF or SNP-array TSV input into BFF `genomicVariations`, and can generate a standalone browser report.
 

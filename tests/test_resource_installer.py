@@ -99,6 +99,21 @@ class ResourceInstallerTests(unittest.TestCase):
                 with self.assertRaisesRegex(installer.ResourceInstallError, "blocked"):
                     installer._gdown_download("https://example.test", data_dir / "part")
 
+            destination = data_dir / "resumable"
+            with mock.patch(
+                "gdown.download", return_value=str(destination)
+            ) as download:
+                self.assertEqual(
+                    installer._gdown_download("https://example.test", destination),
+                    str(destination),
+                )
+            download.assert_called_once_with(
+                "https://example.test",
+                str(destination),
+                quiet=False,
+                resume=True,
+            )
+
     def test_checksum_parsing_and_verification(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             data_dir = Path(tmpdir)

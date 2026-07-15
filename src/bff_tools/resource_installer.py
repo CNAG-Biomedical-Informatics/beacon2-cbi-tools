@@ -61,10 +61,12 @@ def _gdown_download(url: str, destination: Path) -> object:
             "Automatic download requires gdown; reinstall beacon2-cbi-tools"
         ) from exc
     try:
-        return gdown.download(url, str(destination), quiet=False, fuzzy=True)
+        return gdown.download(url, str(destination), quiet=False, resume=True)
     except Exception as exc:
         raise ResourceInstallError(
-            f"Google Drive download failed for {destination.name}: {exc}"
+            f"Google Drive download failed for {destination.name}: {exc}. "
+            "Completed bundle parts were retained; rerun later to resume this "
+            "download, or use --print-links for manual download."
         ) from exc
 
 

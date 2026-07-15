@@ -1,15 +1,15 @@
 Revision history for beacon2-cbi-tools:
 
-2.0.13b1  2026-07-15
+2.0.13b2  2026-07-15
 
     - Replaced the Perl validator and VCF converter with parity-tested Python implementations
     - Retired the portal, queue, MongoDB loading, and legacy browser code
-    - Modernized the standalone BFF GenomicVariations Browser
-    - Added low-memory browser generation and optional JSON Lines output
-    - Added Python packaging, tests, CI, and streamlined documentation
+    - Modernized the standalone BFF GenomicVariations Browser with low-memory report generation
+    - Added optional JSON Lines genomic-variation output
+    - Added Python and PyPI packaging
     - Added source revision metadata to container images
     - Versioned the bundled schemas and CINECA metadata snapshots
-    - Added BFF_TOOLS_DATA, install-resources, and a developer annotation test
+    - Added BFF_TOOLS_DATA and resumable external-resource installation
     - Restored optional JSON Schema self-validation
     - Added a packaged onboarding demo and semantic BFF comparison command
 

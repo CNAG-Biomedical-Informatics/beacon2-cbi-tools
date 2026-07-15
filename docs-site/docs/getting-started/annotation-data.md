@@ -41,9 +41,9 @@ bff-tools install-resources
 
 Use a clean directory when replacing `r1` or `r2`. The installer deliberately refuses to overlay an unversioned existing `databases/` or `soft/` layout, which prevents obsolete files from surviving an upgrade.
 
-The command downloads only missing `r3` files, verifies all seven split-part checksums, streams their concatenation into `beacon2-cbi-tools-data-r3.tar.gz`, extracts directly into `BFF_TOOLS_DATA`, records the installed revision, and creates `tmp/`. Rerunning it after a completed extraction is safe.
+The command downloads only missing `r3` files, resumes an interrupted part, verifies all seven split-part checksums, streams their concatenation into `beacon2-cbi-tools-data-r3.tar.gz`, extracts directly into `BFF_TOOLS_DATA`, records the installed revision, and creates `tmp/`. Rerunning it after an interrupted download or completed extraction is safe.
 
-Google Drive may occasionally reject or throttle an automated large-file request. Print the public folder and individual links without starting a download:
+Google Drive may reject or throttle the download after several large parts. Completed parts are retained, and rerunning the command later resumes the interrupted part. To download a rejected part through a browser, print the public folder and individual links without starting another automatic download:
 
 ```bash
 bff-tools install-resources --print-links
