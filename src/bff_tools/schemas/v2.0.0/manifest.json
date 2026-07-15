@@ -4,7 +4,8 @@
   "origin": {
     "description": "Historical Beacon v2 schema snapshot retained from the Perl validator",
     "repositoryRevision": "8c132350a97fe5fb65e4f9b1537ce168c81594a5",
-    "repositoryPath": "utils/bff_validator/deref_schemas"
+    "repositoryPath": "utils/bff_validator/deref_schemas",
+    "normalization": "Removed four non-assertive VRS dereferencing artifacts that used the JSON Schema deprecated keyword with a non-boolean value"
   },
   "collections": {
     "analyses": {
@@ -25,7 +26,7 @@
     },
     "genomicVariations": {
       "path": "genomicVariations/defaultSchema.json",
-      "sha256": "f8a667ed7f8000d32e7649d64d0668d744ecca107f15578bd7b261bd297b2f6c"
+      "sha256": "e46092c7954c18241c8ae9ec442ffb79dec5f48d86f1e332fd13129c59a2c8ff"
     },
     "individuals": {
       "path": "individuals/defaultSchema.json",

@@ -146,7 +146,7 @@ apptainer exec beacon2-cbi-tools.sif bff-tools validate --help
 apptainer exec beacon2-cbi-tools.sif bff-tools vcf --help
 ```
 
-After binding the complete annotation bundle, process a small representative VCF with the production configuration before starting a cohort-scale run. Image and bundle maintainers can additionally run the [developer integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#developer-integration-test).
+After binding the complete annotation bundle, process a small representative VCF with the production configuration before starting a cohort-scale run. Image and bundle maintainers can additionally run the [packaged compact integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#packaged-integration-test).
 
 ## Common HPC Problems
 

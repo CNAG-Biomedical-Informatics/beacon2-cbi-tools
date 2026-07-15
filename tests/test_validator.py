@@ -116,6 +116,43 @@ class ValidatorTests(unittest.TestCase):
         self.assertTrue(report.ok)
         self.assertEqual(report.checked, 1)
 
+    def test_schema_self_validation_reports_success_and_exact_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            schema_dir = root / "schemas"
+            self._write_schema(schema_dir)
+            data = root / "individuals.json"
+            data.write_text('[{"id":"person-1"}]', encoding="utf-8")
+
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                report = validate_inputs(
+                    [data],
+                    schema_dir=schema_dir,
+                    check_schema=True,
+                )
+            self.assertTrue(report.ok)
+            self.assertIn("Schema self-validation passed", stdout.getvalue())
+
+            invalid_schema = {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {"id": {"type": "not-a-json-schema-type"}},
+            }
+            (schema_dir / "individuals" / "defaultSchema.json").write_text(
+                json.dumps(invalid_schema),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                ValidatorError,
+                r"Schema self-validation failed.*properties/id/type",
+            ):
+                validate_inputs(
+                    [data],
+                    schema_dir=schema_dir,
+                    check_schema=True,
+                )
+
     def test_report_restores_collection_status_and_respects_output_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "individuals.json"

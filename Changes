@@ -1,6 +1,6 @@
 Revision history for beacon2-cbi-tools:
 
-2.0.13-dev  2026-07-12
+2.0.13b1  2026-07-15
 
     - Replaced the Perl validator and VCF converter with parity-tested Python implementations
     - Retired the portal, queue, MongoDB loading, and legacy browser code
@@ -10,6 +10,8 @@ Revision history for beacon2-cbi-tools:
     - Added source revision metadata to container images
     - Versioned the bundled schemas and CINECA metadata snapshots
     - Added BFF_TOOLS_DATA, install-resources, and a developer annotation test
+    - Restored optional JSON Schema self-validation
+    - Added a packaged onboarding demo and semantic BFF comparison command
 
 2.0.12  2026-03-25
 

@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v5
@@ -47,6 +47,10 @@ jobs:
           bff-tools install-resources --help
           bff-tools install-resources --print-links
           bff-tools test --help
+          bff-tools compare --help
+          bff-tools demo --output-dir /tmp/bff-tools-wheel-demo --no-browser
+          bff-tools validate --check-schema
+          bff-tools validate --input /tmp/bff-tools-wheel-demo/vcf/genomicVariationsVcf.json.gz --gv-vcf --check-schema --no-color --no-emoji
           python - <<'PY'
           import os
           from pathlib import Path

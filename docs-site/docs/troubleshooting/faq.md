@@ -123,7 +123,7 @@ The CLI does not rename contigs or lift coordinates. `hg19` and `hs37` are not i
 
 Yes. The repository includes a compact [GRCh38 / hg38 worked example](../examples/hg38) derived from 1000 Genomes chromosome 22, including the commands used to recreate and beaconize it. Compact [GRCh37 / hs37 fixtures](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/src/bff_tools/integration_assets) provide converter regression inputs and expected outputs. The [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) provides a populated metadata example; its full GRCh37/hs37d5 chromosome 22 release fixture is [downloaded separately](https://drive.google.com/drive/folders/1_B30lOZKndJQZPW4Wza3ho-xGsekH4fM).
 
-The compact files are suitable for learning and CI. The complete CINECA chr22 VCF used for release acceptance is intentionally kept outside Git.
+The compact files are suitable for learning and CI. `bff-tools test` uses the packaged chromosome 1 fixture; it does not run chromosome 22. The complete CINECA chr22 VCF used for release acceptance is intentionally kept outside Git and is processed separately with the application's normal VCF and validation commands.
 
 </details>
 

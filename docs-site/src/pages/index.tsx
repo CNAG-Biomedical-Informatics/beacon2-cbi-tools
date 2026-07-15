@@ -7,7 +7,7 @@ const guideLinks = [
   {
     label: 'Get started',
     title: 'Install and run',
-    text: 'Choose Docker, Apptainer, or a source installation and produce your first BFF collections.',
+    text: 'Install from PyPI, Docker, Apptainer, or source and produce your first BFF collections.',
     to: '/docs/getting-started/quick-start',
   },
   {

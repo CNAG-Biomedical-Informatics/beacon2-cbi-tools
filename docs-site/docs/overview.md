@@ -31,9 +31,9 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 <div className="beaconPathGrid">
   <a href="getting-started/quick-start">
-    <span>Five minutes</span>
-    <h3>Build metadata JSON</h3>
-    <p>Export the workbook template and produce your first BFF JSON collections.</p>
+    <span>Two minutes</span>
+    <h3>Run the packaged demo</h3>
+    <p>Convert an annotated VCF, validate BFF, and open the standalone browser without external resources.</p>
   </a>
   <a href="workflows/data-beaconization">
     <span>Complete workflow</span>
@@ -61,6 +61,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 | Command | Use it for |
 |---|---|
+| `bff-tools demo` | Verify an installation and inspect generated BFF without external annotation resources |
 | `bff-tools validate` | Build and validate BFF metadata from XLSX, or validate existing BFF JSON |
 | `bff-tools vcf` | Convert a VCF or VCF.gz file into BFF `genomicVariations` |
 | `bff-tools tsv` | Convert supported SNP-array text data through VCF into BFF |

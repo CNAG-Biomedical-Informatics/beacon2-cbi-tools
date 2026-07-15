@@ -16,9 +16,9 @@ mkdir -p "$PARITY/python"
   --dataset-id CINECA_synthetic_cohort_EUROPE_UK1 \
   --project-dir cineca_chr22 --out-dir "$PARITY/python" --threads 1
 
-PYTHONPATH=src python3 tools/compare_bff_outputs.py \
-  "$PARITY/perl/genomicVariationsVcf.json.gz" \
-  "$PARITY/python/genomicVariationsVcf.json.gz"
+bff-tools compare \
+  --expected "$PARITY/perl/genomicVariationsVcf.json.gz" \
+  --actual "$PARITY/python/genomicVariationsVcf.json.gz"
 ```
 
 To regenerate both outputs, read the legacy converter from the pre-migration

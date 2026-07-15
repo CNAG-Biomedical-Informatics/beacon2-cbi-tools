@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import random
 import sys
 import threading
@@ -8,8 +9,10 @@ import time
 from pathlib import Path
 
 from .config import ConfigError, read_config_file, read_param_file
+from .demo import DemoError, run_demo
 from .integration import IntegrationTestError, run_annotation_integration
 from .orchestrator import ExecutionError, PipelineRunner
+from .parity import ParityError, compare_bff_files
 from .output import (
     format_duration,
     print_finish_banner,
@@ -23,7 +26,13 @@ from .resource_installer import (
     print_download_links,
     resolve_data_directory,
 )
-from .validator import ValidatorError, export_template, print_report, validate_inputs
+from .validator import (
+    ValidatorError,
+    export_template,
+    print_report,
+    validate_inputs,
+    validate_schemas,
+)
 from .version import VERSION
 
 GOODBYES = [
@@ -91,7 +100,7 @@ def build_parser() -> argparse.ArgumentParser:
             "BFF JSON"
         ),
     )
-    input_group = validate.add_mutually_exclusive_group(required=True)
+    input_group = validate.add_mutually_exclusive_group()
     input_group.add_argument(
         "-i",
         "--input",
@@ -109,6 +118,11 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("-o", "--out-dir", default=".")
     validate.add_argument("-gv", "--gv", action="store_true")
     validate.add_argument("-gv-vcf", "--gv-vcf", action="store_true")
+    validate.add_argument(
+        "--check-schema",
+        action="store_true",
+        help="self-validate all or input-selected JSON Schemas",
+    )
     validate.add_argument("--ignore-validation", action="store_true")
     validate.add_argument("--debug", type=int, default=0)
     validate.add_argument("--verbose", action="store_true")
@@ -131,7 +145,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     integration = subparsers.add_parser(
         "test",
-        help="run the developer annotation integration test",
+        help="run the packaged compact annotation integration test",
     )
     integration.add_argument(
         "--data-dir",
@@ -152,6 +166,29 @@ def build_parser() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="show detailed pipeline command output",
+    )
+
+    compare = subparsers.add_parser(
+        "compare",
+        help="compare two BFF genomic-variation files semantically",
+    )
+    compare.add_argument("--expected", required=True, help="reference BFF file")
+    compare.add_argument("--actual", required=True, help="generated BFF file")
+
+    demo = subparsers.add_parser(
+        "demo",
+        help="convert and review the packaged annotated VCF example",
+    )
+    demo.add_argument(
+        "--output-dir",
+        default="bff-tools-demo",
+        help="new demo output directory (default: bff-tools-demo)",
+    )
+    demo.add_argument(
+        "--no-browser",
+        action="store_false",
+        dest="browser",
+        help="skip standalone browser generation",
     )
     return parser
 
@@ -237,18 +274,34 @@ def _validate_args(arg: dict[str, object]) -> None:
 def handle_validate(arg: dict[str, object]) -> int:
     template_out = arg.get("template_out")
     if template_out:
+        if arg.get("check_schema"):
+            raise ValidatorError(
+                "--template-out and --check-schema are separate operations"
+            )
         destination = export_template(Path(str(template_out)).resolve())
         print(f"Wrote {destination}")
         return 0
 
+    input_files = [Path(str(path)) for path in arg.get("input_files") or []]
+    schema_dir = Path(str(arg["schema_dir"])) if arg.get("schema_dir") else None
+    if not input_files:
+        if not arg.get("check_schema"):
+            raise ValidatorError(
+                "validate requires --input, --template-out, or --check-schema"
+            )
+        checked = validate_schemas(schema_dir=schema_dir)
+        print(f"Schema self-validation passed for {len(checked)} schema(s)")
+        return 0
+
     report = validate_inputs(
-        [Path(str(path)) for path in arg.get("input_files") or []],
-        schema_dir=Path(str(arg["schema_dir"])) if arg.get("schema_dir") else None,
+        input_files,
+        schema_dir=schema_dir,
         output_dir=Path(str(arg.get("out_dir") or ".")),
         include_genomic=bool(arg.get("gv")),
         streamed_genomic=bool(arg.get("gv_vcf")),
         ignore_validation=bool(arg.get("ignore_validation")),
         verbose=bool(arg.get("verbose")) or bool(arg.get("debug")),
+        check_schema=bool(arg.get("check_schema")),
     )
     print_report(
         report,
@@ -277,6 +330,37 @@ def handle_test(arg: dict[str, object]) -> int:
         threads=int(arg.get("threads") or 1),
         verbose=bool(arg.get("verbose")),
     )
+    return 0
+
+
+def handle_compare(arg: dict[str, object]) -> int:
+    result = compare_bff_files(Path(str(arg["expected"])), Path(str(arg["actual"])))
+    if not result.equal:
+        print(
+            f"Semantic difference at record {result.first_difference}",
+            file=sys.stderr,
+        )
+        print(f"JSON path: {result.path}", file=sys.stderr)
+        expected = json.dumps(result.expected, ensure_ascii=False)[:1000]
+        actual = json.dumps(result.actual, ensure_ascii=False)[:1000]
+        print(f"Expected: {expected}", file=sys.stderr)
+        print(f"Actual: {actual}", file=sys.stderr)
+        return 1
+    print(f"Semantic parity passed for {result.records} record(s)")
+    return 0
+
+
+def handle_demo(arg: dict[str, object]) -> int:
+    print("Running packaged annotated VCF demo (no external resources required)")
+    result = run_demo(
+        Path(str(arg["output_dir"])),
+        browser=bool(arg.get("browser")),
+    )
+    print(f"Validated {result.records} BFF genomic-variation record(s)")
+    print(f"Wrote {result.bff_path}")
+    if result.browser_path:
+        print(f"Wrote {result.browser_path}")
+    print(f"Demo complete: {result.output_dir}")
     return 0
 
 
@@ -338,6 +422,18 @@ def main(argv: list[str] | None = None) -> int:
         try:
             return handle_test(arg)
         except (IntegrationTestError, ResourceInstallError, OSError) as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+    if arg["mode"] == "compare":
+        try:
+            return handle_compare(arg)
+        except (ParityError, OSError) as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+    if arg["mode"] == "demo":
+        try:
+            return handle_demo(arg)
+        except DemoError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1
 

@@ -22,6 +22,8 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 dependencies = [
@@ -37,12 +39,14 @@ dependencies = [
 Documentation = "https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/"
 Issues = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/issues"
 Repository = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools"
+Changelog = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/Changes"
 
 [project.scripts]
 bff-tools = "bff_tools.cli:main"
 
 [project.optional-dependencies]
 test = ["pytest>=8", "pytest-cov>=5"]
+build = ["build>=1.2", "twine>=6"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

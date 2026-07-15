@@ -85,7 +85,7 @@ bff-tools validate -i metadata.xlsx -o bff
 ```
 
 ```text title="Successful metadata validation"
-🧬 BFF Tools Validator  v2.0.13-dev
+🧬 BFF Tools Validator  v2.0.13b1
 Build and validate BFF metadata from XLSX, or validate existing BFF JSON
 
 == 🗂 analyses ==
@@ -221,7 +221,7 @@ On a 6-core ARM64 Linux workstation, an end-to-end run completed in **13 minutes
 Measured separately on the same workstation, the single-process converter processed the already annotated VCF in **1 minute 47 seconds** with about **20 MB peak RAM**. That VCF uses `FORMAT=GT`; multi-field sample values such as `GT:DP:AD` require additional parsing and may take longer. Browser generation took **44 seconds** with about **22 MB peak RAM**. These are observed timings rather than hardware-independent guarantees; CPU, storage, compression, reference versions, and annotation settings materially affect runtime.
 :::
 
-Resource versions materially affect output and must be recorded with every annotation-enabled run. Complete setup and the download-backed integration test are documented under [Annotation Data](../getting-started/annotation-data).
+Resource versions materially affect output and must be recorded with every annotation-enabled run. Complete setup and the packaged compact integration test are documented under [Annotation Data](../getting-started/annotation-data).
 
 ### Diagnose a Failed VCF Run
 

@@ -80,7 +80,10 @@ def _run_in_project(
     if verbose:
         conversion.append("--verbose")
 
-    print("Running normalization, SnpEff, dbNSFP, ClinVar, and COSMIC integration")
+    print(
+        "Running packaged compact normalization, SnpEff, dbNSFP, "
+        "ClinVar, and COSMIC integration"
+    )
     _run_command(conversion, env=env, run=run)
 
     actual = project_dir / "vcf" / "genomicVariationsVcf.json.gz"
@@ -105,7 +108,7 @@ def _run_in_project(
             f"observed {_format_difference(result.actual)}"
         )
     print(f"Semantic parity passed for {result.records} record(s)")
-    print("Full annotation integration passed")
+    print("Packaged compact annotation integration passed")
 
 
 def run_annotation_integration(

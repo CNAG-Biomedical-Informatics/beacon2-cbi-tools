@@ -168,7 +168,7 @@ docker run --rm manuelrueda/beacon2-cbi-tools:latest validate --help
 docker run --rm manuelrueda/beacon2-cbi-tools:latest vcf --help
 ```
 
-After mounting the complete bundle, process a small representative VCF with the production configuration before starting a cohort-scale run. Image and bundle maintainers can additionally run the [developer integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#developer-integration-test).
+After mounting the complete bundle, process a small representative VCF with the production configuration before starting a cohort-scale run. Image and bundle maintainers can additionally run the [packaged compact integration test](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/annotation-data/#packaged-integration-test).
 
 ## Troubleshooting
 

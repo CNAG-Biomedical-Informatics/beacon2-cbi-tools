@@ -3,7 +3,7 @@ title: CLI
 ---
 
 ```text
-bff-tools {validate,vcf,tsv,install-resources,test} [options]
+bff-tools {validate,vcf,tsv,demo,install-resources,test,compare} [options]
 ```
 
 Run `bff-tools <command> --help` for the installed version. Conversion creates a new project directory and never overwrites an existing one.
@@ -38,10 +38,22 @@ bff-tools validate -i individuals.json biosamples.json
 | `-s`, `--schema-dir DIR` | Override the packaged dereferenced schemas |
 | `--gv` | Include the workbook `genomicVariations` sheet or JSON collection |
 | `--gv-vcf` | Stream generated `genomicVariationsVcf.json[.gz]` or `.jsonl[.gz]` records |
+| `--check-schema` | Self-validate all schemas when used alone, or each input-selected schema before checking data |
 | `--ignore-validation` | Write workbook output despite validation issues |
 | `--verbose` | Print progress for large inputs |
 
 Validation exits nonzero when schema issues are found, unless they are explicitly ignored.
+`bff-tools validate --check-schema` checks the complete schema registry without requiring input data. Combined with `--input`, it checks only the selected schemas before ordinary record validation.
+
+## `demo`
+
+Exercise the installed converter, schema validator, and standalone browser using a packaged, fully annotated fixture:
+
+```bash
+bff-tools demo
+```
+
+The default destination is a new `bff-tools-demo/` directory. Use `--output-dir DIR` to select another path or `--no-browser` to generate only BFF. The command requires no external annotation resources because it does not rerun annotation; it is an onboarding example, not a raw-VCF integration test.
 
 ## `install-resources`
 
@@ -56,14 +68,26 @@ Pass `--data-dir DIR` instead of exporting the environment variable, or use `--p
 
 ## `test` (development)
 
-Developers and bundle maintainers can run the packaged annotation integration test against the selected external bundle:
+Developers and bundle maintainers can run the packaged **compact** annotation integration test against the selected external bundle:
 
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools test
 ```
 
-The command annotates the packaged 1000 Genomes fixture, validates the resulting BFF, and compares all records semantically with the versioned reference output. It is a development and release check, not a required user workflow. Use `--data-dir DIR` instead of the environment variable, `--threads N` for annotation, or `--output-dir DIR` to retain the generated project. Add `--verbose` for detailed pipeline output.
+The command annotates the packaged chromosome 1 1000 Genomes fixture, validates the resulting BFF, and compares all records semantically with the versioned reference output. It does **not** run the external CINECA chromosome 22 fixture. It is a development and bundle check, not a required user workflow. Use `--data-dir DIR` instead of the environment variable, `--threads N` for annotation, or `--output-dir DIR` to retain the generated project. Add `--verbose` for detailed pipeline output.
+
+The release-scale chromosome 22 procedure uses the regular `bff-tools vcf` and `bff-tools validate` commands plus the installed `bff-tools compare` command. Do not use plain `diff` or compare compressed-file checksums for this parity gate. See [Full CINECA Release Fixture](./validation-and-reproducibility#full-cineca-release-fixture).
+
+## `compare`
+
+Compare two BFF genomic-variation files semantically. The command streams compressed or uncompressed JSON, ignores run-specific provenance and known order-only differences, and exits nonzero with the first differing record and JSON path:
+
+```bash
+bff-tools compare \
+  --expected reference/genomicVariationsVcf.json.gz \
+  --actual run/vcf/genomicVariationsVcf.json.gz
+```
 
 ## `vcf`
 

@@ -45,9 +45,9 @@ From `testdata/tsv/`:
   -c ../../bin/config.yaml \
   -o local-tsv-test
 
-python3 ../../tools/compare_bff_outputs.py \
-  ref_beacon_174721318508733/vcf/genomicVariationsVcf.json.gz \
-  local-tsv-test/vcf/genomicVariationsVcf.json.gz
+bff-tools compare \
+  --expected ref_beacon_174721318508733/vcf/genomicVariationsVcf.json.gz \
+  --actual local-tsv-test/vcf/genomicVariationsVcf.json.gz
 ```
 
 TSV conversion cannot use `--no-annotate` because its VCF intermediate does not contain SnpEff ANN data.

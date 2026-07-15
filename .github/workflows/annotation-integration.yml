@@ -1,4 +1,4 @@
-name: Full annotation integration
+name: Compact annotation integration
 
 on:
   workflow_dispatch:
@@ -28,12 +28,12 @@ jobs:
           python3 -m build --wheel
           python3 -m pip install --force-reinstall dist/*.whl
 
-      - name: Install and test downloaded bundle
+      - name: Install bundle and run compact test
         if: inputs.download_bundle
         run: |
           bff-tools install-resources --data-dir "$RUNNER_TEMP/beacon2-cbi-tools-data"
           bff-tools test --data-dir "$RUNNER_TEMP/beacon2-cbi-tools-data"
 
-      - name: Run with existing bundle
+      - name: Run compact test with existing bundle
         if: ${{ !inputs.download_bundle }}
         run: bff-tools test --data-dir "${{ inputs.data_directory }}"

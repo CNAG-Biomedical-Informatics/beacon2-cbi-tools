@@ -38,6 +38,11 @@ class SchemaRegistryTests(unittest.TestCase):
                 payload = path.read_bytes()
                 self.assertEqual(hashlib.sha256(payload).hexdigest(), metadata["sha256"])
                 self.assertNotIn(b'"$ref"', payload)
+                validator._schema_validator(
+                    json.loads(payload),
+                    check_schema=True,
+                    schema_path=path,
+                )
 
     def test_current_schema_pointer_reports_missing_invalid_and_unknown_versions(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

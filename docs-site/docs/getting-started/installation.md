@@ -52,7 +52,7 @@ Metadata validation can run after layer 1. Raw VCF and TSV conversion requires b
 ## Supported Platforms
 
 - Linux on x86-64 or ARM64;
-- Python 3.10 or newer for PyPI and source installations;
+- Python 3.10 through 3.14 for PyPI and source installations;
 - at least 4 GB RAM for basic use;
 - memory sized for Java/SnpEff and cohort scale for annotation;
 - at least 200 GB free for the maintained annotation bundle and more for intermediates.
@@ -66,6 +66,7 @@ bff-tools --version
 bff-tools validate --help
 bff-tools vcf --help
 bff-tools install-resources --help
+bff-tools demo
 ```
 
-After preparing annotation data, process a small representative VCF with the production configuration before starting a cohort-scale run. Project and bundle maintainers can additionally run the [developer integration test](annotation-data#developer-integration-test).
+The demo verifies conversion, schema validation, and browser generation without the external bundle. After preparing annotation data, process a small representative raw VCF with the production configuration before starting a cohort-scale run. Project and bundle maintainers can additionally run the [packaged compact integration test](annotation-data#packaged-integration-test).

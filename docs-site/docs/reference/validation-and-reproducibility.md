@@ -25,6 +25,16 @@ bff-tools validate -i metadata.json \
 
 The current package supports Beacon schema `v2.0.0`.
 
+### Schema Self-validation
+
+Normal validation checks BFF records against the selected schema. Schema maintainers can additionally verify that each selected schema itself conforms to its declared JSON Schema dialect:
+
+```bash
+bff-tools validate --check-schema
+```
+
+Used alone, the command checks all seven schemas. Add `--schema-dir DIR` to inspect another dereferenced registry, or combine `--check-schema` with `--input` to check only the selected collection schemas before validating their records. This replaces the former Perl validator's debug-only self-check. The Python implementation uses the official meta-schema bundled with `jsonschema`, requires no network access for the packaged dereferenced schemas, and reports the exact schema path when a keyword is malformed. The packaged schema registry is also self-validated in the test suite.
+
 ## What Validation Does Not Establish
 
 Validation does not prove that:
@@ -58,7 +68,16 @@ Use `--ignore-validation` only to inspect generated JSON during correction. A su
 
 ## Variant Regression Coverage
 
-Normal CI compares the Python converter with the versioned, fully annotated 1000 Genomes reference output. The developer command `bff-tools test` starts from the compact raw GRCh37 fixture and exercises normalization, every annotation stage, conversion, schema validation, and semantic comparison across all 1,044 emitted records.
+There are two intentionally separate checks:
+
+| Check | Input | How it runs | Purpose |
+|---|---|---|---|
+| Packaged compact integration | GRCh37 chromosome 1 fixture included with the application | `bff-tools test` runs every stage and compares 1,044 emitted records automatically | Fast bundle and installation check |
+| Full CINECA release gate | GRCh37/hs37d5 chromosome 22 fixture downloaded separately | `bff-tools vcf`, `bff-tools validate`, then `bff-tools compare` | Release-scale parity and performance check |
+
+Both checks require the external annotation bundle. Only the compact fixture and its expected output are packaged with the application. `bff-tools test` never selects or downloads the full chromosome 22 data.
+
+Normal CI also compares the Python converter with the versioned, fully annotated compact 1000 Genomes reference output without running the external annotation tools.
 
 The separate CINECA chromosome 22 release run additionally covers 2,504 samples and:
 
@@ -79,7 +98,43 @@ Maintainers can download the release-scale files from the public Google Drive fo
 - `chr22.Test.1000G.phase3.joint.vcf.gz.tbi`: tabix index;
 - `genomicVariationsVcf.json.gz`: versioned BFF reference output.
 
-These are developer and release-validation assets. They are not included in the repository or annotation bundle archive, and `bff-tools install-resources` does not download them. The `bff-tools test` command continues to use its separate compact GRCh37 fixture.
+These are developer and release-validation assets. They are not included in the repository or annotation bundle archive, and `bff-tools install-resources` does not download them.
+
+From a source checkout, run the release gate as follows. `FIXTURE` must be the directory containing all three downloaded files; choose a new `OUTPUT` directory for each run:
+
+:::warning[Do not use plain `diff`]
+Do not compare the `.json.gz` files with `diff` or compare their SHA-256 checksums as the parity test. Compression metadata, JSON key order, run-specific provenance, and two order-insensitive arrays can differ even when the BFF records are equivalent. Use `bff-tools compare`, which performs a streamed semantic comparison and reports the first record and JSON path that differ.
+:::
+
+```bash
+cd /path/to/beacon2-cbi-tools
+
+export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
+FIXTURE=/absolute/path/to/CINECA_synthetic_cohort_EUROPE_UK1/vcf
+OUTPUT=/absolute/path/to/cineca-chr22-acceptance
+
+bff-tools vcf \
+  --input "$FIXTURE/chr22.Test.1000G.phase3.joint.vcf.gz" \
+  --genome hs37 \
+  --dataset-id CINECA_synthetic_cohort_EUROPE_UK1 \
+  --annotate \
+  --no-browser \
+  --threads 6 \
+  --verbose \
+  --project-dir "$OUTPUT"
+
+bff-tools validate \
+  --input "$OUTPUT/vcf/genomicVariationsVcf.json.gz" \
+  --gv-vcf
+
+bff-tools compare \
+  --expected "$FIXTURE/genomicVariationsVcf.json.gz" \
+  --actual "$OUTPUT/vcf/genomicVariationsVcf.json.gz"
+```
+
+The first command uses Beacon v2 CBI Tools for normalization, SnpEff, dbNSFP, ClinVar, COSMIC, and VCF-to-BFF conversion. The second validates every generated record against the packaged schema. The final helper compares every expected and observed BFF record while keeping memory bounded to one record from each file. Success ends with `Semantic parity passed for 1109368 record(s)`.
+
+This explicit sequence prevents the costly release-scale run from being triggered accidentally by `bff-tools test`. Use the annotation-bundle revision associated with the reference output; database-version changes can legitimately alter annotations and must be assessed before replacing that output.
 
 ## Release Checklist
 

@@ -74,6 +74,9 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(conversion_env[DATA_ROOT_ENV], str(data_dir.resolve()))
         self.assertEqual(validation_env[DATA_ROOT_ENV], str(data_dir.resolve()))
         self.assertIn("Semantic parity passed for 1044 record(s)", stdout.getvalue())
+        self.assertIn(
+            "Packaged compact annotation integration passed", stdout.getvalue()
+        )
         self.assertIn(f"Integration output retained in {output_dir}", stdout.getvalue())
 
     def test_temporary_output_is_removed_after_success(self) -> None:

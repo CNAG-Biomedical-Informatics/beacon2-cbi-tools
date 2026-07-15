@@ -127,13 +127,13 @@ On a scheduler, request memory and temporary storage for both Java annotation an
 
 The CLI checks every required executable, reference file, and temporary directory before creating output. A successful preflight does not verify biological version compatibility, so record database versions and manually inspect representative ANN, dbNSFP, ClinVar, and COSMIC records after each resource update.
 
-## Developer Integration Test
+## Packaged Integration Test
 
 :::note[Maintainer check]
 `bff-tools test` is intended for application developers and annotation-bundle maintainers. Routine users do not need to run it before beaconizing data.
 :::
 
-Distributions include the same compact input fixture and versioned reference BFF output. Exercise the installed application and selected bundle through the CLI:
+Distributions include a compact chromosome 1 input fixture and its versioned reference BFF output. Exercise the installed application and selected annotation bundle through the CLI:
 
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
@@ -146,6 +146,6 @@ Temporary output is removed after a successful run. Retain the generated project
 bff-tools test --output-dir annotation-integration-review --verbose
 ```
 
-This test starts from a compact raw **1000 Genomes GRCh37** VCF. It runs bcftools normalization, SnpEff, dbNSFP, ClinVar, COSMIC, Python VCF-to-BFF conversion, streamed schema validation, and semantic comparison of all 1,044 emitted records. It does not download the large bundle implicitly. The manually dispatched GitHub Actions workflow invokes these same installed commands on a self-hosted runner.
+This built-in test starts from a compact raw **1000 Genomes GRCh37 chromosome 1** VCF packaged with the application. It runs bcftools normalization, SnpEff, dbNSFP, ClinVar, COSMIC, Python VCF-to-BFF conversion, streamed schema validation, and semantic comparison of all 1,044 emitted records. The fixture needs no separate download, but the annotation bundle must exist at `BFF_TOOLS_DATA` or be supplied with `--data-dir`. The manually dispatched GitHub Actions workflow invokes this same compact test on a self-hosted runner.
 
-This compact test is distinct from the full CINECA chromosome 22 release gate. The latter is also GRCh37/hs37d5 and covers 1,103,547 raw records, 1,110,240 normalized records, and 2,504 samples. It remains outside Git and is used for release-scale converter parity and performance testing. See [Full CINECA Release Fixture](../reference/validation-and-reproducibility#full-cineca-release-fixture) for the public download folder and file inventory.
+This compact test is distinct from the full CINECA chromosome 22 release gate. The latter is also GRCh37/hs37d5 and covers 1,103,547 raw records, 1,110,240 normalized records, and 2,504 samples. Its files remain outside Git. Beacon v2 CBI Tools performs the full annotation, conversion, and validation run, but `bff-tools test` does not select or download that fixture. See [Full CINECA Release Fixture](../reference/validation-and-reproducibility#full-cineca-release-fixture) for the exact procedure.

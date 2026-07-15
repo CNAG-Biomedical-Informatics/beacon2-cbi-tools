@@ -5453,36 +5453,7 @@
                                             }
                                         }
                                     ],
-                                    "description": "An expression of the sequence state",
-                                    "deprecated": [
-                                        {
-                                            "deprecated": true,
-                                            "description": "DEPRECATED. A Sequence as a State. This is the State class to use for representing \"ref-alt\" style variation, including SNVs, MNVs, del, ins, and delins. This class is deprecated. Use LiteralSequenceExpression instead.",
-                                            "additionalProperties": false,
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "const": "SequenceState",
-                                                    "description": "MUST be \"SequenceState\""
-                                                },
-                                                "sequence": {
-                                                    "additionalProperties": false,
-                                                    "description": "A character string of Residues that represents a biological sequence using the conventional sequence order (5\u2019-to-3\u2019 for nucleic acid sequences, and amino-to-carboxyl for amino acid sequences). IUPAC ambiguity codes are permitted in Sequences.",
-                                                    "type": "string",
-                                                    "pattern": "^[A-Z*\\-]*$"
-                                                }
-                                            },
-                                            "example": {
-                                                "type": "SequenceState",
-                                                "sequence": "C"
-                                            },
-                                            "required": [
-                                                "sequence",
-                                                "type"
-                                            ]
-                                        }
-                                    ]
+                                    "description": "An expression of the sequence state"
                                 }
                             },
                             "required": [
@@ -7478,36 +7449,7 @@
                                                                 }
                                                             }
                                                         ],
-                                                        "description": "An expression of the sequence state",
-                                                        "deprecated": [
-                                                            {
-                                                                "deprecated": true,
-                                                                "description": "DEPRECATED. A Sequence as a State. This is the State class to use for representing \"ref-alt\" style variation, including SNVs, MNVs, del, ins, and delins. This class is deprecated. Use LiteralSequenceExpression instead.",
-                                                                "additionalProperties": false,
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "type": {
-                                                                        "type": "string",
-                                                                        "const": "SequenceState",
-                                                                        "description": "MUST be \"SequenceState\""
-                                                                    },
-                                                                    "sequence": {
-                                                                        "additionalProperties": false,
-                                                                        "description": "A character string of Residues that represents a biological sequence using the conventional sequence order (5\u2019-to-3\u2019 for nucleic acid sequences, and amino-to-carboxyl for amino acid sequences). IUPAC ambiguity codes are permitted in Sequences.",
-                                                                        "type": "string",
-                                                                        "pattern": "^[A-Z*\\-]*$"
-                                                                    }
-                                                                },
-                                                                "example": {
-                                                                    "type": "SequenceState",
-                                                                    "sequence": "C"
-                                                                },
-                                                                "required": [
-                                                                    "sequence",
-                                                                    "type"
-                                                                ]
-                                                            }
-                                                        ]
+                                                        "description": "An expression of the sequence state"
                                                     }
                                                 },
                                                 "required": [
@@ -9527,36 +9469,7 @@
                                                                     }
                                                                 }
                                                             ],
-                                                            "description": "An expression of the sequence state",
-                                                            "deprecated": [
-                                                                {
-                                                                    "deprecated": true,
-                                                                    "description": "DEPRECATED. A Sequence as a State. This is the State class to use for representing \"ref-alt\" style variation, including SNVs, MNVs, del, ins, and delins. This class is deprecated. Use LiteralSequenceExpression instead.",
-                                                                    "additionalProperties": false,
-                                                                    "type": "object",
-                                                                    "properties": {
-                                                                        "type": {
-                                                                            "type": "string",
-                                                                            "const": "SequenceState",
-                                                                            "description": "MUST be \"SequenceState\""
-                                                                        },
-                                                                        "sequence": {
-                                                                            "additionalProperties": false,
-                                                                            "description": "A character string of Residues that represents a biological sequence using the conventional sequence order (5\u2019-to-3\u2019 for nucleic acid sequences, and amino-to-carboxyl for amino acid sequences). IUPAC ambiguity codes are permitted in Sequences.",
-                                                                            "type": "string",
-                                                                            "pattern": "^[A-Z*\\-]*$"
-                                                                        }
-                                                                    },
-                                                                    "example": {
-                                                                        "type": "SequenceState",
-                                                                        "sequence": "C"
-                                                                    },
-                                                                    "required": [
-                                                                        "sequence",
-                                                                        "type"
-                                                                    ]
-                                                                }
-                                                            ]
+                                                            "description": "An expression of the sequence state"
                                                         }
                                                     },
                                                     "required": [
@@ -11552,36 +11465,7 @@
                                                                                         }
                                                                                     }
                                                                                 ],
-                                                                                "description": "An expression of the sequence state",
-                                                                                "deprecated": [
-                                                                                    {
-                                                                                        "deprecated": true,
-                                                                                        "description": "DEPRECATED. A Sequence as a State. This is the State class to use for representing \"ref-alt\" style variation, including SNVs, MNVs, del, ins, and delins. This class is deprecated. Use LiteralSequenceExpression instead.",
-                                                                                        "additionalProperties": false,
-                                                                                        "type": "object",
-                                                                                        "properties": {
-                                                                                            "type": {
-                                                                                                "type": "string",
-                                                                                                "const": "SequenceState",
-                                                                                                "description": "MUST be \"SequenceState\""
-                                                                                            },
-                                                                                            "sequence": {
-                                                                                                "additionalProperties": false,
-                                                                                                "description": "A character string of Residues that represents a biological sequence using the conventional sequence order (5\u2019-to-3\u2019 for nucleic acid sequences, and amino-to-carboxyl for amino acid sequences). IUPAC ambiguity codes are permitted in Sequences.",
-                                                                                                "type": "string",
-                                                                                                "pattern": "^[A-Z*\\-]*$"
-                                                                                            }
-                                                                                        },
-                                                                                        "example": {
-                                                                                            "type": "SequenceState",
-                                                                                            "sequence": "C"
-                                                                                        },
-                                                                                        "required": [
-                                                                                            "sequence",
-                                                                                            "type"
-                                                                                        ]
-                                                                                    }
-                                                                                ]
+                                                                                "description": "An expression of the sequence state"
                                                                             }
                                                                         },
                                                                         "required": [

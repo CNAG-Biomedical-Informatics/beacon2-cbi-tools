@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import json
 import runpy
 import subprocess
 import tempfile
@@ -23,6 +24,109 @@ from bff_tools.parity import compare_bff_files  # noqa: E402
 
 
 class CliTests(unittest.TestCase):
+    def test_demo_cli_reports_generated_outputs(self) -> None:
+        result = SimpleNamespace(
+            records=15,
+            bff_path=Path("demo/vcf/genomicVariationsVcf.json.gz"),
+            browser_path=Path("demo/browser/bff-tools-demo.html"),
+            output_dir=Path("demo"),
+        )
+        stdout = io.StringIO()
+        with mock.patch.object(cli, "run_demo", return_value=result) as run_demo:
+            with contextlib.redirect_stdout(stdout):
+                status = cli.main(["demo", "--output-dir", "demo"])
+        self.assertEqual(status, 0)
+        run_demo.assert_called_once_with(Path("demo"), browser=True)
+        self.assertIn("Validated 15 BFF", stdout.getvalue())
+        self.assertIn("bff-tools-demo.html", stdout.getvalue())
+
+    def test_validate_cli_can_self_validate_selected_schema(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            data = Path(tmpdir) / "individuals.json"
+            data.write_text(
+                json.dumps(
+                    [
+                        {
+                            "id": "person-1",
+                            "sex": {"id": "NCIT:C20197", "label": "male"},
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                result = cli.main(
+                    [
+                        "validate",
+                        "--input",
+                        str(data),
+                        "--check-schema",
+                        "--no-color",
+                    ]
+                )
+        self.assertEqual(result, 0)
+        self.assertIn("Schema self-validation passed", stdout.getvalue())
+
+    def test_validate_cli_can_self_validate_registry_without_input(self) -> None:
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            result = cli.main(["validate", "--check-schema"])
+        self.assertEqual(result, 0)
+        self.assertIn(
+            "Schema self-validation passed for 7 schema(s)",
+            stdout.getvalue(),
+        )
+
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            result = cli.main(["validate"])
+        self.assertEqual(result, 1)
+        self.assertIn("requires --input", stderr.getvalue())
+
+    def test_compare_cli_reports_semantic_parity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            expected = Path(tmpdir) / "expected.json"
+            actual = Path(tmpdir) / "actual.json"
+            expected.write_text(json.dumps([{"id": "v1", "value": 1}]))
+            actual.write_text(json.dumps([{"value": 1, "id": "v1"}]))
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                result = cli.main(
+                    [
+                        "compare",
+                        "--expected",
+                        str(expected),
+                        "--actual",
+                        str(actual),
+                    ]
+                )
+        self.assertEqual(result, 0)
+        self.assertIn("Semantic parity passed for 1 record(s)", stdout.getvalue())
+
+    def test_compare_cli_reports_first_semantic_difference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            expected = Path(tmpdir) / "expected.json"
+            actual = Path(tmpdir) / "actual.json"
+            expected.write_text('[{"id":"v1","value":1}]', encoding="utf-8")
+            actual.write_text('[{"id":"v1","value":2}]', encoding="utf-8")
+            stderr = io.StringIO()
+            with contextlib.redirect_stderr(stderr):
+                result = cli.main(
+                    [
+                        "compare",
+                        "--expected",
+                        str(expected),
+                        "--actual",
+                        str(actual),
+                    ]
+                )
+        self.assertEqual(result, 1)
+        self.assertIn("Semantic difference at record 1", stderr.getvalue())
+        self.assertIn("JSON path: /value", stderr.getvalue())
+        self.assertIn("Expected: 1", stderr.getvalue())
+        self.assertIn("Actual: 2", stderr.getvalue())
+
     def test_vcf_help_names_external_data_environment(self) -> None:
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as ctx:

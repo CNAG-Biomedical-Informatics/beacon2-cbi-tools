@@ -220,8 +220,14 @@ def _load_schema(schema_dir: Path, collection: str) -> dict[str, Any]:
     return schema
 
 
-def _schema_validator(schema: dict[str, Any]) -> Any:
+def _schema_validator(
+    schema: dict[str, Any],
+    *,
+    check_schema: bool = False,
+    schema_path: Path | None = None,
+) -> Any:
     try:
+        from jsonschema.exceptions import SchemaError
         from jsonschema.validators import validator_for
     except ImportError as exc:
         raise ValidatorError(
@@ -229,10 +235,56 @@ def _schema_validator(schema: dict[str, Any]) -> Any:
         ) from exc
 
     validator_class = validator_for(schema)
-    # The dereferenced upstream genomic-variation schema contains annotation
-    # keywords whose values are not accepted by strict schema self-validation.
-    # They do not affect instance validation, matching the legacy validator.
+    if check_schema:
+        try:
+            validator_class.check_schema(schema)
+        except SchemaError as exc:
+            location = "/" + "/".join(str(part) for part in exc.absolute_path)
+            source = f" {schema_path}" if schema_path else ""
+            raise ValidatorError(
+                f"Schema self-validation failed for{source} at {location}: "
+                f"{exc.message}"
+            ) from exc
     return validator_class(schema)
+
+
+def _load_schema_validator(
+    schema_dir: Path,
+    collection: str,
+    *,
+    check_schema: bool,
+) -> Any:
+    schema_path = schema_dir / collection / "defaultSchema.json"
+    validator = _schema_validator(
+        _load_schema(schema_dir, collection),
+        check_schema=check_schema,
+        schema_path=schema_path,
+    )
+    if check_schema:
+        print(f"Schema self-validation passed: {schema_path}")
+    return validator
+
+
+def validate_schemas(
+    *,
+    schema_dir: Path | None = None,
+    collections: Sequence[str] = COLLECTIONS,
+) -> tuple[Path, ...]:
+    selected_schema_dir = (schema_dir or default_schema_dir()).resolve()
+    if not selected_schema_dir.is_dir():
+        raise ValidatorError(
+            f"Schema directory does not exist: {selected_schema_dir}"
+        )
+
+    checked: list[Path] = []
+    for collection in collections:
+        _load_schema_validator(
+            selected_schema_dir,
+            collection,
+            check_schema=True,
+        )
+        checked.append(selected_schema_dir / collection / "defaultSchema.json")
+    return tuple(checked)
 
 
 def _format_schema_error(error: Any) -> str:
@@ -279,6 +331,7 @@ def _validate_workbook(
     *,
     ignore_validation: bool,
     verbose: bool,
+    check_schema: bool = False,
 ) -> ValidationReport:
     try:
         from openpyxl import load_workbook
@@ -320,7 +373,11 @@ def _validate_workbook(
             documents: list[dict[str, Any]] = []
             collection_issues: list[ValidationIssue] = []
             destination: Path | None = None
-            validator = _schema_validator(_load_schema(schema_dir, collection))
+            validator = _load_schema_validator(
+                schema_dir,
+                collection,
+                check_schema=check_schema,
+            )
             for worksheet_row, values in enumerate(rows, start=2):
                 if not any(_has_value(value) for value in values):
                     continue
@@ -464,6 +521,7 @@ def _validate_json_files(
     include_genomic: bool,
     streamed: bool,
     verbose: bool,
+    check_schema: bool = False,
 ) -> ValidationReport:
     checked = 0
     issues: list[ValidationIssue] = []
@@ -474,7 +532,11 @@ def _validate_json_files(
         if collection in seen:
             raise ValidatorError(f"Collection was provided more than once: {collection}")
         seen.add(collection)
-        validator = _schema_validator(_load_schema(schema_dir, collection))
+        validator = _load_schema_validator(
+            schema_dir,
+            collection,
+            check_schema=check_schema,
+        )
         if streamed and collection == "genomicVariations":
             documents: Iterable[tuple[int, Any]] = _read_streamed_array(path)
         else:
@@ -499,6 +561,7 @@ def validate_inputs(
     streamed_genomic: bool = False,
     ignore_validation: bool = False,
     verbose: bool = False,
+    check_schema: bool = False,
 ) -> ValidationReport:
     if not inputs:
         raise ValidatorError("At least one input file is required")
@@ -527,6 +590,7 @@ def validate_inputs(
             collections,
             ignore_validation=ignore_validation,
             verbose=verbose,
+            check_schema=check_schema,
         )
     return _validate_json_files(
         paths,
@@ -534,6 +598,7 @@ def validate_inputs(
         include_genomic=include_genomic or streamed_genomic,
         streamed=streamed_genomic,
         verbose=verbose,
+        check_schema=check_schema,
     )
 
 

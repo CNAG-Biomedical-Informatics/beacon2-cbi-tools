@@ -13,6 +13,7 @@ This path builds and validates BFF metadata and shows the normal raw-VCF workflo
 | Raw or annotated VCF | `bff-tools vcf` | BFF `genomicVariations` |
 | Supported SNP-array TSV/TXT | `bff-tools tsv` | BFF `genomicVariations` |
 | External annotation bundle | `bff-tools install-resources` | Verified local annotation resources |
+| Packaged annotated example | `bff-tools demo` | Validated BFF and standalone browser |
 
 Raw VCF and TSV input is annotated by default and requires the external annotation data. Only an already annotated VCF can use `--no-annotate`.
 
@@ -31,9 +32,19 @@ bff-tools --version
 bff-tools --help
 ```
 
-The primary user commands are `validate`, `vcf`, `tsv`, and `install-resources`. The separate `test` command is a developer integration check.
+The primary user commands are `validate`, `vcf`, `tsv`, and `install-resources`. The `demo` command is a resource-free first run; the separate `test` command is a developer integration check.
 
-## 2. Create and Validate Metadata JSON
+## 2. Run the Packaged Demo
+
+Confirm the installed converter, validator, and browser without downloading the annotation bundle:
+
+```bash
+bff-tools demo
+```
+
+This converts a packaged, fully annotated GRCh37 VCF fixture and writes `bff-tools-demo/vcf/genomicVariationsVcf.json.gz`, a standalone browser, and a short `README.txt`. It does not run SnpEff, dbNSFP, ClinVar, or COSMIC annotation; raw VCFs still require the external resources. Pass `--output-dir DIR` to choose another new directory or `--no-browser` to skip HTML generation.
+
+## 3. Create and Validate Metadata JSON
 
 Export the packaged Beacon workbook template:
 
@@ -55,7 +66,7 @@ Existing JSON follows a validation-only path and is not rewritten:
 bff-tools validate -i bff/individuals.json bff/biosamples.json
 ```
 
-## 3. Convert and Annotate Variants
+## 4. Convert and Annotate Variants
 
 For most raw VCFs, first prepare the [annotation data](annotation-data), then run:
 
@@ -109,7 +120,7 @@ bff-tools vcf -i cohort.vcf.gz \
   --browser -o cohort-bff-browser
 ```
 
-## 4. Convert SNP-Array Data
+## 5. Convert SNP-Array Data
 
 TSV/TXT conversion needs a sample identifier, the matching reference assembly, and the annotation bundle selected above:
 
@@ -124,7 +135,7 @@ bff-tools tsv \
 
 The command creates a VCF intermediate, annotates it, and converts it through the same production VCF-to-BFF path. `--no-annotate` is not accepted for TSV input.
 
-## 5. Verify Annotation and Output
+## 6. Verify Annotation and Output
 
 Annotation-enabled runs retain normalized and annotated VCF intermediates. Inspect representative ANN, dbNSFP, ClinVar, and COSMIC fields and record every database version with the run.
 
