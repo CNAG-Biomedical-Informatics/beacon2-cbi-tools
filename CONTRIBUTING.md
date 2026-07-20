@@ -25,6 +25,6 @@ npm run build
 
 Tests must cover behavioral changes. Converter changes should include focused mapping cases and preserve semantic parity with the versioned references. Do not commit large annotation databases, full-cohort fixtures, generated browser reports, credentials, or local paths.
 
-Keep changes scoped and update `Changes` only for user-visible behavior. Pull requests should explain the input affected, expected BFF behavior, compatibility implications, and verification performed.
+Keep changes scoped and update `CHANGELOG.md` only for user-visible behavior. Pull requests should explain the input affected, expected BFF behavior, compatibility implications, and verification performed.
 
-`README.md` is generated from `README.md.in`. After changing README content, version, or the reported coverage, run `./do_readme.sh` and commit both the source template and generated file.
+Edit `README.md` directly, and keep its version and coverage badges current when either value changes.

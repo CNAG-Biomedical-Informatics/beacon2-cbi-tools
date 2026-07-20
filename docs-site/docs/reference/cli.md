@@ -3,7 +3,7 @@ title: CLI
 ---
 
 ```text
-bff-tools {validate,vcf,tsv,demo,install-resources,test,compare} [options]
+bff-tools {validate,vcf,tsv,demo,doctor,install-resources,test,compare} [options]
 ```
 
 Run `bff-tools <command> --help` for the installed version. Conversion creates a new project directory and never overwrites an existing one.
@@ -55,6 +55,18 @@ bff-tools demo
 
 The default destination is a new `bff-tools-demo/` directory. Use `--output-dir DIR` to select another path or `--no-browser` to generate only BFF. The command requires no external annotation resources because it does not rerun annotation; it is an onboarding example, not a raw-VCF integration test.
 
+## `doctor`
+
+Check packaged assets and the annotation profile selected for the current environment without executing a pipeline:
+
+```bash
+bff-tools doctor --genome hg38
+```
+
+The default profile is `hg19`; `b37` is accepted as an alias for `hs37`. Use `-c FILE` or `--config FILE` to inspect a custom layout and `--no-color` for plain output. Configuration and data-root precedence match conversion commands.
+
+An installation without external resources exits successfully as `CORE READY (annotation not configured)`. Missing or invalid paths selected explicitly through `BFF_TOOLS_DATA`, `BFF_TOOLS_CONFIG`, or `--config` exit nonzero. `READY` means the selected raw-annotation profile also passed.
+
 ## `install-resources`
 
 Install the maintained external annotation bundle into the directory selected by `BFF_TOOLS_DATA`:
@@ -75,7 +87,7 @@ export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools test
 ```
 
-The command annotates the packaged chromosome 1 1000 Genomes fixture, validates the resulting BFF, and compares all records semantically with the versioned reference output. It does **not** run the external CINECA chromosome 22 fixture. It is a development and bundle check, not a required user workflow. Use `--data-dir DIR` instead of the environment variable, `--threads N` for annotation, or `--output-dir DIR` to retain the generated project. Add `--verbose` for detailed pipeline output.
+The command annotates the packaged chromosome 1 1000 Genomes fixture, validates the resulting BFF, and compares all records semantically with the versioned reference output. It does **not** run the external CINECA chromosome 22 fixture. It is a development and bundle check, not a required user workflow. Use `--data-dir DIR` instead of the environment variable, `--threads N` for annotation, or `--output-dir DIR` to retain the generated project. Add `--verbose` for detailed pipeline output or `--no-color` for plain stage labels.
 
 The release-scale chromosome 22 procedure uses the regular `bff-tools vcf` and `bff-tools validate` commands plus the installed `bff-tools compare` command. Do not use plain `diff` or compare compressed-file checksums for this parity gate. See [Full CINECA Release Fixture](./validation-and-reproducibility#full-cineca-release-fixture).
 

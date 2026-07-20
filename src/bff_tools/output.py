@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Mapping, Any
 
+from . import console
 from .redaction import redact_mapping
 
 ARROW = "=>"
 
-RESET = "[0m"
-BOLD = "[1m"
-WHITE = "[37m"
-GREEN = "[32m"
-YELLOW = "[33m"
-BLUE = "[34m"
-CYAN = "[36m"
+RESET = console.RESET
+BOLD = console.BOLD
+WHITE = console.WHITE
+GREEN = console.GREEN
+YELLOW = console.YELLOW
+BLUE = console.BLUE
+CYAN = console.CYAN
 
 
 def _plain(value: Any) -> str:
@@ -61,9 +61,7 @@ def format_duration(seconds: float) -> str:
 
 
 def _colorize(text: str, *codes: str, use_color: bool) -> str:
-    if not use_color:
-        return text
-    return ''.join(codes) + text + RESET
+    return console.colorize(text, *codes, use_color=use_color)
 
 
 def _section(title: str, color: str, *, use_color: bool) -> None:
@@ -88,7 +86,7 @@ def _print_mapping(title: str, data: Mapping[str, Any], color: str, *, use_color
 
 
 def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], param: Mapping[str, Any], version: str, executable: Path, no_color: bool = False, no_emoji: bool = False) -> None:
-    use_color = not no_color and os.environ.get('ANSI_COLORS_DISABLED') != '1'
+    use_color = console.colors_enabled(no_color=no_color)
     _section(f"BFF-Tools {version}", CYAN, use_color=use_color)
     _row("Executable", short_path(executable), use_color=use_color)
     _row("Mode", arg.get("mode"), use_color=use_color)
@@ -130,14 +128,14 @@ def print_run_summary(*, arg: Mapping[str, Any], config: Mapping[str, Any], para
 
 
 def print_start_banner(*, no_color: bool = False, no_emoji: bool = False) -> None:
-    use_color = not no_color and os.environ.get('ANSI_COLORS_DISABLED') != '1'
+    use_color = console.colors_enabled(no_color=no_color)
     _section("Starting BFF-Tools", CYAN, use_color=use_color)
     print(_colorize("  Pipeline execution begins now", WHITE, use_color=use_color))
     print()
 
 
 def print_pipeline_status(pipeline: str, *, no_color: bool = False, no_emoji: bool = False) -> None:
-    use_color = not no_color and os.environ.get('ANSI_COLORS_DISABLED') != '1'
+    use_color = console.colors_enabled(no_color=no_color)
     emoji_map = {
         'tsv2vcf': '📄',
         'vcf2bff': '🧬',
@@ -148,7 +146,7 @@ def print_pipeline_status(pipeline: str, *, no_color: bool = False, no_emoji: bo
 
 
 def print_finish_banner(*, runtime: float, goodbye: str, no_color: bool = False, no_emoji: bool = False) -> None:
-    use_color = not no_color and os.environ.get('ANSI_COLORS_DISABLED') != '1'
+    use_color = console.colors_enabled(no_color=no_color)
     _section("BFF-Tools Finished", GREEN, use_color=use_color)
     _row("Status", "OK", use_color=use_color)
     _row("Runtime", format_duration(runtime), use_color=use_color)

@@ -536,7 +536,9 @@ class ValidatorTests(unittest.TestCase):
             ),
         )
         ignored = io.StringIO()
-        with contextlib.redirect_stdout(ignored):
+        with mock.patch.object(
+            validator.console, "colors_enabled", return_value=True
+        ), contextlib.redirect_stdout(ignored):
             print_report(report, ignore_validation=True, no_color=False, no_emoji=False)
         rendered = ignored.getvalue()
         self.assertIn("validation issue", rendered)

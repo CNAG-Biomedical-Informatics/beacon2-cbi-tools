@@ -3,7 +3,6 @@ from __future__ import annotations
 import gzip
 import json
 import math
-import os
 import re
 import shutil
 import warnings
@@ -12,6 +11,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Sequence, TextIO
 
+from . import console
 from .version import VERSION
 
 
@@ -31,13 +31,13 @@ NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$")
 ARRAY_HEADER_RE = re.compile(r"^[A-Za-z0-9-]+_")
 SCHEMA_VERSION_RE = re.compile(r"^v\d+\.\d+\.\d+$")
 SCHEMA_ROOT = Path(__file__).resolve().parent / "schemas"
-RESET = "\033[0m"
-BOLD = "\033[1m"
-BLUE = "\033[34m"
-CYAN = "\033[36m"
-GREEN = "\033[32m"
-RED = "\033[31m"
-YELLOW = "\033[33m"
+RESET = console.RESET
+BOLD = console.BOLD
+BLUE = console.BLUE
+CYAN = console.CYAN
+GREEN = console.GREEN
+RED = console.RED
+YELLOW = console.YELLOW
 COLLECTION_EMOJI = {
     "analyses": "🗂 ",
     "biosamples": "🧪 ",
@@ -253,6 +253,7 @@ def _load_schema_validator(
     collection: str,
     *,
     check_schema: bool,
+    announce: bool = True,
 ) -> Any:
     schema_path = schema_dir / collection / "defaultSchema.json"
     validator = _schema_validator(
@@ -260,7 +261,7 @@ def _load_schema_validator(
         check_schema=check_schema,
         schema_path=schema_path,
     )
-    if check_schema:
+    if check_schema and announce:
         print(f"Schema self-validation passed: {schema_path}")
     return validator
 
@@ -269,6 +270,7 @@ def validate_schemas(
     *,
     schema_dir: Path | None = None,
     collections: Sequence[str] = COLLECTIONS,
+    announce: bool = True,
 ) -> tuple[Path, ...]:
     selected_schema_dir = (schema_dir or default_schema_dir()).resolve()
     if not selected_schema_dir.is_dir():
@@ -282,6 +284,7 @@ def validate_schemas(
             selected_schema_dir,
             collection,
             check_schema=True,
+            announce=announce,
         )
         checked.append(selected_schema_dir / collection / "defaultSchema.json")
     return tuple(checked)
@@ -603,9 +606,7 @@ def validate_inputs(
 
 
 def _colorize(value: str, *codes: str, use_color: bool) -> str:
-    if not use_color:
-        return value
-    return "".join(codes) + value + RESET
+    return console.colorize(value, *codes, use_color=use_color)
 
 
 def _record_label(count: int) -> str:
@@ -619,7 +620,7 @@ def print_report(
     no_color: bool = False,
     no_emoji: bool = False,
 ) -> None:
-    use_color = not no_color and os.environ.get("ANSI_COLORS_DISABLED") != "1"
+    use_color = console.colors_enabled(no_color=no_color)
     header_prefix = "" if no_emoji else "🧬 "
     print(_colorize(f"{header_prefix}BFF Tools Validator  v{VERSION}", BOLD, CYAN, use_color=use_color))
     print(

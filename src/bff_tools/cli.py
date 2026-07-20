@@ -10,6 +10,7 @@ from pathlib import Path
 
 from .config import ConfigError, read_config_file, read_param_file
 from .demo import DemoError, run_demo
+from .doctor import run_doctor
 from .integration import IntegrationTestError, run_annotation_integration
 from .orchestrator import ExecutionError, PipelineRunner
 from .parity import ParityError, compare_bff_files
@@ -166,6 +167,35 @@ def build_parser() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="show detailed pipeline command output",
+    )
+    integration.add_argument(
+        "-nc",
+        "--no-color",
+        action="store_true",
+        help="disable ANSI colors",
+    )
+
+    doctor = subparsers.add_parser(
+        "doctor",
+        help="check installed capabilities and annotation-resource readiness",
+    )
+    doctor.add_argument(
+        "-c",
+        "--config",
+        dest="configfile",
+        help="annotation configuration file to inspect",
+    )
+    doctor.add_argument(
+        "--genome",
+        choices=("b37", "hs37", "hg19", "hg38"),
+        default="hg19",
+        help="annotation profile to inspect (default: hg19)",
+    )
+    doctor.add_argument(
+        "-nc",
+        "--no-color",
+        action="store_true",
+        help="disable ANSI colors",
     )
 
     compare = subparsers.add_parser(
@@ -329,8 +359,17 @@ def handle_test(arg: dict[str, object]) -> int:
         output_dir=str(arg["output_dir"]) if arg.get("output_dir") else None,
         threads=int(arg.get("threads") or 1),
         verbose=bool(arg.get("verbose")),
+        no_color=bool(arg.get("no_color")),
     )
     return 0
+
+
+def handle_doctor(arg: dict[str, object]) -> int:
+    return run_doctor(
+        config_file=str(arg["configfile"]) if arg.get("configfile") else None,
+        genome=str(arg.get("genome") or "hg19"),
+        no_color=bool(arg.get("no_color")),
+    )
 
 
 def handle_compare(arg: dict[str, object]) -> int:
@@ -424,6 +463,8 @@ def main(argv: list[str] | None = None) -> int:
         except (IntegrationTestError, ResourceInstallError, OSError) as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1
+    if arg["mode"] == "doctor":
+        return handle_doctor(arg)
     if arg["mode"] == "compare":
         try:
             return handle_compare(arg)

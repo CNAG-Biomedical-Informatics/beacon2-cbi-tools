@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["GA4GH", "Beacon", "bioinformatics", "genomics", "VCF"]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Science/Research",
   "Operating System :: POSIX :: Linux",
@@ -39,7 +39,7 @@ dependencies = [
 Documentation = "https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/"
 Issues = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/issues"
 Repository = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools"
-Changelog = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/Changes"
+Changelog = "https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/CHANGELOG.md"
 
 [project.scripts]
 bff-tools = "bff_tools.cli:main"

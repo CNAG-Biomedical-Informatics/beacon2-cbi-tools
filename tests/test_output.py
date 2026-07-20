@@ -98,9 +98,9 @@ class OutputTests(unittest.TestCase):
 
     def test_banners_status_and_color_controls(self) -> None:
         stream = io.StringIO()
-        with mock.patch.dict(os.environ, {}, clear=True), contextlib.redirect_stdout(
-            stream
-        ):
+        with mock.patch.dict(os.environ, {}, clear=True), mock.patch.object(
+            output.console, "colors_enabled", return_value=True
+        ), contextlib.redirect_stdout(stream):
             output.print_start_banner()
             output.print_pipeline_status("vcf2bff")
             output.print_pipeline_status("custom", no_emoji=True)

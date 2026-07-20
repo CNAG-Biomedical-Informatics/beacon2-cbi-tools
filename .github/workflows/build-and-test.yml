@@ -46,6 +46,7 @@ jobs:
           bff-tools validate --help
           bff-tools install-resources --help
           bff-tools install-resources --print-links
+          bff-tools doctor --no-color
           bff-tools test --help
           bff-tools compare --help
           bff-tools demo --output-dir /tmp/bff-tools-wheel-demo --no-browser

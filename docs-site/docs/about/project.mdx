@@ -6,7 +6,7 @@ sidebar_label: Project
 **Beacon v2 CBI Tools** is an open-source bioinformatics toolkit for preparing Beacon v2 data in Beacon Friendly Format. Its command-line interface is called **`bff-tools`**.
 
 :::note[Project name]
-**Beacon v2 CBI Tools** (`beacon2-cbi-tools`) is the actively developed continuation of the original `beacon2-ri-tools`, first developed at [EGA](https://ega-archive.org) and now maintained by its original developer at [CNAG Biomedical Informatics](https://www.cnag.eu). It is used by Beacon deployers and is independent of EGA's separate [`beacon2-ri-tools-v2`](https://github.com/EGA-archive/beacon2-ri-tools-v2) project.
+**Beacon v2 CBI Tools** is the actively developed continuation of the original `beacon2-ri-tools` codebase, now developed at [CNAG Biomedical Informatics](https://www.cnag.eu) by its original developer.
 :::
 
 <div className="about-hero">
@@ -36,23 +36,23 @@ sidebar_label: Project
   </article>
 </div>
 
-## Contributor and Acknowledgment Notes
+## Contributors
 
 <div className="about-grid">
   <article className="about-card">
-    <span className="about-kicker">Documentation author</span>
+    <span className="about-kicker">Project lead</span>
     <h3><a href="https://github.com/mrueda">Manuel Rueda, PhD</a></h3>
-    <p>Project documentation, toolkit guidance, and Beacon v2 data preparation workflows.</p>
+    <p>Original developer of <code>beacon2-ri-tools</code> and Beacon v2 CBI Tools.</p>
   </article>
   <article className="about-card">
-    <span className="about-kicker">Acknowledgments</span>
-    <h3>Bio and Dev Teams at CRG-EGA</h3>
-    <p>Bioinformatics and development support from the <a href="https://www.crg.eu/ca/programmes-groups/ega-team-european-genome-phenome-archive-crg">CRG-EGA team</a>.</p>
+    <span className="about-kicker">Toolkit contributions</span>
+    <h3><a href="https://github.com/MauricioMoldes">Mauricio Moldes</a> and <a href="https://github.com/mrrobb">Roberto Ariosa</a></h3>
+    <p>Mauricio contributed containerization; Roberto contributed the MongoDB implementation.</p>
   </article>
   <article className="about-card">
-    <span className="about-kicker">Additional thanks</span>
-    <h3>Project contributors</h3>
-    <p><a href="https://scholar.google.com/citations?user=vlDi7XAAAAAJ&hl=en">Dietmar Fernandez-Orth, PhD</a> and <a href="https://github.com/sdelatorrep">Sabela de la Torre</a>.</p>
+    <span className="about-kicker">VCF conversion lineage</span>
+    <h3><a href="https://github.com/sdelatorrep">Sabela de la Torre</a>, <a href="https://github.com/ktym/vcftobeacon">Toshiaki Katayama</a>, and <a href="https://github.com/dietmarfdz">Dietmar Fernandez-Orth, PhD</a></h3>
+    <p>Earlier work by Sabela, Toshiaki, and Dietmar informed <code>vcf2bff</code>. Dietmar also contributed usability feedback and bcftools/SnpEff commands.</p>
   </article>
 </div>
 

@@ -30,9 +30,10 @@ The toolkit prepares research data and annotations. It is not a medical device a
 ```bash
 bff-tools --version
 bff-tools --help
+bff-tools doctor
 ```
 
-The primary user commands are `validate`, `vcf`, `tsv`, and `install-resources`. The `demo` command is a resource-free first run; the separate `test` command is a developer integration check.
+The primary user commands are `validate`, `vcf`, `tsv`, and `install-resources`. The `doctor` command checks what the current installation can run without executing a pipeline. Before external data is configured, its expected final status is `CORE READY`; the `demo` command is a resource-free first run, while `test` is a developer integration check.
 
 ## 2. Run the Packaged Demo
 
@@ -73,6 +74,7 @@ For most raw VCFs, first prepare the [annotation data](annotation-data), then ru
 ```bash
 export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools install-resources
+bff-tools doctor --genome hg38
 bff-tools vcf \
   -i cohort.vcf.gz \
   --genome hg38 \

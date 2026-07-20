@@ -34,6 +34,7 @@ jobs:
           /tmp/bff-tools-wheel-test/bin/python -m pip install dist/*.whl
           cd /tmp
           /tmp/bff-tools-wheel-test/bin/bff-tools --version
+          /tmp/bff-tools-wheel-test/bin/bff-tools doctor --no-color
           /tmp/bff-tools-wheel-test/bin/bff-tools validate --check-schema
           /tmp/bff-tools-wheel-test/bin/bff-tools demo \
             --output-dir /tmp/bff-tools-testpypi-demo --no-browser

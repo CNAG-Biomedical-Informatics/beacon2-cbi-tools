@@ -1,0 +1,125 @@
+# Changelog
+
+## 2.0.13 - 2026-07-20
+
+- Replaced the Perl validator and VCF converter with parity-tested Python implementations
+- Retired the portal, queue, MongoDB loading, and legacy browser code
+- Modernized the standalone BFF GenomicVariations Browser with low-memory report generation
+- Added optional JSON Lines genomic-variation output
+- Added Python and PyPI packaging
+- Added source revision metadata to container images
+- Versioned the bundled schemas and CINECA metadata snapshots
+- Added BFF_TOOLS_DATA and resumable external-resource installation
+- Restored optional JSON Schema self-validation
+- Added a packaged onboarding demo and semantic BFF comparison command
+- Added installation diagnostics and colored integration-test stages
+
+## 2.0.12 - 2026-03-25
+
+- Refactored the Perl 5 wrapper to Python 3 while keeping the existing Perl internals in place
+- Updated CLI STDOUT formatting, colors, spinner behavior, and final messages
+- Added Python tests under 'tests/' and renamed integration data directory 'test/' to 'testdata/'
+- Updated README/docs generation to stop relying on 'pod2markdown'
+- Reduced install requirements to the core runtime dependencies and split docs dependencies into 'requirements-docs.txt'
+- Renamed 'scripts/' to 'deploy/'
+- Dockerfile: Updated the base image from Ubuntu 20.04 to Ubuntu 24.04
+
+## 2.0.11 - 2025-12-23
+
+- STDOUT spinner is turned off when --debug or --verbose are used
+- Fixed persistent COLOR in SHELL after STDERR in Docker/HPC
+- BFF Browser: added clinician-friendly filters (Pathogenic clinicalRelevance, homozygous ALT), row counters, and visual highlighting
+
+## 2.0.10 - 2025-05-15
+
+- Added 'tsv' mode to support SNP microarray data as input
+- Updated paths in 'scripts/02_test_deployment.sh'
+- Path to Java bin now can be set via config.yaml
+
+## 2.0.9 - 2025-05-10
+- Added docs
+- Made STDOUT friendlier with UTF-8 emoji (turn off via --no-emoji)
+- Restored defaults to: mem=8GB, tmpdir=/tmp, dbnsfpset=all
+- VCF2BFF
+  - Fixed error in assignment of 'clinicalRelevance' that was using 'CLINVAR_CLNSIGINCL' (i.e., haplotype-based) when present, instead of 'CLINVAR_CLNSIG'
+    - Affected variant rate in CINECA_synthetic_cohort_EUROPE_UK1 (chr22 WGS VCF):
+      - Total variants: < 0.0003% (3 / 1,109,368)
+      - ACMG-annotated variants: < 0.03% (3 / 10,580)
+  - Added additional properties '_CLINVAR_CLNSIGINCL' and '_CLINVAR_ALLELEID' (if present) to the 'clinicalInterpretations' object
+- BFF2HTML
+  - Added pattern 'MODERATE' for fetching these annotated variants in 'bff2html'.
+  - Display only one 'clinicalRelevance' per variant instead of one per 'clinicalInterpretation'
+  - Fixed issue with assigning URLs to the comma-separated ‘ClinVar’ column
+
+## 2.0.8 - 2025-03-22
+
+- The CRG FTP site has reached end-of-life after three years of availability
+  - External files moved to a new location; download script updated accordingly
+  - External datasets are now downloaded outside the container, simplifying data persistence
+- Repository renamed to 'beacon2-cbi-tools' ([C]NAG [B]iomedical [I]nformatics)
+- Repository transferred to @CNAG-Biomedical-Informatics organization
+- Added support for arm64 (Apple Silicon / M-based Macs) architectures
+- 'mongosh' is now installed via apt
+- Updated Dockerfile
+- BEACON => BFF-TOOLS:
+  - 'lib/BEACON/ => 'pipeline/' and 'Beacon.pm' => 'Tools.pm'
+  - 'mongodb' mode renamed to 'load'
+  - Added 'validate' mode runs 'utils/bff_validator/bff-validator'
+  - Now accepts pre-annotated VCFs using `annotate: false` in YAML configuration (requires mandatory ANN fields)
+  - Added an 'examples' directory featuring hg38 (GRCh38)
+  - Added spinner for interactive execution of 'bin/bff-tools'
+  - Added basic tests in 't/' directory
+  - Internal scripts moved from 'lib/BEACON/bin/' to 'pipeline/internal/{complete,partial}/'
+  - Updated 'bin/config.yaml' with placeholder `{base}`
+  - Added $version, $java, and $arch information to 'log.json'
+  - Updated tools versions:
+    - 'bcftools': 1.15.1 -> 1.21-103
+    - 'mongo-database-tools': ubuntu2004-100.5.1 -> ubuntu2204-100.9.4
+    - 'ClinVar' from clinvar_20211218* to clinvar_20250312*
+  - VCF2BFF:
+    - Renamed legacy Perl modules under pipeline/
+    - Added t/ and debugging mode 'bff-pretty'
+    - Now reads 'annotatedWith' from external 'config.yaml' (fixed typo: toolreferences.dbSNSFP -> dbNSFP)
+    - Added Sequence Ontology (SO) terms for calculated variant consequences:
+        https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html
+
+## 2.0.7 - 2025-02-22
+- Moved 'browser/web' to 'utils/bff_browser/static/assets'
+- Added argument '-projectdir-override' to enable external assignment of id (e.g., Celery)
+- Renamed internal parameter from 'ncpu' to 'threads' and option '-n' to '-t'
+
+## 2.0.6 - 2025-01-15
+- Created a Flask app for 'utils/bff_browser' (currently in development)
+- Changed 'bff2html' to output JSON arrays instead of NDJSON for files like 'foo.json' (e.g., 'exome.json')
+- Updated 'docker-compose.yaml' to reflect recent changes
+- Renamed 'bff_api' to 'bff_portal' and added a basic frontend interface for the API
+
+## 2.0.5 - 2025-01-07
+- The 'config.yaml' for the 'beacon' script is now pre-formatted for the Dockerized version
+- Renamed 'testdata/param.in' to 'testdata/param.yaml'
+- Enforced Browser HTML display using Python3's default HTTP server
+
+## 2.0.4 - 2024-12-03
+- Moved 'beacon' script to 'bin/beacon' and updated paths.
+- Reorganized repo in folders
+
+## 2.0.3 - 2024-05-24
+- Added Unicode support to 'utils/bff_validator'
+
+## 2.0.2 - 2024-02-07
+- Updated 'docker-compose.yml'.
+- Changed 'config.yml' to enable connecting to @mongo from within 'beacon2-ri-tools' container
+
+## 2.0.1 - 2024-01-22
+- Updated contact email to @cnag.eu.
+- 'utils/bff-validator': Adjusted STDOUT printout details
+- 'test': Sorted 'frequencyInPopulations' by key in 'genomicVariationsVcf.json.gz'
+- Docker Hub location updated to 'manuelrueda/beacon2-ri-tools'
+- Moved 'BEACON' to 'pipeline/BEACON'
+- Fixed 'Dockerfile':
+    - Changed base image from 'ubuntu' to 'ubuntu:20.04' (thanks to SJD folks)
+
+## 2.0.0 - 2022-08-18
+- Stable version released along with the accompanying paper:
+    * _Bioinformatics_, btac568, https://doi.org/10.1093/bioinformatics/btac568
+- Works with [Beacon v2.0.0](https://github.com/ga4gh-beacon/beacon-v2/releases/tag/v2.0.0) specification

@@ -61,6 +61,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 | Command | Use it for |
 |---|---|
+| `bff-tools doctor` | Check installed capabilities and annotation-resource readiness without running a pipeline |
 | `bff-tools demo` | Verify an installation and inspect generated BFF without external annotation resources |
 | `bff-tools validate` | Build and validate BFF metadata from XLSX, or validate existing BFF JSON |
 | `bff-tools vcf` | Convert a VCF or VCF.gz file into BFF `genomicVariations` |

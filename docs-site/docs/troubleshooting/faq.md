@@ -18,10 +18,18 @@ description: Practical answers for installing bff-tools, correcting Beacon metad
 | SNP-array TSV/TXT | `bff-tools tsv -i input.txt.gz` | BFF genomic variations |
 | Generated genomic BFF | `bff-tools validate -i genomicVariationsVcf.json.gz --gv-vcf` | Validation report only |
 | External annotation bundle | `bff-tools install-resources` | Verified local resources |
+| Installation or resource diagnosis | `bff-tools doctor --genome NAME` | Capability report and actionable fixes |
 
 ## Installation and Annotation
 
 <div className="faqList">
+
+<details>
+<summary>How do I check an installation before running data?</summary>
+
+Run `bff-tools doctor`. It checks packaged assets, schemas, required shell tools, and the selected annotation profile without creating output. `CORE READY (annotation not configured)` is successful when no external bundle has been selected. After setting `BFF_TOOLS_DATA`, run `bff-tools doctor --genome hg19`, `hg38`, or `hs37`; an explicitly configured missing or incomplete resource exits nonzero and names the path to correct.
+
+</details>
 
 <details>
 <summary>Do I need the annotation bundle?</summary>
@@ -367,7 +375,7 @@ The useful static-browser workflow is integrated into `bff-tools vcf --browser` 
 <details>
 <summary>Should I update to the latest release?</summary>
 
-Generally, yes. Releases contain converter fixes, schema alignment, dependency updates, and documentation corrections. Review `Changes` and run your representative inputs in a separate output directory before replacing a production installation. Keep the previous image or environment until record counts, validation, and biological spot checks pass.
+Generally, yes. Releases contain converter fixes, schema alignment, dependency updates, and documentation corrections. Review `CHANGELOG.md` and run your representative inputs in a separate output directory before replacing a production installation. Keep the previous image or environment until record counts, validation, and biological spot checks pass.
 
 </details>
 

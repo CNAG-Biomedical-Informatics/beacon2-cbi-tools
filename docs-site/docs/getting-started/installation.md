@@ -23,9 +23,12 @@ python3 -m venv .venv
 python3 -m pip install --upgrade pip
 python3 -m pip install beacon2-cbi-tools
 bff-tools --version
+bff-tools doctor
 ```
 
 The package installs the command as `bff-tools`. The `bin/bff-tools` path is only a compatibility shim for running directly from a Git checkout.
+
+Before installing external annotation data, `doctor` should finish with `CORE READY (annotation not configured)`. This is a successful result: metadata validation, compatible pre-annotated VCF conversion, and standalone browser generation are available.
 
 The PyPI package provides the Python application, bundle installer, default annotation-resource layout, schemas, templates, panels, and browser assets. It does not contain the large external annotation bundle. Metadata validation and conversion of a compatible pre-annotated VCF can run immediately; raw VCF and TSV workflows also require the annotation layer described below.
 
@@ -63,10 +66,11 @@ Every installation should provide:
 
 ```bash
 bff-tools --version
+bff-tools doctor
 bff-tools validate --help
 bff-tools vcf --help
 bff-tools install-resources --help
 bff-tools demo
 ```
 
-The demo verifies conversion, schema validation, and browser generation without the external bundle. After preparing annotation data, process a small representative raw VCF with the production configuration before starting a cohort-scale run. Project and bundle maintainers can additionally run the [packaged compact integration test](annotation-data#packaged-integration-test).
+The doctor verifies packaged assets and reports readiness by capability without running a pipeline. The demo then exercises conversion, schema validation, and browser generation without the external bundle. After preparing annotation data, run `bff-tools doctor --genome NAME` and process a small representative raw VCF with the production configuration before starting a cohort-scale run. Project and bundle maintainers can additionally run the [packaged compact integration test](annotation-data#packaged-integration-test).

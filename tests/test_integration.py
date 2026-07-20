@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
 import subprocess
 import tempfile
 import unittest
@@ -18,6 +19,12 @@ if str(SRC) not in sys.path:
 from bff_tools import cli, integration  # noqa: E402
 from bff_tools.config import DATA_ROOT_ENV  # noqa: E402
 from bff_tools.parity import ParityError, ParityResult  # noqa: E402
+from bff_tools.resource_installer import ResourceInstallError  # noqa: E402
+
+
+class _TTY(io.StringIO):
+    def isatty(self) -> bool:
+        return True
 
 
 class IntegrationTests(unittest.TestCase):
@@ -78,6 +85,9 @@ class IntegrationTests(unittest.TestCase):
             "Packaged compact annotation integration passed", stdout.getvalue()
         )
         self.assertIn(f"Integration output retained in {output_dir}", stdout.getvalue())
+        self.assertIn("[PASS] Annotation and VCF-to-BFF pipeline", stdout.getvalue())
+        self.assertIn("[PASS] BFF schema validation", stdout.getvalue())
+        self.assertNotIn("\033[", stdout.getvalue())
 
     def test_temporary_output_is_removed_after_success(self) -> None:
         generated_project: Path | None = None
@@ -105,24 +115,27 @@ class IntegrationTests(unittest.TestCase):
         self.assertFalse(generated_project.exists())
 
     def test_preflight_and_command_failures_are_actionable(self) -> None:
-        with self.assertRaisesRegex(integration.IntegrationTestError, "positive"):
-            integration.run_annotation_integration(data_dir="/tmp", threads=0)
+        with contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(integration.IntegrationTestError, "positive"):
+                integration.run_annotation_integration(data_dir="/tmp", threads=0)
 
-        with self.assertRaisesRegex(integration.IntegrationTestError, "does not exist"):
-            integration.run_annotation_integration(
-                data_dir="/definitely/missing/bff-tools-data"
-            )
+        with contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(integration.IntegrationTestError, "does not exist"):
+                integration.run_annotation_integration(
+                    data_dir="/definitely/missing/bff-tools-data"
+                )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             existing = Path(tmpdir) / "existing"
             existing.mkdir()
-            with self.assertRaisesRegex(
-                integration.IntegrationTestError, "output already exists"
-            ):
-                integration.run_annotation_integration(
-                    data_dir=tmpdir,
-                    output_dir=str(existing),
-                )
+            with contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(
+                    integration.IntegrationTestError, "output already exists"
+                ):
+                    integration.run_annotation_integration(
+                        data_dir=tmpdir,
+                        output_dir=str(existing),
+                    )
 
             failed = lambda command, **_kwargs: subprocess.CompletedProcess(command, 2)
             with contextlib.redirect_stdout(io.StringIO()):
@@ -133,6 +146,55 @@ class IntegrationTests(unittest.TestCase):
                         data_dir=tmpdir,
                         run=failed,
                     )
+
+    def test_preflight_marks_missing_fixture_and_resource_configuration(self) -> None:
+        output = io.StringIO()
+        with mock.patch.object(
+            integration,
+            "REQUIRED_ASSETS",
+            (Path("/missing/integration-fixture"),),
+        ), contextlib.redirect_stdout(output):
+            with self.assertRaisesRegex(
+                integration.IntegrationTestError, "fixture is incomplete"
+            ):
+                integration.run_annotation_integration(data_dir="/tmp")
+        self.assertIn("[FAIL] Packaged integration fixtures", output.getvalue())
+
+        output = io.StringIO()
+        with mock.patch.object(
+            integration,
+            "resolve_data_directory",
+            side_effect=ResourceInstallError("BFF_TOOLS_DATA is unset"),
+        ), contextlib.redirect_stdout(output):
+            with self.assertRaisesRegex(ResourceInstallError, "unset"):
+                integration.run_annotation_integration()
+        self.assertIn("[FAIL] Annotation resource root", output.getvalue())
+
+    def test_test_statuses_use_color_only_on_a_tty(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            data_dir = root / "data"
+            data_dir.mkdir()
+            output_dir = root / "output"
+
+            def run(command, **_kwargs):
+                if "vcf" in command:
+                    actual = output_dir / "vcf" / "genomicVariationsVcf.json.gz"
+                    actual.parent.mkdir(parents=True)
+                    actual.write_bytes(integration.EXPECTED_BFF.read_bytes())
+                return subprocess.CompletedProcess(command, 0)
+
+            output = _TTY()
+            with mock.patch.dict(os.environ, {}, clear=True), contextlib.redirect_stdout(
+                output
+            ):
+                integration.run_annotation_integration(
+                    data_dir=str(data_dir),
+                    output_dir=str(output_dir),
+                    run=run,
+                )
+        self.assertIn("\033[", output.getvalue())
+        self.assertIn("[PASS]", output.getvalue())
 
     def test_parity_failures_report_record_and_json_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -202,6 +264,7 @@ class IntegrationTests(unittest.TestCase):
                         "--threads",
                         "4",
                         "--verbose",
+                        "--no-color",
                     ]
                 ),
                 0,
@@ -211,6 +274,7 @@ class IntegrationTests(unittest.TestCase):
             output_dir="/output",
             threads=4,
             verbose=True,
+            no_color=True,
         )
 
         stderr = io.StringIO()

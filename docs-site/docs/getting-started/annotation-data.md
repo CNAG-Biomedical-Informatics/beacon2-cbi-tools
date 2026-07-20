@@ -125,7 +125,15 @@ On a scheduler, request memory and temporary storage for both Java annotation an
 
 ## Preflight
 
-The CLI checks every required executable, reference file, and temporary directory before creating output. A successful preflight does not verify biological version compatibility, so record database versions and manually inspect representative ANN, dbNSFP, ClinVar, and COSMIC records after each resource update.
+Inspect one assembly profile without starting a pipeline:
+
+```bash
+bff-tools doctor --genome hg38
+```
+
+For the standard layout, doctor verifies the `r3` marker, top-level bundle directories, Java, bcftools, SnpEff/SnpSift, FASTA, ClinVar, COSMIC, dbNSFP, and the writable temporary directory. A custom `--config` or `BFF_TOOLS_CONFIG` layout is validated from its resolved paths and does not require the standard bundle marker.
+
+The normal `vcf` and `tsv` commands repeat the relevant preflight before creating output. A successful doctor or command preflight does not verify biological version compatibility, so record database versions and manually inspect representative ANN, dbNSFP, ClinVar, and COSMIC records after each resource update.
 
 ## Packaged Integration Test
 
@@ -145,6 +153,8 @@ Temporary output is removed after a successful run. Retain the generated project
 ```bash
 bff-tools test --output-dir annotation-integration-review --verbose
 ```
+
+The parent test stages use colored `[PASS]`, `[INFO]`, and `[FAIL]` labels while annotation output continues to stream. Use `--no-color` or either `NO_COLOR=1` or `ANSI_COLORS_DISABLED=1` for plain logs.
 
 This built-in test starts from a compact raw **1000 Genomes GRCh37 chromosome 1** VCF packaged with the application. It runs bcftools normalization, SnpEff, dbNSFP, ClinVar, COSMIC, Python VCF-to-BFF conversion, streamed schema validation, and semantic comparison of all 1,044 emitted records. The fixture needs no separate download, but the annotation bundle must exist at `BFF_TOOLS_DATA` or be supplied with `--data-dir`. The manually dispatched GitHub Actions workflow invokes this same compact test on a self-hosted runner.
 
