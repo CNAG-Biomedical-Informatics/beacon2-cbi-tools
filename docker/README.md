@@ -122,7 +122,7 @@ release build, check out the release tag and confirm that the worktree is clean
 before building:
 
 ```bash
-git checkout 2.0.13
+git checkout v2.0.13
 git status --short
 ```
 
@@ -132,13 +132,15 @@ The Dockerfile provides two targets. Pass the version and revision as image
 metadata; these arguments identify the source but do not select or download it:
 
 ```bash
+version=$(python3 -c 'import runpy; print(runpy.run_path("src/bff_tools/version.py")["VERSION"])')
+
 docker build --target core \
-  --build-arg BFF_TOOLS_VERSION="$(cat VERSION)" \
+  --build-arg BFF_TOOLS_VERSION="$version" \
   --build-arg VCS_REF="$(git rev-parse HEAD)" \
   -t beacon2-cbi-tools:core -f docker/Dockerfile .
 
 docker build --target runtime \
-  --build-arg BFF_TOOLS_VERSION="$(cat VERSION)" \
+  --build-arg BFF_TOOLS_VERSION="$version" \
   --build-arg VCS_REF="$(git rev-parse HEAD)" \
   -t beacon2-cbi-tools:annotation -f docker/Dockerfile .
 ```
@@ -152,11 +154,12 @@ docker inspect beacon2-cbi-tools:annotation \
   --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}'
 ```
 
-The manual Docker GitHub Action follows the same source model: it builds the
-ref selected when launching the workflow, records that exact commit, and
+The manual Docker GitHub Action follows the same source model: it checks out
+the `release_tag` entered when launching the workflow, verifies that it matches
+the Python package version, records that exact commit, and
 publishes both `manuelrueda/beacon2-cbi-tools:<VERSION>` and `:latest`. For a
-release, create and push the release tag first, then launch the action against
-that tag. Pull an immutable image digest when byte-for-byte identity with a
+release, create and push the release tag first, then enter that tag when
+launching the action. Pull an immutable image digest when byte-for-byte identity with a
 published image is required.
 
 ## Verification

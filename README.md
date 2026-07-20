@@ -22,108 +22,33 @@
 
 The two historical image badges preserve the download record of earlier distributions; those images are deprecated for new installations.
 
-## Quick links
-
-- Documentation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/>
-- Installation: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/>
-- Quick start: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/quick-start/>
-- End-to-end tutorial: <https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/workflows/data-beaconization/>
-- Docker image: <https://hub.docker.com/r/manuelrueda/beacon2-cbi-tools/tags>
-
-## What it does
-
-- Validates XLSX workbooks and BFF JSON against the bundled Beacon v2 schemas, with optional schema self-validation.
-- Serializes workbook metadata into deterministic BFF collections.
-- Normalizes and annotates raw VCF input with SnpEff, dbNSFP, ClinVar, and COSMIC.
-- Converts VCF or SNP-array TSV data into streamed, compressed BFF `genomicVariations`.
-- Generates a standalone **BFF Tools Browser** for clinical-style review.
-
 The output remains independent of a particular Beacon server or database. For serving, consider the [Beacon v2 Production Implementation](https://github.com/EGA-archive/beacon2-pi-api) or [bycon](https://codeberg.org/Progenetix/bycon/).
 
-## How data flows
-
-![Flow from source metadata and variants through Beacon v2 CBI Tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
+**[Read the documentation](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/)** for installation options, the quick start, the end-to-end tutorial, CLI reference, annotation resources, and troubleshooting.
 
 ## Install
-
-Python 3.10 through 3.14 is supported:
 
 ```bash
 python3 -m pip install beacon2-cbi-tools
 ```
 
-Docker, Apptainer, and source/HPC installations are first-class options in the [installation guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/). The large annotation bundle remains outside the package and is installed with `bff-tools install-resources` into the directory selected by `BFF_TOOLS_DATA`.
+Python 3.10 through 3.14 is supported. Docker, Apptainer, and source/HPC instructions are available in the [installation guide](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/getting-started/installation/).
 
-## Main command
-
-The `bff-tools` command has three focused data modes, a resource setup command, and small verification utilities:
-
-- `validate`: build and validate BFF metadata from XLSX, or validate existing BFF JSON.
-- `vcf`: annotate and convert VCF data, with optional browser generation.
-- `tsv`: convert SNP-array TSV input through VCF into BFF.
-- `install-resources`: download and verify the external annotation bundle.
-- `doctor`: check packaged capabilities and the selected annotation profile.
-- `demo`: generate validated BFF and a browser from a packaged annotated example.
-- `compare`: compare large BFF genomic-variation outputs semantically and with bounded memory.
-- `test`: run the compact annotation integration check for maintainers.
+Check the installation and run the packaged example without downloading annotation databases:
 
 ```bash
-bff-tools --help
 bff-tools doctor
-```
-
-Without external annotation data, `doctor` reports `CORE READY`: metadata validation, compatible pre-annotated VCF conversion, and browser generation are available. After setting `BFF_TOOLS_DATA`, use `bff-tools doctor --genome NAME` to verify the complete raw-annotation profile.
-
-Try the converter, validator, and browser without downloading external annotation data:
-
-```bash
 bff-tools demo
 ```
 
-## Quick start
+## Data flow
 
-Create a workbook template, fill it, then build and validate BFF JSON:
-
-```bash
-bff-tools validate --template-out metadata.xlsx
-bff-tools validate -i metadata.xlsx -o bff
-```
-
-Convert and annotate a cohort VCF:
-
-```bash
-export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
-bff-tools install-resources
-bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1 \
-  --annotate --browser
-```
-
-Annotation is enabled by default and requires the external bundle. Use `--no-annotate` only when the input already contains a compatible SnpEff `ANN` header and records; dbNSFP and ClinVar fields remain strongly recommended for complete BFF output.
-
-## Example workflow
-
-1. Prepare and validate metadata with `bff-tools validate`.
-2. Convert VCF or SNP-array input with `bff-tools vcf` or `bff-tools tsv`.
-3. Inspect the generated BFF files and optional standalone browser.
-4. Import the collections into the storage layer used by the selected Beacon implementation.
-
-The populated [CINECA synthetic cohort](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/tree/main/CINECA_synthetic_cohort_EUROPE_UK1) provides a real-world metadata example. Its workbook and generated BFF collections are preserved together by Beacon schema version, with compatibility aliases pointing to the current snapshot. Compact annotated VCF fixtures are kept in `testdata/`; full release acceptance uses the complete 2,504-sample CINECA chromosome 22 data outside Git.
+![Flow from source metadata and variants through Beacon v2 CBI Tools to portable BFF files and a downstream Beacon service](docs-site/static/img/beaconization-workflow.svg)
 
 ## Roadmap
 
 - Follow Beacon v2 developments, including VRS alignment.
 - Move to Beacon v3 once the specification is finalized.
-
-## Development and validation
-
-```bash
-python3 -m pip install ".[test]"
-pytest -q
-```
-
-Maintainers can run `bff-tools test` with `BFF_TOOLS_DATA` set to exercise every annotation stage using the packaged compact chromosome 1 fixture. The full CINECA chromosome 22 release gate is a separate external run documented under [Validation and Trust](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/docs/reference/validation-and-reproducibility#full-cineca-release-fixture).
-
-The Python validator reproduces the former Perl output byte-for-byte across all 10,018 CINECA metadata records. The VCF converter is checked against versioned reference output with strict type-sensitive streamed comparisons, including the complete 1,110,240-record normalized chromosome 22 acceptance dataset.
 
 ## Citation
 
@@ -131,10 +56,6 @@ If you use these tools in published work, please cite:
 
 Rueda M, Ariosa R. "Beacon v2 Reference Implementation: a toolkit to enable federated sharing of genomic and phenotypic data." *Bioinformatics*, btac568. <https://doi.org/10.1093/bioinformatics/btac568>
 
-## Author
-
-Written by Manuel Rueda, PhD, [CNAG Biomedical Informatics](https://www.cnag.eu).
-
 ## License
 
-GNU General Public License v3.0 or later. See the [LICENSE](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/LICENSE).
+Written by Manuel Rueda, PhD, at [CNAG Biomedical Informatics](https://www.cnag.eu). Licensed under the GNU General Public License v3.0 or later; see [LICENSE](https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools/blob/main/LICENSE).

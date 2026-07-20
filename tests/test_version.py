@@ -17,12 +17,10 @@ from bff_tools.vcf2bff import VERSION as CONVERTER_VERSION  # noqa: E402
 
 
 class VersionTests(unittest.TestCase):
-    def test_runtime_versions_match_generated_release_marker(self) -> None:
-        release_marker = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        self.assertEqual(VERSION, release_marker)
-        self.assertEqual(__version__, release_marker)
-        self.assertEqual(CLI_VERSION, release_marker)
-        self.assertEqual(CONVERTER_VERSION, release_marker)
+    def test_runtime_versions_use_the_canonical_python_version(self) -> None:
+        self.assertEqual(__version__, VERSION)
+        self.assertEqual(CLI_VERSION, VERSION)
+        self.assertEqual(CONVERTER_VERSION, VERSION)
 
     def test_converter_remains_directly_executable(self) -> None:
         result = subprocess.run(

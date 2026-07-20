@@ -29,9 +29,9 @@ jobs:
         run: |
           python - <<'PY'
           import os
-          from pathlib import Path
+          import runpy
 
-          version = Path("VERSION").read_text(encoding="utf-8").strip()
+          version = runpy.run_path("src/bff_tools/version.py")["VERSION"]
           tag = os.environ["RELEASE_TAG"].removeprefix("v")
           if tag != version:
               raise SystemExit(f"release tag {tag!r} does not match project version {version!r}")
