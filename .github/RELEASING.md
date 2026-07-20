@@ -26,9 +26,10 @@ TestPyPI betas are built manually from committed `main` without creating Git tag
 ## Stable Release
 
 1. Replace the prerelease version with the final version, update `CHANGELOG.md`, and rerun the release gates.
-2. Create and push an annotated tag for the accepted commit (for example, `v2.0.13`). The tag is the release record for this project and automatically starts **Publish to PyPI**.
-3. Approve the protected `pypi` environment if prompted, then verify the trusted-publishing workflow completes.
-4. Manually launch the multi-architecture Docker workflow and enter the same stable tag in `release_tag`.
-5. Verify that the PyPI, Git tag, and Docker versions identify the same source revision.
+2. Configure PyPI trusted publishing with workflow `publish-pypi.yml` and environment `pypi`.
+3. Create and push an annotated tag for the accepted commit (for example, `v2.0.13`). The tag is the release record for this project and automatically starts **Publish to PyPI**.
+4. Approve the protected `pypi` environment if prompted, then verify the trusted-publishing workflow completes.
+5. Manually launch the multi-architecture Docker workflow and enter the same stable tag in `release_tag`.
+6. Verify that the PyPI, Git tag, and Docker versions identify the same source revision.
 
 Never reuse a published Python version or move a stable release tag. TestPyPI and PyPI artifacts are immutable.
