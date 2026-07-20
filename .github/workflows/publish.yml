@@ -1,12 +1,9 @@
 name: Publish to PyPI
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: Release tag to publish (for example, v2.0.13)
-        required: true
-        type: string
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
@@ -16,23 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.release_tag }}
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Check release version
-        env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           python - <<'PY'
           import os
           import runpy
 
           version = runpy.run_path("src/bff_tools/version.py")["VERSION"]
-          tag = os.environ["RELEASE_TAG"].removeprefix("v")
+          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
           if tag != version:
               raise SystemExit(f"release tag {tag!r} does not match project version {version!r}")
           if "dev" in version:

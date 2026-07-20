@@ -1,6 +1,6 @@
 # Release Process
 
-TestPyPI betas are built from committed `main` without creating Git tags. Stable releases use annotated Git tags; this project does not create separate GitHub Releases. All GitHub Actions workflows remain manually dispatched so the source ref is selected deliberately.
+TestPyPI betas are built manually from committed `main` without creating Git tags. Stable PyPI publication starts when an annotated `v*` tag is pushed. Docker publication remains manually dispatched against that same tag. This project does not create separate GitHub Releases.
 
 ## Prerelease
 
@@ -26,8 +26,8 @@ TestPyPI betas are built from committed `main` without creating Git tags. Stable
 ## Stable Release
 
 1. Replace the prerelease version with the final version, update `CHANGELOG.md`, and rerun the release gates.
-2. Create and push an annotated tag for the accepted commit (for example, `v2.0.13`). The tag is the release record for this project.
-3. Manually launch **Publish to PyPI** and select the stable tag. The protected `pypi` environment uses PyPI trusted publishing.
+2. Create and push an annotated tag for the accepted commit (for example, `v2.0.13`). The tag is the release record for this project and automatically starts **Publish to PyPI**.
+3. Approve the protected `pypi` environment if prompted, then verify the trusted-publishing workflow completes.
 4. Manually launch the multi-architecture Docker workflow and enter the same stable tag in `release_tag`.
 5. Verify that the PyPI, Git tag, and Docker versions identify the same source revision.
 
