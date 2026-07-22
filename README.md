@@ -22,8 +22,6 @@
 
 The two historical image badges preserve the download record of earlier distributions; those images are deprecated for new installations.
 
-The output remains independent of a particular Beacon server or database. For serving, consider the [Beacon v2 Production Implementation](https://github.com/EGA-archive/beacon2-pi-api) or [bycon](https://codeberg.org/Progenetix/bycon/).
-
 **[Read the documentation](https://cnag-biomedical-informatics.github.io/beacon2-cbi-tools/)** for installation options, the quick start, the end-to-end tutorial, CLI reference, annotation resources, and troubleshooting.
 
 ## Install
