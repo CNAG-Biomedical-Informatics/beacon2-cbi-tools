@@ -84,6 +84,10 @@ Convert and validate the completed workbook:
 bff-tools validate -i metadata.xlsx -o bff
 ```
 
+:::tip[Starting from an existing spreadsheet or clinical format?]
+The workbook above is designed for metadata already arranged in Beacon entity worksheets. For a regular Excel table, export the relevant worksheet as CSV and use [Convert-Pheno](https://github.com/CNAG-Biomedical-Informatics/convert-pheno) to map its columns to BFF. Convert-Pheno also supports sources such as REDCap, OMOP CDM, Phenopackets v2, FHIR, and CDISC. Validate the generated BFF collections with `bff-tools validate` before loading them into a Beacon.
+:::
+
 ```text title="Successful metadata validation"
 🧬 BFF Tools Validator  v2.0.13
 Build and validate BFF metadata from XLSX, or validate existing BFF JSON

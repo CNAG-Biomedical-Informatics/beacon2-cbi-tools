@@ -226,7 +226,7 @@ Support is limited. The production mapping is designed for SNVs and nucleotide i
 
 No. `bff-tools validate` accepts existing BFF JSON collections directly. The workbook is provided because it makes mapping nested Beacon entities approachable and produces deterministic JSON.
 
-For REDCap, OMOP CDM, Phenopackets v2, or general CSV conversion, see [Convert-Pheno](https://github.com/CNAG-Biomedical-Informatics/convert-pheno), then validate the resulting BFF JSON here.
+For a regular Excel table, export the relevant worksheet as CSV and use [Convert-Pheno](https://github.com/CNAG-Biomedical-Informatics/convert-pheno) to map its columns to BFF. Convert-Pheno also supports REDCap, OMOP CDM, Phenopackets v2, FHIR, CDISC, and other clinical formats. Validate the resulting BFF JSON here.
 
 </details>
 
