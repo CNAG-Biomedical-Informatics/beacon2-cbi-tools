@@ -197,14 +197,14 @@ The generated BFF uses **0-start, half-open** intervals. VCF `POS` is 1-based; t
 <details>
 <summary>Can I keep my existing VCF annotations?</summary>
 
-Yes, when they follow the SnpEff ANN structure expected by the converter. Run with `--no-annotate` to preserve the input and skip normalization and re-annotation:
+Yes, when they follow the SnpEff ANN structure expected by the converter and are already normalized to **one ALT allele per record (biallelic records)**. Run with `--no-annotate` to preserve the input and skip normalization and re-annotation:
 
 ```bash
 bff-tools vcf -i cohort.annotated.vcf.gz \
   --genome hg38 --dataset-id cohort-1 --no-annotate
 ```
 
-ANN is required. dbNSFP and ClinVar are not required for parsing, but omitting them produces less complete identifiers, frequencies, prediction fields, and clinical interpretations.
+ANN is required. Because normalization is skipped, multiallelic records must be split before running this command. dbNSFP and ClinVar are not required for parsing, but omitting them produces less complete identifiers, frequencies, prediction fields, and clinical interpretations.
 
 </details>
 

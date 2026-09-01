@@ -219,6 +219,10 @@ bff-tools vcf \
   -o cohort-bff
 ```
 
+:::warning[`--no-annotate` requires biallelic input]
+This option skips bcftools normalization as well as annotation. The input must already contain **one ALT allele per record**. Split multiallelic records before conversion; otherwise genotype allele indexes and allele-specific annotations cannot be mapped reliably.
+:::
+
 :::info[CINECA chr22 observed benchmark]
 On a 6-core ARM64 Linux workstation, an end-to-end run completed in **13 minutes 52 seconds**. It normalized 1,103,547 source records into 1,110,240 records, applied SnpEff, dbNSFP, ClinVar, and COSMIC annotations, produced 1,109,368 BFF records for 2,504 samples, and generated a standalone report containing 14,305 panel-matched variants.
 

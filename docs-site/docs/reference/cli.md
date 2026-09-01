@@ -110,7 +110,7 @@ export BFF_TOOLS_DATA=/absolute/path/to/beacon2-cbi-tools-data
 bff-tools vcf -i cohort.vcf.gz --genome hg38 --dataset-id cohort-1
 ```
 
-Annotation is enabled by default because the converter requires a compatible SnpEff `ANN` header. Pass `--no-annotate` only when the input VCF is already annotated. Raw input requires the external annotation bundle selected through `BFF_TOOLS_DATA`.
+Annotation is enabled by default because the converter requires a compatible SnpEff `ANN` header. Pass `--no-annotate` only when the input VCF is already annotated **and already normalized to one ALT allele per record (biallelic records)**. This option bypasses the bcftools normalization stage as well as annotation. Raw input requires the external annotation bundle selected through `BFF_TOOLS_DATA`.
 
 ```bash
 bff-tools vcf -i cohort.annotated.vcf.gz \
@@ -139,7 +139,7 @@ TSV conversion creates a VCF intermediate, annotates it, and then uses the same 
 | `--genome NAME` | `hg19`, `hg38`, `hs37`, or `b37` |
 | `--dataset-id ID` | Dataset identifier embedded in BFF records |
 | `--sample-id ID` | Sample identifier used by TSV conversion |
-| `--annotate`, `--no-annotate` | Annotation is enabled by default; disable only for a compatibly annotated VCF |
+| `--annotate`, `--no-annotate` | Annotation is enabled by default; disable only for a compatibly annotated, normalized biallelic VCF |
 | `--browser`, `--no-browser` | Enable or disable standalone HTML generation |
 | `--jsonl`, `--no-jsonl` | Write JSON Lines (`.jsonl.gz`) instead of the default JSON array |
 | `--verbose` | Stream stage output rather than showing the interactive spinner |

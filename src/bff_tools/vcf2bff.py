@@ -54,21 +54,11 @@ ANNOTATED_WITH = {
     },
 }
 
-CHROMOSOME_NAMES = {
-    **{str(value): str(value) for value in range(1, 23)},
-    **{f"chr{value}": str(value) for value in range(1, 23)},
-    "X": "X",
-    "Y": "Y",
-    "chr23": "X",
+LEGACY_CONTIG_ALIASES = {
     "23": "X",
-    "chr24": "Y",
     "24": "Y",
-    "chr25": "XY",
     "25": "XY",
-    "chr26": "MT",
     "26": "MT",
-    "chrM": "MT",
-    "M": "MT",
 }
 
 SEQUENCE_ONTOLOGY = {
@@ -273,6 +263,34 @@ def parse_info_field(value: str, uid: str) -> dict[str, str]:
     if len(flattened) % 2:
         raise ConversionError(f"Uneven INFO field count for {uid}")
     return dict(zip(flattened[::2], flattened[1::2]))
+
+
+def canonical_contig_name(value: str) -> str:
+    raw = value.strip()
+    if not raw:
+        return raw
+
+    candidate = raw[3:] if raw[:3].lower() == "chr" else raw
+    upper = candidate.upper()
+    if candidate.isdigit():
+        number = int(candidate)
+        if 1 <= number <= 22:
+            return str(number)
+        return LEGACY_CONTIG_ALIASES.get(str(number), raw)
+    if upper in {"X", "Y", "XY"}:
+        return upper
+    if upper in {"M", "MT"}:
+        return "MT"
+
+    # Preserve non-canonical contigs (for example RefSeq accessions) rather than
+    # silently emitting an empty reference-sequence identifier.
+    return raw
+
+
+def variant_internal_id(variant: dict[str, str]) -> str:
+    contig = canonical_contig_name(variant["CHROM"])
+    prefix = contig if contig[:3].lower() == "chr" else f"chr{contig}"
+    return f"{prefix}_{variant['POS']}_{variant['REF']}_{variant['ALT']}"
 
 
 def molecular_annotation_positions(names: Sequence[str]) -> tuple[int, int, int, int]:
@@ -554,7 +572,6 @@ def map_record(
     info: dict[str, str],
     molecular_attributes: dict[str, Any],
     case_level_data: list[dict[str, Any]],
-    uid: str,
     *,
     genome: str,
     dataset_id: str,
@@ -563,7 +580,9 @@ def map_record(
 ) -> dict[str, Any]:
     position = int(variant["POS"])
     start = position - 1
-    identifiers = map_identifiers(variant, info)
+    contig = canonical_contig_name(variant["CHROM"])
+    normalized_variant = {**variant, "CHROM": contig}
+    identifiers = map_identifiers(normalized_variant, info)
     record: dict[str, Any] = {
         "_info": {
             "vcf2bff": provenance,
@@ -583,9 +602,9 @@ def map_record(
         "end": [position],
         "startInteger": start,
         "endInteger": position,
-        "refseqId": CHROMOSOME_NAMES.get(variant["CHROM"], ""),
+        "refseqId": contig,
     }
-    record["variantInternalId"] = uid
+    record["variantInternalId"] = variant_internal_id(normalized_variant)
     variant_level = map_variant_level_data(info, annotated_with)
     if variant_level:
         record["variantLevelData"] = variant_level
@@ -671,6 +690,7 @@ def iter_bff_records(
                 "QUAL": fields[5],
                 "FILTER": fields[6],
             }
+            uid = variant_internal_id(variant)
             if not ann_fields or ann_positions is None:
                 raise ConversionError(
                     "VCF has no usable SnpEff ANN header; rerun bff-tools with "
@@ -678,7 +698,11 @@ def iter_bff_records(
                 )
             if variant["ALT"].startswith("<"):
                 continue
-            uid = f"chr{variant['CHROM']}_{variant['POS']}_{variant['REF']}_{variant['ALT']}"
+            if "," in variant["ALT"]:
+                raise ConversionError(
+                    f"VCF record {source_records} ({uid}) has multiple ALT alleles; "
+                    "split multiallelic records before VCF-to-BFF conversion"
+                )
             info = parse_info_field(fields[7], uid)
             if "VT" not in info or "," in info["VT"]:
                 info["VT"] = "SNP" if len(variant["REF"]) == len(variant["ALT"]) else "INDEL"
@@ -698,7 +722,6 @@ def iter_bff_records(
                 info,
                 molecular_attributes,
                 case_level_data,
-                uid,
                 genome=genome,
                 dataset_id=dataset_id,
                 provenance=provenance,

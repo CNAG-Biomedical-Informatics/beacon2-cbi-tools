@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.14 - 2026-XX-XX
+
+- Fixed `chr`-prefixed contigs and rejected unsplit multiallelic VCF input
+
 ## 2.0.13 - 2026-07-20
 
 - Replaced the Perl validator and VCF converter with parity-tested Python implementations

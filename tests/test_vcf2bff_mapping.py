@@ -340,7 +340,6 @@ class VcfMappingTests(unittest.TestCase):
                     },
                 }
             ],
-            "chr22_100_A_T",
             genome="hg19",
             dataset_id="dataset-1",
             provenance={"version": "test"},
@@ -403,12 +402,18 @@ class VcfMappingTests(unittest.TestCase):
         )
         self.assertNotIn("DP", record["variantQuality"])
 
-    def test_chromosome_aliases_and_missing_quality_values(self) -> None:
+    def test_contig_aliases_and_missing_quality_values(self) -> None:
         for chromosome, expected in (
+            ("1", "1"),
+            ("chr1", "1"),
+            ("chrX", "X"),
+            ("chrY", "Y"),
             ("chr23", "X"),
             ("chr24", "Y"),
+            ("MT", "MT"),
+            ("chrMT", "MT"),
             ("chrM", "MT"),
-            ("GL000220.1", ""),
+            ("GL000220.1", "GL000220.1"),
         ):
             with self.subTest(chromosome=chromosome):
                 record = vcf2bff.map_record(
@@ -423,17 +428,43 @@ class VcfMappingTests(unittest.TestCase):
                     {"VT": "SNP"},
                     {},
                     [],
-                    f"chr{chromosome}_1_A_G",
                     genome="hg38",
                     dataset_id="dataset",
                     provenance={},
                     annotated_with={},
                 )
                 self.assertEqual(record["_position"]["refseqId"], expected)
+                expected_prefix = expected if expected.startswith("chr") else f"chr{expected}"
+                self.assertEqual(
+                    record["variantInternalId"],
+                    f"{expected_prefix}_1_A_G",
+                )
                 self.assertEqual(
                     record["variantQuality"],
                     {"QUAL": None, "FILTER": None},
                 )
+
+    def test_prefixed_contig_is_canonicalized_across_generated_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = write_vcf(
+                Path(tmpdir),
+                [
+                    "chrX\t10\t.\tA\tG\t42\tPASS\t"
+                    f"ANN={snpeff_annotation('G')}\tGT\t0/1\t0/0"
+                ],
+            )
+            record = next(
+                vcf2bff.iter_bff_records(
+                    path,
+                    genome="hg38",
+                    dataset_id="dataset",
+                    provenance={},
+                )
+            )
+
+        self.assertEqual(record["_position"]["refseqId"], "X")
+        self.assertEqual(record["variantInternalId"], "chrX_10_A_G")
+        self.assertEqual(record["identifiers"]["genomicHGVSId"], "X:g.10A>G")
 
     def test_gt_only_mapping_exercises_sparse_dense_and_truncated_inputs(self) -> None:
         self.assertEqual(vcf2bff.map_case_level_data("0/0\t./.", ("a", "b"), "GT"), [])
@@ -545,6 +576,29 @@ class VcfMappingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             path = write_vcf(Path(tmpdir), ["1\t10\t."])
             with self.assertRaisesRegex(vcf2bff.ConversionError, "fewer than 8 columns"):
+                list(
+                    vcf2bff.iter_bff_records(
+                        path,
+                        genome="hg19",
+                        dataset_id="dataset",
+                        provenance={},
+                    )
+                )
+
+    def test_stream_conversion_rejects_multiallelic_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = write_vcf(
+                Path(tmpdir),
+                [
+                    "1\t10\t.\tA\tG,T\t42\tPASS\t"
+                    f"ANN={snpeff_annotation('G')},{snpeff_annotation('T')}\t"
+                    "GT\t0/1\t0/2"
+                ],
+            )
+            with self.assertRaisesRegex(
+                vcf2bff.ConversionError,
+                "multiple ALT alleles; split multiallelic records",
+            ):
                 list(
                     vcf2bff.iter_bff_records(
                         path,
