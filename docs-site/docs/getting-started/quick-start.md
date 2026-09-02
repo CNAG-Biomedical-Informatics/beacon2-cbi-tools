@@ -2,7 +2,7 @@
 title: Quick Start
 ---
 
-This path builds and validates BFF metadata and shows the normal raw-VCF workflow, the explicit shortcut for compatible pre-annotated VCFs, and SNP-array conversion.
+Build and validate BFF metadata, process raw or compatibly annotated VCFs, and convert supported SNP-array input.
 
 ## Which Command Do I Need?
 
@@ -147,4 +147,4 @@ bff-tools validate -i cohort-bff/vcf/genomicVariationsVcf.json.gz --gv-vcf
 
 See [Configuration](../reference/configuration) for the profile, [Annotation Data](annotation-data) for the complete setup and integration test, and [Outputs](../reference/outputs) for the resulting directory layout.
 
-For a connected metadata-and-variants workflow, continue with the [end-to-end tutorial](../workflows/data-beaconization). The [GRCh38 worked example](../examples/hg38) shows how the included 1000 Genomes subset was prepared, and the [FAQ](../troubleshooting/faq) retains common errors and fixes.
+The [end-to-end tutorial](../workflows/data-beaconization) connects the metadata and variant workflows. The [GRCh38 worked example](../examples/hg38) shows how the included 1000 Genomes subset was prepared, and the [FAQ](../troubleshooting/faq) covers common errors and fixes.

@@ -36,7 +36,7 @@ bff-tools install-resources --help
 
 ## 2. Install from a Source Checkout
 
-Use this route for development or for an unreleased version:
+Install from a source checkout for development or an unreleased version:
 
 ```bash
 git clone https://github.com/CNAG-Biomedical-Informatics/beacon2-cbi-tools.git
