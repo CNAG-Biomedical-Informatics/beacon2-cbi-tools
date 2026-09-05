@@ -18,6 +18,10 @@ The current BFF converter requires ANN and uses dbNSFP and ClinVar extensively. 
 
 Allow at least **200 GB** for the distributed bundle, extraction, indexes, temporary files, and annotation intermediates. Production cohorts may require considerably more working space.
 
+:::note[Third-party licenses]
+Beacon v2 CBI Tools is distributed under GPLv3. Third-party executables and biological resources in the external annotation bundle retain their own licenses and terms; they are not relicensed under the toolkit's license. Users are responsible for reviewing and complying with those terms.
+:::
+
 Reference databases have their own terms of use. In particular, confirm that your use of dbNSFP and COSMIC complies with their academic or institutional licenses before downloading or redistributing data.
 
 The external bundle has its own revision lifecycle and is not renamed for every application release. An application release continues to use the same bundle revision and checksum until the bundle contents change.
